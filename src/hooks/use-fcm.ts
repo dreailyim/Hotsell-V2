@@ -47,7 +47,7 @@ export function useFcm() {
           console.log('Notification permission granted.');
           // TODO: Replace with your actual VAPID key from Firebase console
           const currentToken = await getToken(messaging, {
-            vapidKey: 'YOUR_PUBLIC_VAPID_KEY',
+            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
           });
           
           if (currentToken) {
