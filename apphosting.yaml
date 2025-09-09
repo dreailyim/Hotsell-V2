@@ -5,3 +5,9 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+  # Add environment variables to your backend.
+  # These values are only available to your Next.js server code.
+  # https://firebase.google.com/docs/app-hosting/configure#set-env-vars
+  env:
+    - variable: NEXT_PUBLIC_FIREBASE_VAPID_KEY
+      value: "YOUR_VAPID_KEY_HERE"
