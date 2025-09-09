@@ -1,0 +1,70 @@
+'use client';
+
+import Link from 'next/link';
+import { Search, ArrowLeft, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useRouter } from 'next/navigation';
+import { Input } from '@/components/ui/input';
+
+type HeaderProps = {
+  showSearch?: boolean;
+  title?: string;
+  showBackButton?: boolean;
+  showSettingsButton?: boolean;
+};
+
+export function Header({
+  showSearch = false,
+  title,
+  showBackButton = false,
+  showSettingsButton = false,
+}: HeaderProps) {
+  const router = useRouter();
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b-0 bg-background/50 backdrop-blur-sm">
+      <div className="container mx-auto flex h-14 items-center px-4 md:px-6">
+        {/* Left Section */}
+        <div className="flex w-1/5 justify-start">
+          {showBackButton && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-6 w-6" />
+            </Button>
+          )}
+        </div>
+
+        {/* Center Section */}
+        <div className="flex w-3/5 items-center justify-center">
+          {showSearch && (
+            <div className="relative w-full max-w-md">
+              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                placeholder="搜尋商品..."
+                className="w-full rounded-full pl-10"
+              />
+            </div>
+          )}
+          {!showSearch && title && (
+            <h1 className="whitespace-nowrap text-xl font-bold">{title}</h1>
+          )}
+        </div>
+
+        {/* Right Section */}
+        <div className="flex w-1/5 items-center justify-end">
+          {showSettingsButton && (
+            <Link href="/profile/settings">
+              <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
+                <Settings className="h-6 w-6" />
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
+    </header>
+  );
+}

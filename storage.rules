@@ -1,0 +1,30 @@
+
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper function to check if the user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the user ID from the path matches the authenticated user's ID
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    // Rules for user avatars
+    // Allow users to read any avatar, but only write to their own avatar folder.
+    match /avatars/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+
+    // Rules for product images
+    // Allow users to read any product image, but only write to their own product image folder.
+    match /products/{userId}/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+  }
+}
