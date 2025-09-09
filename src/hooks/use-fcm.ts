@@ -41,14 +41,22 @@ export function useFcm() {
         return;
       }
       
+      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+      if (!vapidKey) {
+          console.error("VAPID key is missing. Please set NEXT_PUBLIC_FIREBASE_VAPID_KEY in your environment variables.");
+          toast({
+              title: "推播設定錯誤",
+              description: "缺少 VAPID Key，無法註冊推播通知。",
+              variant: "destructive",
+          });
+          return;
+      }
+
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('Notification permission granted.');
-          // TODO: Replace with your actual VAPID key from Firebase console
-          const currentToken = await getToken(messaging, {
-            vapidKey: process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY,
-          });
+          const currentToken = await getToken(messaging, { vapidKey });
           
           if (currentToken) {
             console.log('FCM Token:', currentToken);
@@ -71,7 +79,7 @@ export function useFcm() {
     };
 
     requestPermissionAndToken();
-  }, [user]);
+  }, [user, toast]);
 
   // Effect to handle foreground messages
   useEffect(() => {
