@@ -41,12 +41,16 @@ export function useFcm() {
         return;
       }
       
-      const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
-      if (!vapidKey) {
-          console.error("VAPID key is missing. Please set NEXT_PUBLIC_FIREBASE_VAPID_KEY in your environment variables.");
-          toast({
-              title: "推播設定錯誤",
-              description: "缺少 VAPID Key，無法註冊推播通知。",
+      // The VAPID key is a public key, so it's safe to be included directly here.
+      // This is the most reliable way to ensure it's available on the client-side,
+      // especially with build tools and different hosting environments.
+      const vapidKey = "YOUR_VAPID_KEY_HERE";
+
+      if (!vapidKey || vapidKey === "YOUR_VAPID_KEY_HERE") {
+           console.error("VAPID key is missing. Please replace 'YOUR_VAPID_KEY_HERE' in src/hooks/use-fcm.ts");
+           toast({
+              title: "Push Notification Setup Error",
+              description: "VAPID key is not configured.",
               variant: "destructive",
           });
           return;
