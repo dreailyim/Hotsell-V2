@@ -42,20 +42,9 @@ export function useFcm() {
         return;
       }
       
-      // The VAPID key is a public key, so it's safe to be included directly here.
-      // This is the most reliable way to ensure it's available on the client-side.
+      // ❗️ IMPORTANT: Replace the placeholder value below with your own VAPID key from the Firebase console.
+      // It is a public key and is safe to be hardcoded here.
       const vapidKey = "YOUR_VAPID_KEY_HERE";
-
-      // Simple check to prevent running with the placeholder key.
-      if (vapidKey === "YOUR_VAPID_KEY_HERE") {
-          console.error("VAPID key is a placeholder. Please replace it in src/hooks/use-fcm.ts with your own key from the Firebase console.");
-          toast({
-              title: "Push Notification Setup Error",
-              description: "VAPID key is a placeholder. Push notifications are disabled.",
-              variant: "destructive",
-          });
-          return;
-      }
 
       try {
         const permission = await Notification.requestPermission();
@@ -79,6 +68,11 @@ export function useFcm() {
         }
       } catch (error) {
         console.error('An error occurred while retrieving token. ', error);
+        toast({
+            title: "獲取推播權杖失敗",
+            description: "請檢查您的 VAPID Key 是否正確，或查看控制台以獲取詳細資訊。",
+            variant: "destructive"
+        });
       }
     };
 
