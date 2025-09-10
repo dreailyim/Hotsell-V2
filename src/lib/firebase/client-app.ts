@@ -1,4 +1,3 @@
-
 // @ts-nocheck
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
@@ -44,5 +43,5 @@ export const getMessagingInstance = async () => {
     return null;
 }
 
-export { app, db, auth, storage, functions };
 
+export { app, db, auth, storage, functions };

@@ -24,6 +24,11 @@ export function useFcm() {
     const messaging = await getMessagingInstance();
     if (!messaging) {
         console.log("FCM: Messaging not supported in this browser. Aborting.");
+        toast({
+          title: '瀏覽器不支援通知',
+          description: '此瀏覽器無法接收推播通知。',
+          variant: 'destructive',
+        });
         return;
     }
 
