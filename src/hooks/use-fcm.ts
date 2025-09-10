@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -43,25 +44,12 @@ export function useFcm() {
       
       // The VAPID key is a public key, so it's safe to be included directly here.
       // This is the most reliable way to ensure it's available on the client-side.
-      // ❗️ IMPORTANT: Replace this with your own VAPID key from the Firebase console.
-      const vapidKey = GpQqf6CIruinrPty78-GjSRRkllA0-J5cm8MUxordYI;
-
-      // Simple check to prevent running with the placeholder key.
-      if (vapidKey === "YOUR_VAPID_KEY_HERE") {
-           console.error("VAPID key is missing. Please replace 'YOUR_VAPID_KEY_HERE' in src/hooks/use-fcm.ts");
-           toast({
-              title: "Push Notification Setup Error",
-              description: "VAPID key is not configured.",
-              variant: "destructive",
-          });
-          return;
-      }
+      const vapidKey = "GpQqf6CIruinrPty78-GjSRRkllA0-J5cm8MUxordYI";
 
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('Notification permission granted.');
-          // Use the constant directly here.
           const currentToken = await getToken(messaging, { vapidKey });
           
           if (currentToken) {
