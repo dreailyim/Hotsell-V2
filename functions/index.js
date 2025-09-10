@@ -40,16 +40,17 @@ async function deleteCollection(collectionRef, batchSize) {
 /**
  * Creates a notification document in the 'notifications' collection
  * and sends a push notification to the user's devices.
+ * This function has been refactored for robustness and better logging.
  * @param {string} userId The ID of the user who will receive the notification.
  * @param {object} notificationData The data for the notification.
  */
 async function createNotification(userId, notificationData) {
   if (!userId) {
-    console.warn("Attempted to create notification for null or undefined userId.");
+    console.warn("createNotification called with null or undefined userId. Skipping.");
     return;
   }
   
-  // Create the in-app notification document first
+  // 1. Create the in-app notification document.
   try {
     const userRef = db.collection("users").doc(userId);
     
@@ -60,17 +61,17 @@ async function createNotification(userId, notificationData) {
       ...notificationData,
     });
 
-    // Also increment the total unread count for the user
+    // Also increment the total unread count for the user.
     await userRef.set({
         totalUnreadCount: admin.firestore.FieldValue.increment(1)
     }, { merge: true });
 
   } catch (error) {
-    console.error(`Failed to create notification document for user ${userId}:`, error);
-    // Continue to attempt sending push notification
+    console.error(`Failed to create in-app notification document for user ${userId}.`, error);
+    // We still attempt to send a push notification.
   }
   
-  // --- Send Push Notification ---
+  // 2. Send the push notification (FCM).
   try {
     const userDoc = await db.collection('users').doc(userId).get();
     if (!userDoc.exists) {
@@ -84,53 +85,64 @@ async function createNotification(userId, notificationData) {
         return;
     }
 
+    const clickTargetUrl = notificationData.relatedData?.conversationId
+      ? `https://hotsell-dolw2.web.app/chat/${notificationData.relatedData.conversationId}`
+      : notificationData.relatedData?.productId
+      ? `https://hotsell-dolw2.web.app/products/${notificationData.relatedData.productId}`
+      : `https://hotsell-dolw2.web.app/messages`;
+
+    // Construct a more robust payload for better cross-platform compatibility.
     const payload = {
       notification: {
         title: 'HotSell 有新通知！',
         body: notificationData.message,
+        // You can add an icon or badge here if needed
+        // icon: 'https://example.com/notification-icon.png'
       },
-      webpush: {
+      data: { // Custom data for the client to handle
+        click_action: clickTargetUrl
+      },
+      webpush: { // Specific configuration for web clients
           fcm_options: {
-              link: notificationData.relatedData?.conversationId
-                    ? `https://hotsell-dolw2.web.app/chat/${notificationData.relatedData.conversationId}`
-                    : notificationData.relatedData?.productId
-                    ? `https://hotsell-dolw2.web.app/products/${notificationData.relatedData.productId}`
-                    : `https://hotsell-dolw2.web.app/messages`
+              link: clickTargetUrl
           }
-      }
+      },
+      tokens: fcmTokens // Send to all registered tokens for the user
     };
     
-    const response = await messaging.sendEachForMulticast({
-      tokens: fcmTokens,
-      data: payload.notification, // `data` for background handling
-      notification: payload.notification, // `notification` for foreground display
-      webpush: payload.webpush,
-    });
+    console.log(`Attempting to send push notification to user ${userId} with payload:`, JSON.stringify(payload, null, 2));
 
+    const response = await messaging.sendEachForMulticast(payload);
 
+    console.log(`Push notification sent to user ${userId}. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
+
+    // 3. Clean up invalid tokens.
     if (response.failureCount > 0) {
       const invalidTokens = [];
       response.responses.forEach((resp, idx) => {
         if (!resp.success) {
           const errorCode = resp.error.code;
+           // These error codes indicate the token is no longer valid.
            if (errorCode === 'messaging/invalid-registration-token' ||
-              errorCode === 'messaging/registration-token-not-registered') {
+              errorCode === 'messaging/registration-token-not-registered' ||
+              errorCode === 'messaging/invalid-argument') {
               invalidTokens.push(fcmTokens[idx]);
            }
         }
       });
       
       if (invalidTokens.length > 0) {
-        console.log(`Found ${invalidTokens.length} invalid tokens. Removing them for user ${userId}.`);
-        await db.collection('users').doc(userId).update({
+        console.log(`Found ${invalidTokens.length} invalid tokens for user ${userId}. Removing them...`);
+        const userRef = db.collection('users').doc(userId);
+        await userRef.update({
             fcmTokens: admin.firestore.FieldValue.arrayRemove(...invalidTokens)
         });
+        console.log(`Invalid tokens removed for user ${userId}.`);
       }
     }
-     console.log(`Push notifications sent to user ${userId} successfully for ${response.successCount} tokens.`);
 
   } catch (error) {
-      console.error(`Failed to send push notification to user ${userId}:`, error);
+      console.error(`An unhandled error occurred while trying to send push notification to user ${userId}:`, error);
   }
 }
 
@@ -147,7 +159,7 @@ exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/me
     const senderId = messageData?.senderId;
     
     if (!senderId || !messageData) {
-        console.error(`Message ${event.data.id} is missing senderId or data.`);
+        console.error(`Message ${event.data.id} in conversation ${conversationId} is missing senderId or data.`);
         return;
     }
 
@@ -156,7 +168,7 @@ exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/me
     try {
         const convoDoc = await convoDocRef.get();
         if (!convoDoc.exists) {
-            console.warn(`Conversation ${conversationId} does not exist.`);
+            console.warn(`Conversation ${conversationId} does not exist. Cannot process new message.`);
             return;
         }
 
@@ -165,18 +177,24 @@ exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/me
         const otherUserId = participants.find(p => p !== senderId);
 
         if (!otherUserId) {
-            console.error(`Could not determine the other user in conversation ${conversationId}.`);
+            console.error(`Could not determine the recipient in conversation ${conversationId}. Participants: ${participants}`);
             return;
         }
         
         // --- Create Notification for the recipient ---
-        const senderDetails = convoData.participantDetails[senderId];
+        // Use details from the conversation document itself to avoid extra DB reads and race conditions.
+        const senderDetails = convoData.participantDetails?.[senderId];
+        if (!senderDetails) {
+            console.error(`Could not find sender details for user ${senderId} in conversation ${conversationId}.`);
+            return;
+        }
+
         await createNotification(otherUserId, {
             type: 'new_message',
-            message: `${senderDetails?.displayName || '有新訊息'}: ${messageData.text}`,
+            message: `${senderDetails.displayName || '新訊息'}: ${messageData.text}`,
             relatedData: {
                 conversationId: conversationId,
-                productId: convoData.product.id, // For deeplinking
+                productId: convoData.product.id, // For constructing the deeplink
             }
         });
 
@@ -185,8 +203,6 @@ exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/me
             [`unreadCounts.${otherUserId}`]: admin.firestore.FieldValue.increment(1),
         });
         
-        // Also update the total unread count on the user object (done within createNotification)
-
     } catch (error) {
         console.error(`Failed to process new message for conversation ${conversationId}:`, error);
     }
@@ -292,7 +308,7 @@ exports.processConversationUpdate = onDocumentUpdated("conversations/{conversati
         const notifsQuery = db.collection("notifications").where("userId", "==", userId).where("isRead", "==", false);
 
         try {
-            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsSnapshot.get()]);
+            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsQuery.get()]);
             
             let convoUnread = 0;
             convosSnapshot.forEach(doc => {
