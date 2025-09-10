@@ -5,8 +5,10 @@ import { useEffect, useCallback } from 'react';
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db, app } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
+import { getMessagingInstance } from '@/lib/firebase/client-app';
+
 
 export function useFcm() {
   const { user } = useAuth();
@@ -17,23 +19,25 @@ export function useFcm() {
       console.log("FCM: User not logged in. Aborting.");
       return;
     }
-
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-        console.log("FCM: Service Worker not supported. Aborting.");
+    
+    console.log("FCM: Attempting to get messaging instance...");
+    const messaging = await getMessagingInstance();
+    if (!messaging) {
+        console.log("FCM: Messaging not supported in this browser. Aborting.");
         return;
     }
 
     try {
-      const messaging = getMessaging(app);
-      
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         console.log('FCM: Notification permission granted.');
         
-        const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
+        // This is the public VAPID key from your Firebase project settings.
+        const vapidKey = "BClYxO9z_3_4Yy065PUIJPw_2tWcWbX20uunb3e4J5XbA70e2E6y0l3o7o4c4e7g3y2t1WcWbX20uunb3e4J5X"; // THIS IS A PLACEHOLDER. A REAL KEY WILL BE SUBSTITUTED.
+        
+        console.log("FCM: Requesting token with VAPID key...");
         const currentToken = await getToken(messaging, { 
             vapidKey: vapidKey,
-            serviceWorkerRegistration: await navigator.serviceWorker.ready, // Use the active service worker
         });
         
         if (currentToken) {
@@ -47,7 +51,7 @@ export function useFcm() {
           console.error('FCM Error: No registration token available. Request permission to generate one.');
           toast({
               title: "無法獲取推播權杖",
-              description: "未能生成註冊權杖，請檢查 Service Worker 狀態。",
+              description: "未能生成註冊權杖，請檢查 Service Worker 狀態或瀏覽器設定。",
               variant: "destructive"
           });
         }
@@ -65,7 +69,7 @@ export function useFcm() {
       console.error('FCM Error: An error occurred while retrieving token.', error);
       toast({
           title: "獲取推播權杖失敗",
-          description: `請在瀏覽器開發者工具的控制台中查看詳細錯誤: ${error}`,
+          description: `請在瀏覽器開發者工具的控制台中查看詳細錯誤。`,
           variant: "destructive"
       });
     }
@@ -79,17 +83,19 @@ export function useFcm() {
   }, [user, requestPermissionAndToken]);
 
   useEffect(() => {
-     if (typeof window === 'undefined') return;
-     
-     const messagingInstance = getMessaging(app);
-     const unsubscribe = onMessage(messagingInstance, (payload) => {
-          console.log('FCM: Foreground message received.', payload);
-          toast({
-            title: payload.notification?.title || '新通知',
-            description: payload.notification?.body,
-          });
-      });
-      return () => unsubscribe();
-
+    const initializeMessaging = async () => {
+        const messagingInstance = await getMessagingInstance();
+        if (messagingInstance) {
+            const unsubscribe = onMessage(messagingInstance, (payload) => {
+                console.log('FCM: Foreground message received.', payload);
+                toast({
+                    title: payload.notification?.title || '新通知',
+                    description: payload.notification?.body,
+                });
+            });
+            return () => unsubscribe();
+        }
+    };
+    initializeMessaging();
   }, [toast]);
 }
