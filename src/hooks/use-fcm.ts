@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db } from '@/lib/firebase/client-app'; // Direct import without messaging
+import { db } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 
@@ -42,11 +42,12 @@ export function useFcm() {
       }
       
       // The VAPID key is a public key, so it's safe to be included directly here.
-      // This is the most reliable way to ensure it's available on the client-side,
-      // especially with build tools and different hosting environments.
+      // This is the most reliable way to ensure it's available on the client-side.
+      // ❗️ IMPORTANT: Replace this with your own VAPID key from the Firebase console.
       const vapidKey = "YOUR_VAPID_KEY_HERE";
 
-      if (!vapidKey || vapidKey === "YOUR_VAPID_KEY_HERE") {
+      // Simple check to prevent running with the placeholder key.
+      if (vapidKey === "YOUR_VAPID_KEY_HERE") {
            console.error("VAPID key is missing. Please replace 'YOUR_VAPID_KEY_HERE' in src/hooks/use-fcm.ts");
            toast({
               title: "Push Notification Setup Error",
@@ -60,13 +61,13 @@ export function useFcm() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('Notification permission granted.');
+          // Use the constant directly here.
           const currentToken = await getToken(messaging, { vapidKey });
           
           if (currentToken) {
             console.log('FCM Token:', currentToken);
             setFcmToken(currentToken);
-            // Save token to Firestore, but check if it already exists first
-            // to avoid unnecessary writes.
+            // Save token to Firestore
             const userDocRef = doc(db, 'users', user.uid);
             await updateDoc(userDocRef, {
               fcmTokens: arrayUnion(currentToken),
