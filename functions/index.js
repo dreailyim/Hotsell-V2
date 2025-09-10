@@ -86,10 +86,10 @@ async function createNotification(userId, notificationData) {
     }
 
     const clickTargetUrl = notificationData.relatedData?.conversationId
-      ? `https://hotsell-dolw2.web.app/chat/${notificationData.relatedData.conversationId}`
+      ? `/chat/${notificationData.relatedData.conversationId}`
       : notificationData.relatedData?.productId
-      ? `https://hotsell-dolw2.web.app/products/${notificationData.relatedData.productId}`
-      : `https://hotsell-dolw2.web.app/messages`;
+      ? `/products/${notificationData.relatedData.productId}`
+      : `/messages`;
 
     // Construct a more robust payload for better cross-platform compatibility.
     const payload = {
@@ -103,7 +103,7 @@ async function createNotification(userId, notificationData) {
         click_action: clickTargetUrl
       },
       webpush: { // Specific configuration for web clients
-          fcm_options: {
+          fcmOptions: {
               link: clickTargetUrl
           }
       },

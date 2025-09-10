@@ -44,7 +44,18 @@ export function useFcm() {
       
       // The VAPID key is a public key, so it's safe to be included directly here.
       // This is the most reliable way to ensure it's available on the client-side.
-      const vapidKey = "GpQqf6CIruinrPty78-GjSRRkllA0-J5cm8MUxordYI";
+      const vapidKey = "YOUR_VAPID_KEY_HERE";
+
+      // Simple check to prevent running with the placeholder key.
+      if (vapidKey === "YOUR_VAPID_KEY_HERE") {
+          console.error("VAPID key is a placeholder. Please replace it in src/hooks/use-fcm.ts with your own key from the Firebase console.");
+          toast({
+              title: "Push Notification Setup Error",
+              description: "VAPID key is a placeholder. Push notifications are disabled.",
+              variant: "destructive",
+          });
+          return;
+      }
 
       try {
         const permission = await Notification.requestPermission();
