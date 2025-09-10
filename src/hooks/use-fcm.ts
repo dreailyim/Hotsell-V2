@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { getMessaging, getToken, onMessage } from "firebase/messaging";
+import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
 import { db } from '@/lib/firebase/client-app';
@@ -33,7 +33,7 @@ export function useFcm() {
         console.log('FCM: Notification permission granted.');
         
         // This is the public VAPID key from your Firebase project settings.
-        const vapidKey = "BClYxO9z_3_4Yy065PUIJPw_2tWcWbX20uunb3e4J5XbA70e2E6y0l3o7o4c4e7g3y2t1WcWbX20uunb3e4J5X"; // THIS IS A PLACEHOLDER. A REAL KEY WILL BE SUBSTITUTED.
+        const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
         
         console.log("FCM: Requesting token with VAPID key...");
         const currentToken = await getToken(messaging, { 
