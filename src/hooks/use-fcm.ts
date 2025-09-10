@@ -2,10 +2,10 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getToken, onMessage } from "firebase/messaging";
+import { getToken, onMessage, isSupported } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db, messaging } from '@/lib/firebase/client-app';
+import { db, getMessagingInstance } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
 
 export function useFcm() {
@@ -17,21 +17,19 @@ export function useFcm() {
     if (typeof window === 'undefined' || !user) return;
 
     const requestPermissionAndToken = async () => {
-      const messagingInstance = await messaging;
-      if (!messagingInstance) {
-        console.log("Firebase Messaging is not supported in this browser.");
+      const messaging = await getMessagingInstance();
+      if (!messaging) {
+        console.log("FCM: Firebase Messaging is not supported in this browser or the instance could not be retrieved.");
         return;
       }
       
-      // This is your VAPID key from the Firebase console.
-      // It is public and safe to be exposed here.
       const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
       try {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('FCM: Notification permission granted.');
-          const currentToken = await getToken(messagingInstance, { vapidKey });
+          const currentToken = await getToken(messaging, { vapidKey });
           
           if (currentToken) {
             console.log('FCM: Token successfully retrieved:', currentToken);
@@ -71,7 +69,7 @@ export function useFcm() {
      if (typeof window === 'undefined') return;
      
      const setupOnMessageListener = async () => {
-        const messagingInstance = await messaging;
+        const messagingInstance = await getMessagingInstance();
         if (messagingInstance) {
            const unsubscribe = onMessage(messagingInstance, (payload) => {
                 console.log('FCM: Foreground message received.', payload);

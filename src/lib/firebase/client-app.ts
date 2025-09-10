@@ -28,16 +28,18 @@ const storage = getStorage(app);
 // Explicitly connect to the correct function region.
 const functions = getFunctions(app, 'us-central1');
 
-// Initialize messaging only if the browser supports it
-const messaging = (async () => {
-    const supported = await isSupported();
-    if (typeof window !== 'undefined' && supported) {
-        return getMessaging(app);
+// Cache the messaging instance
+let messagingInstance = null;
+
+export const getMessagingInstance = async () => {
+    if (messagingInstance) {
+        return messagingInstance;
+    }
+    if (typeof window !== 'undefined' && await isSupported()) {
+        messagingInstance = getMessaging(app);
+        return messagingInstance;
     }
     return null;
-})();
+}
 
-
-export { app, db, auth, storage, functions, messaging };
-
-    
+export { app, db, auth, storage, functions };
