@@ -107,12 +107,14 @@ async function createNotification(userId, notificationData) {
               link: clickTargetUrl
           }
       },
-      tokens: fcmTokens // Send to all registered tokens for the user
     };
     
     console.log(`Attempting to send push notification to user ${userId} with payload:`, JSON.stringify(payload, null, 2));
 
-    const response = await messaging.sendEachForMulticast(payload);
+    const response = await messaging.sendEachForMulticast({
+        ...payload,
+        tokens: fcmTokens // Send to all registered tokens for the user
+    });
 
     console.log(`Push notification sent to user ${userId}. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
 
@@ -636,3 +638,5 @@ exports.onNotificationUpdated = onDocumentUpdated("notifications/{notificationId
         }
     }
 });
+
+    
