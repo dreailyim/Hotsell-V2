@@ -53,9 +53,10 @@ export function useFcm() {
       }
     };
 
+    // Delay the call slightly to ensure all browser services are ready
     const timer = setTimeout(() => {
         requestPermissionAndToken();
-    }, 1000);
+    }, 1500);
 
     return () => clearTimeout(timer);
 

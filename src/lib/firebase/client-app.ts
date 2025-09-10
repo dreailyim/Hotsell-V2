@@ -31,11 +31,13 @@ const functions = getFunctions(app, 'us-central1');
 // Cache the messaging instance
 let messagingInstance = null;
 
+// Export a function to get the messaging instance on demand.
 export const getMessagingInstance = async () => {
     if (messagingInstance) {
         return messagingInstance;
     }
-    if (typeof window !== 'undefined' && await isSupported()) {
+    const supported = await isSupported();
+    if (typeof window !== 'undefined' && supported) {
         messagingInstance = getMessaging(app);
         return messagingInstance;
     }
@@ -43,3 +45,4 @@ export const getMessagingInstance = async () => {
 }
 
 export { app, db, auth, storage, functions };
+
