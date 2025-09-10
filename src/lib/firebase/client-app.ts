@@ -30,7 +30,8 @@ const functions = getFunctions(app, 'us-central1');
 
 // Initialize messaging only if the browser supports it
 const messaging = (async () => {
-    if (typeof window !== 'undefined' && await isSupported()) {
+    const supported = await isSupported();
+    if (typeof window !== 'undefined' && supported) {
         return getMessaging(app);
     }
     return null;

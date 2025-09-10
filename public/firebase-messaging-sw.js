@@ -1,10 +1,12 @@
-// This file must be in the public folder.
 
-// Scripts for firebase and firebase messaging
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+// @ts-nocheck
+// This file needs to be in the public directory.
+// It's the service worker that will handle background push notifications.
 
-// Your web app's Firebase configuration
+import { initializeApp } from 'firebase/app';
+import { getMessaging } from 'firebase/messaging/sw';
+
+// IMPORTANT: This config has to be sync and cannot be behind a dynamic import.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -16,22 +18,10 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-// Retrieve an instance of Firebase Messaging so that it can handle background
-// messages.
-const messaging = firebase.messaging();
-
-// Optional: Set a background message handler
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/firebase-logo.png' // Optional: a logo for the notification
-  };
-
-  self.registration.showNotification(notificationTitle, notificationOptions);
-});
+// Background message handler (optional)
+// self.addEventListener('push', (event) => {
+//   console.log('[SW] Push Received.', event.data.json());
+// });

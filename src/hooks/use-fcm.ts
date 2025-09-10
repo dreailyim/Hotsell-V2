@@ -23,8 +23,8 @@ export function useFcm() {
         return;
       }
       
-      // ❗️ VAPID key is hardcoded for reliability on the client-side.
-      // This is a public key and is safe to be exposed.
+      // This is your VAPID key from the Firebase console.
+      // It is public and safe to be exposed here.
       const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
       try {
@@ -51,13 +51,19 @@ export function useFcm() {
         console.error('FCM Error: An error occurred while retrieving token.', error);
         toast({
             title: "獲取推播權杖失敗",
-            description: "請在瀏覽器開發者工具的控制台中查看詳細錯誤。",
+            description: `請在瀏覽器開發者工具的控制台中查看詳細錯誤: ${error.message}`,
             variant: "destructive"
         });
       }
     };
 
-    requestPermissionAndToken();
+    // Delay the request slightly to ensure service worker is ready.
+    const timer = setTimeout(() => {
+        requestPermissionAndToken();
+    }, 1000);
+
+    return () => clearTimeout(timer);
+
   }, [user, toast]);
 
   // Effect to handle foreground messages
