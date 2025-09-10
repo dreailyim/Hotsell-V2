@@ -2,19 +2,11 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
+import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { app, db } from '@/lib/firebase/client-app'; // Import the initialized app
+import { db, messaging } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
-
-// This function now just returns the initialized messaging instance or null
-async function getFirebaseMessaging() {
-    if (typeof window !== 'undefined' && (await isSupported())) {
-        return getMessaging(app); // Use the explicit app instance
-    }
-    return null;
-}
 
 export function useFcm() {
   const { user } = useAuth();
@@ -25,8 +17,8 @@ export function useFcm() {
     if (typeof window === 'undefined' || !user) return;
 
     const requestPermissionAndToken = async () => {
-      const messaging = await getFirebaseMessaging();
-      if (!messaging) {
+      const messagingInstance = await messaging;
+      if (!messagingInstance) {
         console.log("Firebase Messaging is not supported in this browser.");
         return;
       }
@@ -39,7 +31,7 @@ export function useFcm() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('FCM: Notification permission granted.');
-          const currentToken = await getToken(messaging, { vapidKey });
+          const currentToken = await getToken(messagingInstance, { vapidKey });
           
           if (currentToken) {
             console.log('FCM: Token successfully retrieved:', currentToken);
@@ -73,9 +65,9 @@ export function useFcm() {
      if (typeof window === 'undefined') return;
      
      const setupOnMessageListener = async () => {
-        const messaging = await getFirebaseMessaging();
-        if (messaging) {
-           const unsubscribe = onMessage(messaging, (payload) => {
+        const messagingInstance = await messaging;
+        if (messagingInstance) {
+           const unsubscribe = onMessage(messagingInstance, (payload) => {
                 console.log('FCM: Foreground message received.', payload);
                 toast({
                   title: payload.notification?.title || '新通知',
