@@ -44,7 +44,7 @@ export function useFcm() {
       
       // ❗️ IMPORTANT: Replace the placeholder value below with your own VAPID key from the Firebase console.
       // It is a public key and is safe to be hardcoded here.
-      const vapidKey = "YOUR_VAPID_KEY_HERE";
+      const vapidKey = "GpQqf6CIruinrPty78-GjSRRkllA0-J5cm8MUxordYI";
 
       try {
         const permission = await Notification.requestPermission();
