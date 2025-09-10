@@ -42,10 +42,12 @@ export function useFcm() {
       }
       
       // The VAPID key is a public key and is safe to be exposed on the client.
-      // This key is now hardcoded for reliability.
+      // This is the most reliable way to ensure it's available on the client-side.
+      // ❗️ IMPORTANT: Replace this with your own VAPID key from the Firebase console.
       const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
       try {
+        // We no longer need to check for the placeholder, as it's hardcoded.
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           console.log('Notification permission granted.');
