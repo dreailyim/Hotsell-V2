@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { getToken, onMessage, isSupported } from "firebase/messaging";
+import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
 import { db, getMessagingInstance } from '@/lib/firebase/client-app';
@@ -12,14 +12,13 @@ export function useFcm() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Effect to request permission and get token
   useEffect(() => {
     if (typeof window === 'undefined' || !user) return;
 
     const requestPermissionAndToken = async () => {
       const messaging = await getMessagingInstance();
       if (!messaging) {
-        console.log("FCM: Firebase Messaging is not supported in this browser or the instance could not be retrieved.");
+        console.log("FCM: Firebase Messaging is not supported in this browser.");
         return;
       }
       
@@ -33,7 +32,6 @@ export function useFcm() {
           
           if (currentToken) {
             console.log('FCM: Token successfully retrieved:', currentToken);
-            // Save token to Firestore
             const userDocRef = doc(db, 'users', user.uid);
             await updateDoc(userDocRef, {
               fcmTokens: arrayUnion(currentToken),
@@ -49,13 +47,12 @@ export function useFcm() {
         console.error('FCM Error: An error occurred while retrieving token.', error);
         toast({
             title: "獲取推播權杖失敗",
-            description: `請在瀏覽器開發者工具的控制台中查看詳細錯誤: ${error.message}`,
+            description: "請在瀏覽器開發者工具的控制台中查看詳細錯誤。",
             variant: "destructive"
         });
       }
     };
 
-    // Delay the request slightly to ensure service worker is ready.
     const timer = setTimeout(() => {
         requestPermissionAndToken();
     }, 1000);
@@ -64,7 +61,6 @@ export function useFcm() {
 
   }, [user, toast]);
 
-  // Effect to handle foreground messages
   useEffect(() => {
      if (typeof window === 'undefined') return;
      
