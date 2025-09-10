@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { useEffect } from 'react';
+import { getMessaging, getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
 import { db } from '@/lib/firebase/client-app';
@@ -28,7 +28,6 @@ async function getFirebaseMessaging() {
 export function useFcm() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [fcmToken, setFcmToken] = useState<string | null>(null);
 
   // Effect to request permission and get token
   useEffect(() => {
@@ -42,8 +41,8 @@ export function useFcm() {
         return;
       }
       
-      // ❗️ IMPORTANT: Replace the placeholder value below with your own VAPID key from the Firebase console.
-      // It is a public key and is safe to be hardcoded here.
+      // The VAPID key is a public key and is safe to be exposed on the client.
+      // This key is now hardcoded for reliability.
       const vapidKey = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
       try {
@@ -53,8 +52,7 @@ export function useFcm() {
           const currentToken = await getToken(messaging, { vapidKey });
           
           if (currentToken) {
-            console.log('FCM Token:', currentToken);
-            setFcmToken(currentToken);
+            console.log('FCM Token successfully retrieved:', currentToken);
             // Save token to Firestore
             const userDocRef = doc(db, 'users', user.uid);
             await updateDoc(userDocRef, {
@@ -101,5 +99,5 @@ export function useFcm() {
 
   }, [toast]);
 
-  return { fcmToken };
+  // This hook's primary purpose is to set up listeners, so it doesn't need to return anything.
 }
