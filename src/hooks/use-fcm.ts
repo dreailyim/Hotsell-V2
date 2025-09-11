@@ -5,9 +5,8 @@ import { useEffect, useCallback } from 'react';
 import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db } from '@/lib/firebase/client-app';
+import { db, getMessagingInstance } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
-import { getMessagingInstance } from '@/lib/firebase/client-app';
 
 // THE ONLY CORRECT VAPID KEY PROVIDED BY THE USER.
 const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
@@ -17,8 +16,8 @@ export function useFcm() {
   const { toast } = useToast();
 
   const requestPermissionAndToken = useCallback(async () => {
-    if (!user || typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-      console.log("FCM: Pre-conditions not met (no user, no window, or no serviceWorker). Aborting.");
+    if (!user || typeof window === 'undefined' || !('Notification' in window)) {
+      console.log("FCM: Pre-conditions not met.");
       return;
     }
 
@@ -29,11 +28,6 @@ export function useFcm() {
         return;
       }
       
-      console.log('FCM: Waiting for Service Worker to be ready...');
-      const swRegistration = await navigator.serviceWorker.ready;
-      console.log('FCM: Service Worker is ready.');
-
-      // 1. Request permission.
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         console.log('FCM: Notification permission not granted. Status:', permission);
@@ -50,10 +44,9 @@ export function useFcm() {
       console.log('FCM: Notification permission granted.');
       console.log('FCM: Requesting token with VAPID key...');
             
-      // 2. Get the token with the correct VAPID key.
+      // The SDK will automatically find and register the service worker from the public folder.
       const currentToken = await getToken(messaging, {
           vapidKey: VAPID_KEY,
-          serviceWorkerRegistration: swRegistration,
       });
 
       if (currentToken) {
@@ -79,7 +72,11 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      requestPermissionAndToken();
+      // A small delay can sometimes help ensure the service worker has had time to register on initial load.
+      const timer = setTimeout(() => {
+         requestPermissionAndToken();
+      }, 2000);
+      return () => clearTimeout(timer);
     }
   }, [user, requestPermissionAndToken]);
 
