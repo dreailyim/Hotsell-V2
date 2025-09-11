@@ -31,6 +31,7 @@ const functions = getFunctions(app, 'us-central1');
 let messagingInstance = null;
 
 // Export a function to get the messaging instance on demand.
+// This ensures it's only called on the client and when supported.
 export const getMessagingInstance = async () => {
     if (messagingInstance) {
         return messagingInstance;

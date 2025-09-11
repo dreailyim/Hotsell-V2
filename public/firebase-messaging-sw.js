@@ -1,10 +1,12 @@
-// This file MUST be in the /public folder
 
+// This file must be in the public directory.
+
+// Import the Firebase app and messaging packages.
+// This is the "modular" SDK.
 import { initializeApp } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-// IMPORTANT: Replace this with your project's configuration
-// This configuration is safe to be exposed on the client-side.
+// Your web app's Firebase configuration.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -19,15 +21,20 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Optional: Handle background messages
+// onBackgroundMessage is used to handle messages when the app is in the background.
 onBackgroundMessage(messaging, (payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  console.log(
+    '[firebase-messaging-sw.js] Received background message ',
+    payload
+  );
   
-  // Customize notification here
-  const notificationTitle = payload.notification?.title || 'New Message';
+  const notificationTitle = payload.notification?.title || 'HotSell';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new message.',
-    icon: '/favicon.ico' // Optional
+    icon: '/icon-192x192.png', // Ensure you have this icon in /public
+    data: {
+      click_action: payload.fcmOptions?.link || '/'
+    }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
