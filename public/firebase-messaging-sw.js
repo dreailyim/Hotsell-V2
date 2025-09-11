@@ -1,9 +1,9 @@
-// IMPORTANT: This file MUST be in the public folder.
+// Version: 2024-08-01T12:00:00Z
+// This file must be in the public folder.
 
 import { initializeApp } from 'firebase/app';
 import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-// This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -15,19 +15,16 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-
-// Initialize the Firebase app in the service worker
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
-// Handle background messages
 onBackgroundMessage(messaging, (payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
-  const notificationTitle = payload.notification?.title || 'New Message';
+  const notificationTitle = payload.notification?.title || 'HotSell';
   const notificationOptions = {
-    body: payload.notification?.body || '',
-    icon: payload.notification?.icon || '/favicon.ico', // You can add a default icon
+    body: payload.notification?.body || 'You have a new message.',
+    icon: '/icon-192x192.png' // Make sure you have this icon in your public folder
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
