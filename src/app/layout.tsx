@@ -6,6 +6,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "HotSell",
   description: "A secondhand marketplace app.",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
