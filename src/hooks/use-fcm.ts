@@ -9,6 +9,7 @@ import { db } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
 import { getMessagingInstance } from '@/lib/firebase/client-app';
 
+// This VAPID key is a public key used by push services to identify the application.
 const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
 export function useFcm() {
@@ -20,37 +21,24 @@ export function useFcm() {
       console.log("FCM: User not logged in, aborting token request.");
       return;
     }
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator)) {
-      toast({ title: "瀏覽器不支援通知", variant: "destructive" });
+    if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('Notification' in window)) {
+      toast({ title: "您的瀏覽器不支援通知功能", variant: "destructive" });
       return;
     }
 
     try {
-      // Step 1: Explicitly register the service worker and wait for it to be ready.
-      // This is the most critical step to prevent the "no active Service Worker" error.
-      const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      await navigator.serviceWorker.ready; // Wait until the Service Worker is active and ready.
-      
-      console.log('FCM: Service Worker registered and ready:', swRegistration);
-
-      // Step 2: Get the messaging instance.
       const messaging = await getMessagingInstance();
       if (!messaging) {
         toast({ title: "FCM 初始化失敗", description: "無法獲取 Messaging 實例。", variant: "destructive" });
         return;
       }
       
-      // Step 3: Request permission from the user.
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         console.log('FCM: Notification permission granted.');
         
-        // Step 4: Get the token ONLY after the SW is ready and permission is granted.
-        console.log("FCM: Requesting token with VAPID key...");
-        const currentToken = await getToken(messaging, {
-            vapidKey: VAPID_KEY,
-            serviceWorkerRegistration: swRegistration, // Pass the registration to getToken.
-        });
+        // The SDK will automatically register the service worker located at /firebase-messaging-sw.js
+        const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
         
         if (currentToken) {
           console.log('FCM: Token successfully retrieved:', currentToken);
@@ -60,7 +48,7 @@ export function useFcm() {
           });
           console.log('FCM: Token saved to Firestore.');
         } else {
-          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured.');
+          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured or the VAPID key is invalid.');
           toast({
               title: "無法獲取推播權杖",
               description: "未能生成註冊權杖，請檢查 Service Worker 狀態或瀏覽器設定。",
@@ -79,7 +67,6 @@ export function useFcm() {
       }
     } catch (error: any) {
       console.error('FCM Error: An error occurred while retrieving token.', error);
-      // Log the specific error to help diagnose the issue.
       toast({
           title: "獲取推播權杖失敗",
           description: `${error.message} (${error.code || '未知錯誤碼'})`,
