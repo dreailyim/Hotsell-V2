@@ -5,8 +5,9 @@ import { useEffect, useCallback } from 'react';
 import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db, getMessagingInstance } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
+import { getMessagingInstance } from '@/lib/firebase/client-app';
 
 // THE ONLY CORRECT VAPID KEY PROVIDED BY THE USER.
 const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
@@ -16,8 +17,8 @@ export function useFcm() {
   const { toast } = useToast();
 
   const requestPermissionAndToken = useCallback(async () => {
-    if (!user || typeof window === 'undefined' || !('Notification' in window)) {
-      console.log("FCM: Pre-conditions not met.");
+    if (!user || typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
+      console.log("FCM: Pre-conditions not met (no user, window, Notification, or serviceWorker).");
       return;
     }
 
@@ -27,26 +28,32 @@ export function useFcm() {
         console.log("FCM: Messaging is not supported in this browser.");
         return;
       }
-      
+
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         console.log('FCM: Notification permission not granted. Status:', permission);
         if (permission === 'denied') {
-            toast({
-                title: "通知權限已被封鎖",
-                description: "如要接收通知，請在瀏覽器設定中手動允許。",
-                variant: "destructive"
-            });
+          toast({
+            title: "通知權限已被封鎖",
+            description: "如要接收通知，請在瀏覽器設定中手動允許。",
+            variant: "destructive"
+          });
         }
         return;
       }
       
       console.log('FCM: Notification permission granted.');
-      console.log('FCM: Requesting token with VAPID key...');
+
+      // **THE FIX**: Manually register the service worker at the root scope '/'
+      const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('FCM: Service worker registered successfully at scope:', swRegistration.scope);
+      
+      console.log('FCM: Requesting token with explicit service worker registration and VAPID key...');
             
-      // The SDK will automatically find and register the service worker from the public folder.
+      // Pass the registration to getToken to ensure correct scope is used.
       const currentToken = await getToken(messaging, {
           vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: swRegistration,
       });
 
       if (currentToken) {
@@ -72,7 +79,6 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      // A small delay can sometimes help ensure the service worker has had time to register on initial load.
       const timer = setTimeout(() => {
          requestPermissionAndToken();
       }, 2000);
