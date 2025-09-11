@@ -1,9 +1,9 @@
-// IMPORTANT: This file must be in the public directory.
 
-import { initializeApp } from 'firebase/app';
-import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
+// Use the "compat" version of the SDK for widest browser compatibility in Service Workers.
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
 
-// This configuration is safe to be exposed on the client-side.
+// This configuration is safe to be exposed in a service worker.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -15,48 +15,19 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
+firebase.initializeApp(firebaseConfig);
 
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+const messaging = firebase.messaging();
 
-// This listener handles notifications when the app is in the background or closed.
-onBackgroundMessage(messaging, (payload) => {
-  console.log(
-    '[firebase-messaging-sw.js] Received background message ',
-    payload
-  );
-
-  const notificationTitle = payload.notification?.title || 'HotSell';
+// Optional: Background message handler
+messaging.onBackgroundMessage((payload) => {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+  // Customize notification here
+  const notificationTitle = payload.notification.title;
   const notificationOptions = {
-    body: payload.notification?.body || 'You have a new message.',
-    icon: '/favicon.ico', // Optional: Use a default icon
-    data: {
-        url: payload.fcmOptions?.link || '/'
-    }
+    body: payload.notification.body,
+    icon: '/favicon.ico' // You can add a default icon here
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// Optional: Listener for notification click
-self.addEventListener('notificationclick', (event) => {
-    event.notification.close();
-    const notification = event.notification;
-    const urlToOpen = notification.data?.url || '/';
-
-    event.waitUntil(
-        clients.matchAll({
-            type: 'window',
-            includeUncontrolled: true,
-        }).then((clientList) => {
-            // If a window for this origin is already open, focus it.
-            for (const client of clientList) {
-                if (new URL(client.url).origin === new URL(urlToOpen).origin) {
-                    return client.focus();
-                }
-            }
-            // Otherwise, open a new window.
-            return clients.openWindow(urlToOpen);
-        })
-    );
 });
