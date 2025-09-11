@@ -43,117 +43,120 @@ async function deleteCollection(collectionRef, batchSize) {
  * This function has been refactored for robustness and better logging.
  * @param {string} userId The ID of the user who will receive the notification.
  * @param {object} notificationData The data for the notification.
+ * @param {boolean} options.sendPushNotification Whether to send a push notification. Defaults to true.
+ * @param {boolean} options.createInAppNotification Whether to create an in-app notification document. Defaults to true.
  */
-async function createNotification(userId, notificationData) {
+async function createAndSendNotification(userId, notificationData, options = {}) {
+  const { sendPushNotification = true, createInAppNotification = true } = options;
+
   if (!userId) {
-    console.warn("createNotification called with null or undefined userId. Skipping.");
+    console.warn("createAndSendNotification called with null or undefined userId. Skipping.");
     return;
   }
   
-  // 1. Create the in-app notification document.
-  try {
-    const userRef = db.collection("users").doc(userId);
-    
-    await db.collection("notifications").add({
-      userId: userId,
-      isRead: false,
-      createdAt: admin.firestore.FieldValue.serverTimestamp(),
-      ...notificationData,
-    });
+  // 1. Create the in-app notification document (if requested).
+  if (createInAppNotification) {
+    try {
+        const userRef = db.collection("users").doc(userId);
+        
+        await db.collection("notifications").add({
+        userId: userId,
+        isRead: false,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        ...notificationData,
+        });
 
-    // Also increment the total unread count for the user.
-    await userRef.set({
-        totalUnreadCount: admin.firestore.FieldValue.increment(1)
-    }, { merge: true });
+        // Also increment the total unread count for the user.
+        await userRef.set({
+            totalUnreadCount: admin.firestore.FieldValue.increment(1)
+        }, { merge: true });
 
-  } catch (error) {
-    console.error(`Failed to create in-app notification document for user ${userId}.`, error);
-    // We still attempt to send a push notification.
+    } catch (error) {
+        console.error(`Failed to create in-app notification document for user ${userId}.`, error);
+        // We can still attempt to send a push notification.
+    }
   }
   
-  // 2. Send the push notification (FCM).
-  try {
-    const userDoc = await db.collection('users').doc(userId).get();
-    if (!userDoc.exists) {
-        console.log(`User document ${userId} not found. Cannot send push notification.`);
-        return;
-    }
-    
-    const fcmTokens = userDoc.data()?.fcmTokens;
-    if (!fcmTokens || !Array.isArray(fcmTokens) || fcmTokens.length === 0) {
-        console.log(`User ${userId} has no FCM tokens. No push notification sent.`);
-        return;
-    }
-
-    const clickTargetUrl = notificationData.relatedData?.conversationId
-      ? `/chat/${notificationData.relatedData.conversationId}`
-      : notificationData.relatedData?.productId
-      ? `/products/${notificationData.relatedData.productId}`
-      : `/messages`;
-
-    // Construct a more robust payload for better cross-platform compatibility.
-    const payload = {
-      notification: {
-        title: 'HotSell 有新通知！',
-        body: notificationData.message,
-        // You can add an icon or badge here if needed
-        // icon: 'https://example.com/notification-icon.png'
-      },
-      data: { // Custom data for the client to handle
-        click_action: clickTargetUrl
-      },
-      webpush: { // Specific configuration for web clients
-          fcmOptions: {
-              link: clickTargetUrl
-          }
-      },
-    };
-    
-    console.log(`Attempting to send push notification to user ${userId} with payload:`, JSON.stringify(payload, null, 2));
-
-    const response = await messaging.sendEachForMulticast({
-        ...payload,
-        tokens: fcmTokens // Send to all registered tokens for the user
-    });
-
-    console.log(`Push notification sent to user ${userId}. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
-
-    // 3. Clean up invalid tokens.
-    if (response.failureCount > 0) {
-      const invalidTokens = [];
-      response.responses.forEach((resp, idx) => {
-        if (!resp.success) {
-          const errorCode = resp.error.code;
-           // These error codes indicate the token is no longer valid.
-           if (errorCode === 'messaging/invalid-registration-token' ||
-              errorCode === 'messaging/registration-token-not-registered' ||
-              errorCode === 'messaging/invalid-argument') {
-              invalidTokens.push(fcmTokens[idx]);
-           }
+  // 2. Send the push notification (FCM) (if requested).
+  if (sendPushNotification) {
+    try {
+        const userDoc = await db.collection('users').doc(userId).get();
+        if (!userDoc.exists) {
+            console.log(`User document ${userId} not found. Cannot send push notification.`);
+            return;
         }
-      });
-      
-      if (invalidTokens.length > 0) {
-        console.log(`Found ${invalidTokens.length} invalid tokens for user ${userId}. Removing them...`);
-        const userRef = db.collection('users').doc(userId);
-        await userRef.update({
-            fcmTokens: admin.firestore.FieldValue.arrayRemove(...invalidTokens)
-        });
-        console.log(`Invalid tokens removed for user ${userId}.`);
-      }
-    }
+        
+        const fcmTokens = userDoc.data()?.fcmTokens;
+        if (!fcmTokens || !Array.isArray(fcmTokens) || fcmTokens.length === 0) {
+            console.log(`User ${userId} has no FCM tokens. No push notification sent.`);
+            return;
+        }
 
-  } catch (error) {
-      console.error(`An unhandled error occurred while trying to send push notification to user ${userId}:`, error);
+        const clickTargetUrl = notificationData.relatedData?.conversationId
+        ? `/chat/${notificationData.relatedData.conversationId}`
+        : notificationData.relatedData?.productId
+        ? `/products/${notificationData.relatedData.productId}`
+        : `/messages`;
+
+        const payload = {
+        notification: {
+            title: 'HotSell 有新通知！',
+            body: notificationData.message,
+        },
+        data: {
+            click_action: clickTargetUrl
+        },
+        webpush: {
+            fcmOptions: {
+                link: clickTargetUrl
+            }
+        },
+        };
+        
+        console.log(`Attempting to send push notification to user ${userId} with payload:`, JSON.stringify(payload, null, 2));
+
+        const response = await messaging.sendEachForMulticast({
+            ...payload,
+            tokens: fcmTokens
+        });
+
+        console.log(`Push notification sent to user ${userId}. Success count: ${response.successCount}, Failure count: ${response.failureCount}`);
+
+        // 3. Clean up invalid tokens.
+        if (response.failureCount > 0) {
+        const invalidTokens = [];
+        response.responses.forEach((resp, idx) => {
+            if (!resp.success) {
+            const errorCode = resp.error.code;
+            if (errorCode === 'messaging/invalid-registration-token' ||
+                errorCode === 'messaging/registration-token-not-registered' ||
+                errorCode === 'messaging/invalid-argument') {
+                invalidTokens.push(fcmTokens[idx]);
+            }
+            }
+        });
+        
+        if (invalidTokens.length > 0) {
+            console.log(`Found ${invalidTokens.length} invalid tokens for user ${userId}. Removing them...`);
+            const userRef = db.collection('users').doc(userId);
+            await userRef.update({
+                fcmTokens: admin.firestore.FieldValue.arrayRemove(...invalidTokens)
+            });
+            console.log(`Invalid tokens removed for user ${userId}.`);
+        }
+        }
+
+    } catch (error) {
+        console.error(`An unhandled error occurred while trying to send push notification to user ${userId}:`, error);
+    }
   }
 }
 
 
 /**
  * A Firestore trigger that runs when a new message is created.
- * It updates the recipient's total unread count.
- * The responsibility for updating the conversation's lastMessage and lastActivity
- * has been moved to the client-side to resolve race condition/permission issues.
+ * It sends a push notification to the recipient and updates their conversation unread count.
+ * It NO LONGER creates a redundant in-app system notification for the new message.
  */
 exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/messages/{messageId}", async (event) => {
     const { conversationId } = event.params;
@@ -183,27 +186,35 @@ exports.processNewMessage = onDocumentCreated("conversations/{conversationId}/me
             return;
         }
         
-        // --- Create Notification for the recipient ---
-        // Use details from the conversation document itself to avoid extra DB reads and race conditions.
+        // --- Send Push Notification (but no in-app notification) ---
         const senderDetails = convoData.participantDetails?.[senderId];
         if (!senderDetails) {
             console.error(`Could not find sender details for user ${senderId} in conversation ${conversationId}.`);
             return;
         }
 
-        await createNotification(otherUserId, {
+        await createAndSendNotification(otherUserId, {
             type: 'new_message',
             message: `${senderDetails.displayName || '新訊息'}: ${messageData.text}`,
             relatedData: {
                 conversationId: conversationId,
                 productId: convoData.product.id, // For constructing the deeplink
             }
+        }, { 
+            createInAppNotification: false, // This is the key change!
+            sendPushNotification: true 
         });
 
         // Atomically increment the unread count for the other user in the conversation
         await convoDocRef.update({
             [`unreadCounts.${otherUserId}`]: admin.firestore.FieldValue.increment(1),
         });
+
+        // Increment the total unread count on the user document as well.
+        const userRef = db.collection("users").doc(otherUserId);
+        await userRef.set({
+            totalUnreadCount: admin.firestore.FieldValue.increment(1)
+        }, { merge: true });
         
     } catch (error) {
         console.error(`Failed to process new message for conversation ${conversationId}:`, error);
@@ -372,7 +383,7 @@ exports.processNewReview = onDocumentCreated("reviews/{reviewId}", async (event)
     }
 
     // --- Send Notification ---
-    await createNotification(ratedUserId, {
+    await createAndSendNotification(ratedUserId, {
         type: 'new_review',
         message: `${reviewData.reviewerName} 對您作出了評價。`,
         relatedData: {
@@ -395,7 +406,7 @@ exports.onProductCreated = onDocumentCreated("products/{productId}", (event) => 
     const sellerId = product.sellerId;
     const productName = product.name;
 
-    return createNotification(sellerId, {
+    return createAndSendNotification(sellerId, {
         type: 'new_listing_success',
         message: `您已成功上架新產品：${productName}`,
         relatedData: {
@@ -430,7 +441,7 @@ exports.onProductUpdated = onDocumentUpdated("products/{productId}", async (even
             const favoriterDoc = await db.collection("users").doc(newFavoriterId).get();
             const favoriterName = favoriterDoc.exists() ? favoriterDoc.data().displayName : "一位使用者";
             
-            await createNotification(afterData.sellerId, {
+            await createAndSendNotification(afterData.sellerId, {
                 type: 'new_favorite',
                 message: `${favoriterName} 收藏了您的產品：${afterData.name}`,
                 relatedData: {
@@ -448,7 +459,7 @@ exports.onProductUpdated = onDocumentUpdated("products/{productId}", async (even
     if (afterData.price < beforeData.price) {
         const notificationPromises = beforeFavoritedBy.map(userId => {
             if (userId === afterData.sellerId) return null; // Don't notify the seller
-            return createNotification(userId, {
+            return createAndSendNotification(userId, {
                 type: 'price_drop',
                 message: `您收藏的產品「${afterData.name}」已減價！`,
                 relatedData: {
@@ -465,7 +476,7 @@ exports.onProductUpdated = onDocumentUpdated("products/{productId}", async (even
     // --- Logic 4: Notify seller and favoriters of sale ---
     if (afterData.status === 'sold' && beforeData.status !== 'sold') {
         // Notify seller
-        await createNotification(afterData.sellerId, {
+        await createAndSendNotification(afterData.sellerId, {
             type: 'item_sold',
             message: `恭喜！您的產品「${afterData.name}」已成功賣出。`,
             relatedData: {
@@ -477,7 +488,7 @@ exports.onProductUpdated = onDocumentUpdated("products/{productId}", async (even
         // Notify favoriters
          const saleNotificationPromises = beforeFavoritedBy.map(userId => {
             if (userId === afterData.sellerId) return null;
-            return createNotification(userId, {
+            return createAndSendNotification(userId, {
                 type: 'item_sold_to_other',
                 message: `您收藏的產品「${afterData.name}」已賣出。`,
                  relatedData: {
@@ -506,7 +517,7 @@ exports.onConversationDeleted = onDocumentDeleted("conversations/{conversationId
         const notifsQuery = db.collection("notifications").where("userId", "==", userId).where("isRead", "==", false);
 
         try {
-            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsQuery.get()]);
+            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsSnapshot.get()]);
             
             let convoUnread = 0;
             convosSnapshot.forEach(doc => {
@@ -638,5 +649,7 @@ exports.onNotificationUpdated = onDocumentUpdated("notifications/{notificationId
         }
     }
 });
+
+    
 
     
