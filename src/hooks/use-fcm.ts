@@ -21,30 +21,21 @@ export function useFcm() {
       return;
     }
 
-    if (typeof window === 'undefined' || !('serviceWorker' in navigator) || !('Notification' in window)) {
-      toast({ title: "您的瀏覽器不支援通知功能", variant: "destructive" });
-      return;
-    }
-
     const messaging = await getMessagingInstance();
     if (!messaging) {
-      console.error("FCM Error: Messaging instance is not available.");
+      console.error("FCM Error: Messaging is not supported in this browser.");
       return;
     }
 
     try {
-      // 1. Manually register the service worker at the root scope.
-      // This is the most crucial step to ensure scope and script path match.
-      const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
-      console.log('FCM: Service worker registered successfully with scope:', swRegistration.scope);
-
-      // 2. Request notification permission.
       const permission = await Notification.requestPermission();
       if (permission === 'granted') {
         console.log('FCM: Notification permission granted.');
+        
+        // The service worker is expected to be at the root, served from /public
+        const swRegistration = await navigator.serviceWorker.ready;
+        console.log('FCM: Service worker is ready.');
 
-        // 3. Get token, providing the explicit registration.
-        // This tells Firebase to use our manually registered worker, solving the scope issue.
         const currentToken = await getToken(messaging, {
           vapidKey: VAPID_KEY,
           serviceWorkerRegistration: swRegistration,
@@ -58,7 +49,7 @@ export function useFcm() {
           });
           console.log('FCM: Token saved to Firestore.');
         } else {
-          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured, the VAPID key is invalid, or the service worker path is incorrect.');
+          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured or the VAPID key is invalid.');
         }
       } else {
         console.log('FCM: Unable to get permission to notify. Status:', permission);
@@ -82,7 +73,10 @@ export function useFcm() {
 
   useEffect(() => {
     if (user) {
-      requestPermissionAndToken();
+      // Small delay to ensure the service worker has a chance to register
+      setTimeout(() => {
+        requestPermissionAndToken();
+      }, 1000);
     }
   }, [user, requestPermissionAndToken]);
 
