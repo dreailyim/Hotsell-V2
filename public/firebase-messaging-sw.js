@@ -1,9 +1,7 @@
+// IMPORTANT: This file must be in the public directory.
 
-// This file must be in the public directory.
-
-// Import the compat version of the SDK for the service worker
-importScripts("https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js");
+import { initializeApp } from 'firebase/app';
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
 // This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
@@ -18,22 +16,47 @@ const firebaseConfig = {
 };
 
 
-firebase.initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-const messaging = firebase.messaging();
-
-// Optional: Handle background messages
-messaging.onBackgroundMessage((payload) => {
+// This listener handles notifications when the app is in the background or closed.
+onBackgroundMessage(messaging, (payload) => {
   console.log(
-    "[firebase-messaging-sw.js] Received background message ",
+    '[firebase-messaging-sw.js] Received background message ',
     payload
   );
-  
-  const notificationTitle = payload.notification.title || "New Message";
+
+  const notificationTitle = payload.notification?.title || 'HotSell';
   const notificationOptions = {
-    body: payload.notification.body || "",
-    icon: "/favicon.ico", // You can change this to your app's icon
+    body: payload.notification?.body || 'You have a new message.',
+    icon: '/favicon.ico', // Optional: Use a default icon
+    data: {
+        url: payload.fcmOptions?.link || '/'
+    }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// Optional: Listener for notification click
+self.addEventListener('notificationclick', (event) => {
+    event.notification.close();
+    const notification = event.notification;
+    const urlToOpen = notification.data?.url || '/';
+
+    event.waitUntil(
+        clients.matchAll({
+            type: 'window',
+            includeUncontrolled: true,
+        }).then((clientList) => {
+            // If a window for this origin is already open, focus it.
+            for (const client of clientList) {
+                if (new URL(client.url).origin === new URL(urlToOpen).origin) {
+                    return client.focus();
+                }
+            }
+            // Otherwise, open a new window.
+            return clients.openWindow(urlToOpen);
+        })
+    );
 });

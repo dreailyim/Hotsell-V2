@@ -33,11 +33,14 @@ let messagingInstance = null;
 // Export a function to get the messaging instance on demand.
 // This ensures it's only called on the client and when supported.
 export const getMessagingInstance = async () => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
     if (messagingInstance) {
         return messagingInstance;
     }
     const supported = await isSupported();
-    if (typeof window !== 'undefined' && supported) {
+    if (supported) {
         messagingInstance = getMessaging(app);
         return messagingInstance;
     }

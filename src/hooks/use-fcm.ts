@@ -17,18 +17,18 @@ export function useFcm() {
   const { toast } = useToast();
 
   const requestPermissionAndToken = useCallback(async () => {
-    if (!user || typeof window === 'undefined' || !('Notification' in window) || !('serviceWorker' in navigator)) {
-      console.log("FCM: Pre-conditions not met (no user, window, Notification, or serviceWorker).");
+    if (!user) {
+      console.log("FCM: Aborted. User not logged in.");
+      return;
+    }
+    
+    const messaging = await getMessagingInstance();
+    if (!messaging) {
+      console.log("FCM: Aborted. Messaging not supported in this browser.");
       return;
     }
 
     try {
-      const messaging = await getMessagingInstance();
-      if (!messaging) {
-        console.log("FCM: Messaging is not supported in this browser.");
-        return;
-      }
-
       const permission = await Notification.requestPermission();
       if (permission !== 'granted') {
         console.log('FCM: Notification permission not granted. Status:', permission);
@@ -42,29 +42,27 @@ export function useFcm() {
         return;
       }
       
-      console.log('FCM: Notification permission granted.');
-
-      // **THE FIX**: Manually register the service worker at the root scope '/'
-      const swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('FCM: Service worker registered successfully at scope:', swRegistration.scope);
-      
-      console.log('FCM: Requesting token with explicit service worker registration and VAPID key...');
+      console.log('FCM: Notification permission granted. Requesting token...');
             
-      // Pass the registration to getToken to ensure correct scope is used.
       const currentToken = await getToken(messaging, {
           vapidKey: VAPID_KEY,
-          serviceWorkerRegistration: swRegistration,
       });
 
       if (currentToken) {
           console.log('FCM: Token successfully retrieved:', currentToken);
           const userDocRef = doc(db, 'users', user.uid);
+          // This ensures we don't write the same token multiple times.
           await updateDoc(userDocRef, {
               fcmTokens: arrayUnion(currentToken),
           });
           console.log('FCM: Token saved to Firestore.');
       } else {
-          console.error('FCM Error: No registration token available. This often means the VAPID key is invalid, the service worker is not registered correctly, or there is a configuration issue.');
+          console.error('FCM Error: No registration token available. This often means the VAPID key is invalid or there is a configuration issue.');
+           toast({
+            title: "獲取推播權杖失敗",
+            description: "無法獲取權杖，請確認您的瀏覽器設定或稍後再試。",
+            variant: "destructive"
+          });
       }
     } catch (error: any) {
       console.error('FCM Error: An error occurred while retrieving token.', error);
@@ -79,31 +77,40 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
+      // Give the app a moment to stabilize before requesting permission
       const timer = setTimeout(() => {
          requestPermissionAndToken();
-      }, 2000);
+      }, 3000); 
       return () => clearTimeout(timer);
     }
   }, [user, requestPermissionAndToken]);
 
   // Effect for handling foreground messages.
   useEffect(() => {
-    const initializeMessagingListener = async () => {
-      const messagingInstance = await getMessagingInstance();
-      if (messagingInstance) {
-        const unsubscribe = onMessage(messagingInstance, (payload) => {
-          console.log('FCM: Foreground message received.', payload);
-          toast({
-            title: payload.notification?.title || '新通知',
-            description: payload.notification?.body,
-          });
-        });
-        return () => unsubscribe();
-      }
-    };
-
     if (user) {
-      initializeMessagingListener();
+      const setupListener = async () => {
+        const messagingInstance = await getMessagingInstance();
+        if (messagingInstance) {
+          const unsubscribe = onMessage(messagingInstance, (payload) => {
+            console.log('FCM: Foreground message received.', payload);
+            toast({
+              title: payload.notification?.title || '新通知',
+              description: payload.notification?.body,
+            });
+          });
+          return unsubscribe;
+        }
+      };
+
+      const unsubscribePromise = setupListener();
+      
+      return () => {
+        unsubscribePromise.then(unsubscribe => {
+          if (unsubscribe) {
+            unsubscribe();
+          }
+        });
+      };
     }
   }, [toast, user]);
 }
