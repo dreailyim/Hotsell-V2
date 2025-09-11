@@ -22,6 +22,7 @@ export function useFcm() {
       return;
     }
     
+    // Get messaging instance safely
     const messaging = await getMessagingInstance();
     if (!messaging) {
       console.log("FCM: Aborted. Messaging not supported in this browser.");
@@ -29,9 +30,12 @@ export function useFcm() {
     }
 
     try {
+      console.log('FCM: Service worker is ready. Requesting permission...');
       const permission = await Notification.requestPermission();
+
       if (permission !== 'granted') {
         console.log('FCM: Notification permission not granted. Status:', permission);
+        // Do not toast if user just dismissed it. Only if it's denied.
         if (permission === 'denied') {
           toast({
             title: "通知權限已被封鎖",
@@ -44,8 +48,11 @@ export function useFcm() {
       
       console.log('FCM: Notification permission granted. Requesting token...');
             
+      // Get token
       const currentToken = await getToken(messaging, {
           vapidKey: VAPID_KEY,
+          // The service worker is now loaded from /firebase-messaging-sw.js
+          // so we don't need to specify scope.
       });
 
       if (currentToken) {

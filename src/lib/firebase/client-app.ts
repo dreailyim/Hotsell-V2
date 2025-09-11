@@ -21,31 +21,21 @@ const firebaseConfig = {
 // A robust way to initialize Firebase on the client, ensuring it only happens once.
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const db = getFirestore(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const storage = getStorage(app);
-// Explicitly connect to the correct function region.
 const functions = getFunctions(app, 'us-central1');
 
-// Cache the messaging instance
-let messagingInstance = null;
 
-// Export a function to get the messaging instance on demand.
-// This ensures it's only called on the client and when supported.
-export const getMessagingInstance = async () => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-    if (messagingInstance) {
-        return messagingInstance;
-    }
-    const supported = await isSupported();
-    if (supported) {
-        messagingInstance = getMessaging(app);
-        return messagingInstance;
-    }
-    return null;
-}
+// It's crucial to check for support and only initialize messaging on the client.
+// We export a function that can be called safely from a useEffect hook.
+const getMessagingInstance = async () => {
+  const isMessagingSupported = await isSupported();
+  if (typeof window !== 'undefined' && isMessagingSupported) {
+    return getMessaging(app);
+  }
+  return null;
+};
 
 
-export { app, db, auth, storage, functions };
+export { app, db, auth, storage, functions, getMessagingInstance };

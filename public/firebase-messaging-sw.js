@@ -1,9 +1,9 @@
+// IMPORTANT: This file MUST be in the public folder.
 
-// Use the "compat" version of the SDK for widest browser compatibility in Service Workers.
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+import { initializeApp } from 'firebase/app';
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-// This configuration is safe to be exposed in a service worker.
+// This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -15,18 +15,19 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-firebase.initializeApp(firebaseConfig);
 
-const messaging = firebase.messaging();
+// Initialize the Firebase app in the service worker
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-// Optional: Background message handler
-messaging.onBackgroundMessage((payload) => {
+// Handle background messages
+onBackgroundMessage(messaging, (payload) => {
   console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
+  
+  const notificationTitle = payload.notification?.title || 'New Message';
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/favicon.ico' // You can add a default icon here
+    body: payload.notification?.body || '',
+    icon: payload.notification?.icon || '/favicon.ico', // You can add a default icon
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

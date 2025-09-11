@@ -31,6 +31,13 @@ const nextConfig: NextConfig = {
       }
     ],
   },
+  webpack: (config, { isServer }) => {
+    // This is to allow 'firebase/messaging/sw' to be imported in the service worker.
+    if (!isServer) {
+      config.resolve.alias['@/firebase/messaging/sw'] = 'firebase/messaging/sw';
+    }
+    return config;
+  },
 };
 
 export default nextConfig;
