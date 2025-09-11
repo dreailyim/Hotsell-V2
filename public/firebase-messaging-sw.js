@@ -1,8 +1,12 @@
-// Use the old `importScripts` syntax for maximum compatibility in Service Workers.
-importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
+// DO NOT USE 'import' statements in this file. It is not a module.
 
-// This configuration is safe to be exposed in the service worker.
+// Load the Firebase app and messaging services using the compatible 'importScripts' method.
+// This is the most reliable way to load external scripts in a service worker.
+importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
+
+
+// This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -21,19 +25,18 @@ firebase.initializeApp(firebaseConfig);
 // messages.
 const messaging = firebase.messaging();
 
-// If you want to handle background messages, you can add a listener here.
-// For now, Firebase will automatically handle displaying the notification.
+// If you want to handle background messages, you can do so here.
 messaging.onBackgroundMessage((payload) => {
   console.log(
     "[firebase-messaging-sw.js] Received background message ",
     payload
   );
-
+  
   // Customize notification here
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification?.title || "New Message";
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/favicon.ico", // You can add a default icon here
+    body: payload.notification?.body || "You have a new message.",
+    icon: "/favicon.ico", // Optional: use an icon from your public folder
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
