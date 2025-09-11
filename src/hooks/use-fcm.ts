@@ -10,6 +10,7 @@ import { useToast } from './use-toast';
 import { getMessagingInstance } from '@/lib/firebase/client-app';
 
 // This VAPID key is a public key used by push services to identify the application.
+// It must match the key pair in your Firebase project settings.
 const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
 export function useFcm() {
@@ -29,6 +30,7 @@ export function useFcm() {
     try {
       const messaging = await getMessagingInstance();
       if (!messaging) {
+        console.error("FCM Error: Messaging instance is not available.");
         toast({ title: "FCM 初始化失敗", description: "無法獲取 Messaging 實例。", variant: "destructive" });
         return;
       }
@@ -37,7 +39,8 @@ export function useFcm() {
       if (permission === 'granted') {
         console.log('FCM: Notification permission granted.');
         
-        // The SDK will automatically register the service worker located at /firebase-messaging-sw.js
+        // The SDK will automatically register the service worker at /firebase-messaging-sw.js
+        console.log('FCM: Requesting token with VAPID key...');
         const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
         
         if (currentToken) {
@@ -48,7 +51,7 @@ export function useFcm() {
           });
           console.log('FCM: Token saved to Firestore.');
         } else {
-          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured or the VAPID key is invalid.');
+          console.error('FCM Error: No registration token available. This often means the service worker is not correctly configured, the VAPID key is invalid, or the service worker path is incorrect.');
           toast({
               title: "無法獲取推播權杖",
               description: "未能生成註冊權杖，請檢查 Service Worker 狀態或瀏覽器設定。",

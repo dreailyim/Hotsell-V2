@@ -1,41 +1,30 @@
 
-// This file must be in the public folder.
+// This file MUST be in the public folder.
 
-// Give the service worker access to Firebase Messaging.
-// Note that you can only use Firebase Messaging here, other Firebase libraries
-// are not available in the service worker.
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');
-importScripts('https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js');
+// Import the Firebase app and messaging packages.
+// This uses the "compat" version of the SDK, which is recommended for service workers.
+importScripts('https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.15.0/firebase-messaging-compat.js');
 
-// Initialize the Firebase app in the service worker by passing in
-// the messagingSenderId.
-const firebaseConfig = {
-  "projectId": "hotsell-dolw2",
-  "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
-  "storageBucket": "hotsell-dolw2.firebasestorage.app",
-  "apiKey": "AIzaSyAZChqV6v73lcJBCMVXIdd4VlREq7tdDVo",
-  "authDomain": "hotsell-dolw2.firebaseapp.com",
-  "messagingSenderId": "25821240563",
-  "measurementId": "G-5G6503TB6P",
-  "databaseURL": "https://hotsell-dolw2.firebaseio.com"
-};
+// IMPORTANT: Do not copy your config object here.
+// The service worker will be initialized automatically from the client-side app.
+// If you put your config here, you may accidentally initialize the app twice.
 
+// Set Firebase messaging background handler
+// This is triggered when the app is in the background or closed.
+self.addEventListener('push', (event) => {
+  // Background message handling logic can be added here if needed,
+  // but for simple notifications, Firebase handles it automatically.
+});
 
-firebase.initializeApp(firebaseConfig);
-
-// Retrieve an instance of Firebase Messaging so that it can handle background
-// messages.
-const messaging = firebase.messaging();
-
-messaging.onBackgroundMessage((payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
-  const notificationOptions = {
-    body: payload.notification.body,
-    icon: '/firebase-logo.png'
-  };
-
-  self.registration.showNotification(notificationTitle,
-    notificationOptions);
+// Optional: If you want to customize the notification click action
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const notificationPayload = event.notification.data;
+  if (notificationPayload && notificationPayload.FCM_MSG) {
+      const clickAction = notificationPayload.FCM_MSG.data.click_action;
+      if (clickAction) {
+          event.waitUntil(clients.openWindow(clickAction));
+      }
+  }
 });
