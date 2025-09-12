@@ -522,7 +522,7 @@ export default function ChatPage() {
 
 
       return (
-        <div className="border-b bg-background/50 backdrop-blur-sm">
+        <div className="sticky top-[56px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
           <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
@@ -622,7 +622,7 @@ export default function ChatPage() {
 
     // Default view when no special status
     return (
-      <div className="border-b bg-background/50 backdrop-blur-sm">
+      <div className="sticky top-[56px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
          <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
@@ -683,12 +683,18 @@ export default function ChatPage() {
     );
   }
 
+  const hasStickyHeader = conversation?.product?.status === 'sold';
+  const chatPaddingTop = hasStickyHeader ? 'pt-[92px]' : 'pt-4';
+  const headerHeight = 56; // from Header component h-14
+  const chatProductHeaderHeight = 68; // from ChatProductHeader p-2(8) + h-12(48) + p-2(8) + border-b(1) ~approx 68px
+  const stickyTopValue = `${headerHeight}px`;
+
   return (
     <div className="flex flex-col h-screen">
       <Header title={otherUser?.displayName || "對話"} showBackButton />
       <ChatProductHeader />
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className={cn("flex-1 overflow-y-auto p-4 space-y-4", hasStickyHeader && "pt-4")}>
         {error && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
