@@ -403,6 +403,8 @@ exports.processNewReview = onDocumentCreated("reviews/{reviewId}", async (event)
  */
 exports.onProductCreated = onDocumentCreated("products/{productId}", (event) => {
     const product = event.data.data();
+    if (!product) return null;
+    
     const sellerId = product.sellerId;
     const productName = product.name;
 
@@ -649,6 +651,8 @@ exports.onNotificationUpdated = onDocumentUpdated("notifications/{notificationId
         }
     }
 });
+
+    
 
     
 
