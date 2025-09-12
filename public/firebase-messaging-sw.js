@@ -1,8 +1,10 @@
-// Version: 2024052301
+
+// Version: 202407231030
 // This file must be in the public folder.
 
-importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js");
+// Use the legacy/compat version of the SDK for maximum browser compatibility in service workers.
+importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js");
+importScripts("https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js");
 
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
@@ -15,20 +17,24 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
+// Initialize the Firebase app in the service worker with the config
 firebase.initializeApp(firebaseConfig);
 
+// Retrieve an instance of Firebase Messaging so that it can handle background messages.
 const messaging = firebase.messaging();
 
+// If you want to handle background messages, you can add a handler here.
+// For now, Firebase will handle showing the notification automatically.
 messaging.onBackgroundMessage((payload) => {
   console.log(
     "[firebase-messaging-sw.js] Received background message ",
     payload
   );
-  
+  // Customize notification here
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.image || '/icon-192x192.png'
+    icon: "/icon-192x192.png", // Ensure you have this icon in your public folder
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
