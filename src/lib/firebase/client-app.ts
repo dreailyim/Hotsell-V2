@@ -5,12 +5,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
+import 'firebase/compat/storage'; // Import the compat library
 
 // This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
-  "storageBucket": "hotsell-dolw2.firebasestorage.app",
+  "storageBucket": "hotsell-dolw2.appspot.com",
   "apiKey": "AIzaSyAZChqV6v73lcJBCMVXIdd4VlREq7tdDVo",
   "authDomain": "hotsell-dolw2.firebaseapp.com",
   "messagingSenderId": "25821240563",

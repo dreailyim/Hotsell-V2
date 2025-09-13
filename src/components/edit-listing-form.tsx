@@ -34,6 +34,7 @@ import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
 import { ref, uploadString, getDownloadURL, getBlob } from 'firebase/storage';
+import { getStorage, refFromURL } from "firebase/compat/storage"; // Correct way to get refFromURL
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -186,8 +187,10 @@ export function EditListingForm({ product }: EditListingFormProps) {
       // If the image is a URL from Firebase Storage, fetch it as a blob and convert to data URI
       if (imageAsDataUri.startsWith('https://firebasestorage.googleapis.com')) {
         try {
-            const imageRef = ref(storage, imageAsDataUri);
-            const blob = await getBlob(imageRef);
+            // Use the compat library to get a reference from the URL
+            const compatStorage = getStorage();
+            const imageRef = refFromURL(compatStorage, imageAsDataUri);
+            const blob = await imageRef.getBlob();
             
             imageAsDataUri = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -196,6 +199,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
                 reader.readAsDataURL(blob);
             });
         } catch (error) {
+             console.error("Error converting storage URL to data URI:", error);
              toast({
                 title: '圖片讀取失敗',
                 description: '無法讀取現有圖片以生成描述，請稍後再試。',
