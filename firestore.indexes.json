@@ -6,7 +6,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "participantIds", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "lastActivity", "order": "DESCENDING" }
+        { "fieldPath": "lastMessage.timestamp", "order": "DESCENDING" }
       ]
     },
     {
