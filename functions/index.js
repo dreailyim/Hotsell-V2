@@ -55,7 +55,7 @@ async function createAndSendNotification(userId, notificationData, options = {})
   }
   
   // 1. Create the in-app notification document (if requested).
-  if (createInA_AppNotification) {
+  if (createInAppNotification) {
     try {
         const userRef = db.collection("users").doc(userId);
         
@@ -641,5 +641,7 @@ exports.onNotificationUpdated = onDocumentUpdated("notifications/{notificationId
         }
     }
 });
+
+    
 
     
