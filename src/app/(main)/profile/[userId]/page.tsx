@@ -323,13 +323,6 @@ export default function UserProfilePage() {
                     <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                 </div>
              </div>
-             {isOwnProfile && (
-                <Button asChild variant="outline" size="icon" className="rounded-full">
-                  <Link href="/profile/settings">
-                    <Edit className="h-4 w-4" />
-                  </Link>
-                </Button>
-             )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
