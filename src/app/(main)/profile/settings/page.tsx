@@ -168,34 +168,44 @@ export default function SettingsPage() {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleProfileUpdate} className="space-y-6">
-               <div className="flex flex-col items-center space-y-4">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    className="hidden"
-                    accept="image/png, image/jpeg"
-                  />
-                  <div className="relative group">
-                     <Avatar className="h-24 w-24 cursor-pointer" onClick={handleAvatarClick}>
-                        <AvatarImage src={newAvatar || user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
-                        <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                     <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
-                        <Camera className="h-8 w-8 text-white" />
+                <div className="flex items-center gap-4">
+                     <div className="relative group flex-shrink-0">
+                         <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            className="hidden"
+                            accept="image/png, image/jpeg"
+                          />
+                         <Avatar className="h-20 w-20 cursor-pointer" onClick={handleAvatarClick}>
+                            <AvatarImage src={newAvatar || user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
+                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                         <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
+                            <Camera className="h-8 w-8 text-white" />
+                        </div>
                     </div>
-                  </div>
-              </div>
+                    <div className="flex-1 space-y-4">
+                        <div className='space-y-1.5'>
+                            <Label htmlFor="displayName">顯示名稱</Label>
+                            <Input
+                              id="displayName"
+                              value={displayName}
+                              onChange={(e) => setDisplayName(e.target.value)}
+                              disabled={isSaveDisabled}
+                            />
+                        </div>
+                         <div className='space-y-1.5'>
+                            <Label htmlFor="email">電郵地址</Label>
+                            <Input
+                              id="email"
+                              value={user.email || ''}
+                              disabled
+                            />
+                        </div>
+                    </div>
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="displayName">顯示名稱</Label>
-                <Input
-                  id="displayName"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  disabled={isSaveDisabled}
-                />
-              </div>
               <div className="space-y-2">
                 <Label htmlFor="aboutMe">關於我</Label>
                 <Textarea
@@ -207,7 +217,7 @@ export default function SettingsPage() {
                   className="min-h-[120px]"
                 />
               </div>
-              <Button type="submit" disabled={isSaveDisabled}>
+              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto">
                 {(isPending || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 儲存變更
               </Button>
