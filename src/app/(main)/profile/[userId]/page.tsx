@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2 } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
-import { collection, query, where, getDoc, getDocs, onSnapshot, Timestamp, orderBy, doc } from 'firebase/firestore';
+import { collection, query, where, getDoc, getDocs, onSnapshot, Timestamp, orderBy, doc, writeBatch, deleteDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product, Review, FullUser } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -21,6 +21,18 @@ import { zhHK } from 'date-fns/locale';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 function ProductGridSkeleton() {
     return (
@@ -38,7 +50,21 @@ function ProductGridSkeleton() {
     );
 }
 
-function ProductGrid({ products, loading, emptyMessage }: { products: Product[], loading: boolean, emptyMessage: string }) {
+function ProductGrid({ 
+    products, 
+    loading, 
+    emptyMessage,
+    isManaging,
+    selectedProducts,
+    onToggleSelect,
+}: { 
+    products: Product[], 
+    loading: boolean, 
+    emptyMessage: string,
+    isManaging?: boolean;
+    selectedProducts?: Set<string>;
+    onToggleSelect?: (id: string) => void;
+}) {
     if (loading) {
       return <ProductGridSkeleton />;
     }
@@ -52,7 +78,18 @@ function ProductGrid({ products, loading, emptyMessage }: { products: Product[],
     return (
         <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
+                <div key={product.id} className="relative" onClick={() => isManaging && onToggleSelect?.(product.id)}>
+                    <ProductCard product={product} />
+                    {isManaging && (
+                        <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer">
+                           {selectedProducts?.has(product.id) ? (
+                                <CheckCircle2 className="h-8 w-8 text-white bg-primary rounded-full" />
+                            ) : (
+                                <Circle className="h-8 w-8 text-white/70" />
+                            )}
+                        </div>
+                    )}
+                </div>
             ))}
         </div>
     )
@@ -121,6 +158,7 @@ export default function UserProfilePage() {
   const params = useParams();
   const router = useRouter();
   const userId = params.userId as string;
+  const { toast } = useToast();
   
   const [profileUser, setProfileUser] = useState<FullUser | null>(null);
   const [userProducts, setUserProducts] = useState<Product[]>([]);
@@ -130,6 +168,10 @@ export default function UserProfilePage() {
   const [loadingUserProducts, setLoadingUserProducts] = useState(true);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingReviews, setLoadingReviews] = useState(true);
+
+  const [isManaging, setIsManaging] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
+  const [isProcessing, startTransition] = useTransition();
   
   const isOwnProfile = currentUser?.uid === userId;
   
@@ -276,6 +318,63 @@ export default function UserProfilePage() {
     }
   }, [activeTab, isOwnProfile, fetchReviews, fetchFavoriteProducts]);
 
+  // --- Management Mode Handlers ---
+  const handleToggleSelection = (productId: string) => {
+    setSelectedProducts(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(productId)) {
+            newSet.delete(productId);
+        } else {
+            newSet.add(productId);
+        }
+        return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedProducts.size === userProducts.length) {
+        setSelectedProducts(new Set());
+    } else {
+        setSelectedProducts(new Set(userProducts.map(p => p.id)));
+    }
+  };
+  
+  const handleBulkAction = (action: 'sold' | 'delete') => {
+    if (selectedProducts.size === 0) return;
+
+    startTransition(async () => {
+        const batch = writeBatch(db);
+        const productIds = Array.from(selectedProducts);
+
+        try {
+            if (action === 'sold') {
+                productIds.forEach(id => {
+                    const productRef = doc(db, 'products', id);
+                    batch.update(productRef, { status: 'sold' });
+                });
+                await batch.commit();
+                toast({ title: `已將 ${productIds.length} 件產品標示為已售出` });
+            } else if (action === 'delete') {
+                 productIds.forEach(id => {
+                    const productRef = doc(db, 'products', id);
+                    batch.delete(productRef);
+                });
+                await batch.commit();
+                toast({ title: `已成功刪除 ${productIds.length} 件產品` });
+            }
+            
+            // Exit management mode and clear selection
+            setIsManaging(false);
+            setSelectedProducts(new Set());
+
+        } catch (error: any) {
+            console.error(`Error performing bulk ${action}:`, error);
+            toast({ title: '操作失敗', description: error.message, variant: 'destructive' });
+        }
+    });
+  };
+
+
   if (loadingProfile) {
     return (
         <div className="flex min-h-screen items-center justify-center">
@@ -294,11 +393,61 @@ export default function UserProfilePage() {
         </div>
     )
   }
+
+   const ManagementFooter = () => (
+    <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t z-50 md:hidden">
+      <div className="container mx-auto px-4 h-20 flex items-center justify-between">
+        <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">
+            {selectedProducts.size === userProducts.length ? '取消全選' : '全選'}
+        </Button>
+        <div className="flex items-center gap-2">
+            <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => handleBulkAction('sold')}
+                disabled={isProcessing || selectedProducts.size === 0}
+            >
+                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
+                已售出 ({selectedProducts.size})
+            </Button>
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button
+                        variant="destructive"
+                        className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                        disabled={isProcessing || selectedProducts.size === 0}
+                    >
+                        <Trash2 className="mr-2 h-4 w-4" />
+                        刪除 ({selectedProducts.size})
+                    </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            此操作無法復原，將會永久刪除您選取的 {selectedProducts.size} 件產品。
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel className="rounded-full">取消</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={() => handleBulkAction('delete')}
+                            className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                        >
+                            確認刪除
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
+      </div>
+    </div>
+  );
   
   return (
     <>
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
-      <div className="container mx-auto px-4 md:px-6 py-4">
+      <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         <div className="flex items-center gap-4 mb-6">
              <Avatar className="h-20 w-20">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
@@ -351,13 +500,18 @@ export default function UserProfilePage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input placeholder="搵下我有啲咩產品先" className="pl-10 rounded-full" />
                     </div>
-                    <Button variant="ghost" className="rounded-full">管理</Button>
+                    <Button variant="ghost" className="rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedProducts(new Set()); }}>
+                        {isManaging ? '取消' : '管理'}
+                    </Button>
                 </div>
             )}
              <ProductGrid 
                 products={userProducts} 
                 loading={loadingUserProducts} 
                 emptyMessage={isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品"}
+                isManaging={isManaging}
+                selectedProducts={selectedProducts}
+                onToggleSelect={handleToggleSelection}
             />
           </TabsContent>
           
@@ -441,6 +595,7 @@ export default function UserProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
+      {isOwnProfile && isManaging && <ManagementFooter />}
     </>
   );
 }
