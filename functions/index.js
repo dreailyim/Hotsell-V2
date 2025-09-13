@@ -55,7 +55,7 @@ async function createAndSendNotification(userId, notificationData, options = {})
   }
   
   // 1. Create the in-app notification document (if requested).
-  if (createInAppNotification) {
+  if (createInA_AppNotification) {
     try {
         const userRef = db.collection("users").doc(userId);
         
@@ -401,14 +401,14 @@ exports.processNewReview = onDocumentCreated("reviews/{reviewId}", async (event)
  * Firestore trigger for when a product is created.
  * Sends a notification to the seller.
  */
-exports.onProductCreated = onDocumentCreated("products/{productId}", (event) => {
+exports.onProductCreated = onDocumentCreated("products/{productId}", async (event) => {
     const product = event.data.data();
-    if (!product) return null;
+    if (!product) return;
     
     const sellerId = product.sellerId;
     const productName = product.name;
 
-    return createAndSendNotification(sellerId, {
+    await createAndSendNotification(sellerId, {
         type: 'new_listing_success',
         message: `您已成功上架新產品：${productName}`,
         relatedData: {
@@ -475,19 +475,9 @@ exports.onProductUpdated = onDocumentUpdated("products/{productId}", async (even
         await Promise.all(notificationPromises);
     }
     
-    // --- Logic 4: Notify seller and favoriters of sale ---
+    // --- Logic 4: Notify favoriters of sale (but NOT the seller) ---
+    // The seller is notified of the sale via the bid acceptance logic in the chat.
     if (afterData.status === 'sold' && beforeData.status !== 'sold') {
-        // Notify seller
-        await createAndSendNotification(afterData.sellerId, {
-            type: 'item_sold',
-            message: `恭喜！您的產品「${afterData.name}」已成功賣出。`,
-            relatedData: {
-                productId: productId,
-                productName: afterData.name,
-                productImage: afterData.image
-            }
-        });
-        // Notify favoriters
          const saleNotificationPromises = beforeFavoritedBy.map(userId => {
             if (userId === afterData.sellerId) return null;
             return createAndSendNotification(userId, {
@@ -519,7 +509,7 @@ exports.onConversationDeleted = onDocumentDeleted("conversations/{conversationId
         const notifsQuery = db.collection("notifications").where("userId", "==", userId).where("isRead", "==", false);
 
         try {
-            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsSnapshot.get()]);
+            const [convosSnapshot, notifsSnapshot] = await Promise.all([convosQuery.get(), notifsQuery.get()]);
             
             let convoUnread = 0;
             convosSnapshot.forEach(doc => {
@@ -651,9 +641,5 @@ exports.onNotificationUpdated = onDocumentUpdated("notifications/{notificationId
         }
     }
 });
-
-    
-
-    
 
     
