@@ -218,6 +218,7 @@ export function ListingForm() {
 
         const newDocRef = await addDoc(collection(db, 'products'), {
             name: values.productName,
+            name_lowercase: values.productName.toLowerCase(),
             category: values.productCategory,
             price: values.price,
             originalPrice: values.price,

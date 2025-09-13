@@ -9,7 +9,8 @@ import { z } from 'zod';
 import { Upload, Wand2, Loader2, RefreshCw, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
-import { getStorage, refFromURL } from 'firebase/compat/storage';
+import { getStorage, refFromURL } from 'firebase/storage';
+
 
 import { Button } from '@/components/ui/button';
 import {
@@ -187,9 +188,8 @@ export function EditListingForm({ product }: EditListingFormProps) {
       
       if (imageAsDataUri.startsWith('https://firebasestorage.googleapis.com')) {
         try {
-            const compatStorage = getStorage();
-            const imageRef = refFromURL(compatStorage, imageAsDataUri);
-            const blob = await (await fetch(imageAsDataUri)).blob();
+            const imageRef = ref(storage, imageAsDataUri);
+            const blob = await getBlob(imageRef);
             
             imageAsDataUri = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -262,6 +262,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
         
         const dataToUpdate: Partial<Product> & { [key: string]: any } = {
           name: values.productName,
+          name_lowercase: values.productName.toLowerCase(),
           category: values.productCategory,
           price: values.price,
           condition: values.condition,

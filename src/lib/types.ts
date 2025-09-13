@@ -6,6 +6,7 @@ export type ShippingMethod = '面交' | '速遞包郵' | '速遞到付';
 export type Product = {
   id: string;
   name: string;
+  name_lowercase: string;
   price: number;
   originalPrice?: number;
   image: string; // Legacy, for fallback

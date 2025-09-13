@@ -64,13 +64,11 @@ function HomePageContent() {
         let q;
 
         if (searchTerm) {
-          // Firestore does not support case-insensitive search natively.
-          // This is a common workaround but has limitations.
-          // For a robust solution, a third-party search service like Algolia or Typesense is recommended.
+          const searchTermLower = searchTerm.toLowerCase();
           q = query(productsRef, 
-              orderBy('name'), 
-              startAt(searchTerm), 
-              endAt(searchTerm + '\uf8ff')
+              orderBy('name_lowercase'), 
+              startAt(searchTermLower), 
+              endAt(searchTermLower + '\uf8ff')
           );
         } else {
           q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
