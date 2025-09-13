@@ -20,15 +20,17 @@ export function useFcm() {
       return;
     }
     
-    // Get messaging instance safely
     const messaging = await getMessagingInstance();
     if (!messaging) {
       console.log("FCM: Aborted. Messaging not supported in this browser.");
       return;
     }
 
+    // The VAPID key is required by getToken() to authorize the request.
+    // This key is public and safe to be in client-side code.
+    const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
+
     try {
-      // 1. Request permission
       console.log('FCM: Requesting permission...');
       const permission = await Notification.requestPermission();
 
@@ -46,15 +48,11 @@ export function useFcm() {
       
       console.log('FCM: Notification permission granted. Requesting token...');
       
-      // 2. Get token
-      // We no longer provide a VAPID key here. The SDK will use the one from the firebase-messaging-sw.js file's config.
-      // This is the crucial change to let Firebase handle the key automatically.
-      const currentToken = await getToken(messaging);
+      const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
 
       if (currentToken) {
           console.log('FCM: Token successfully retrieved:', currentToken);
           const userDocRef = doc(db, 'users', user.uid);
-          // This ensures we don't write the same token multiple times.
           await updateDoc(userDocRef, {
               fcmTokens: arrayUnion(currentToken),
           });
@@ -80,7 +78,6 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      // Give the app a moment to stabilize before requesting permission
       const timer = setTimeout(() => {
          requestPermissionAndToken();
       }, 3000); 
