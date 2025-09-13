@@ -6,7 +6,7 @@
       "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "participantIds", "arrayConfig": "CONTAINS" },
-        { "fieldPath": "lastMessage.timestamp", "order": "DESCENDING" }
+        { "fieldPath": "lastActivity", "order": "DESCENDING" }
       ]
     },
     {
@@ -52,7 +52,7 @@
   "fieldOverrides": [
     {
       "collectionGroup": "conversations",
-      "fieldPath": "lastMessage.timestamp",
+      "fieldPath": "lastActivity",
       "indexes": [
         {
           "order": "DESCENDING",
