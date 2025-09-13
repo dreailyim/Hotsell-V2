@@ -9,8 +9,6 @@ import { db } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
 import { getMessagingInstance } from '@/lib/firebase/client-app';
 
-// THE ONLY CORRECT VAPID KEY PROVIDED BY THE USER.
-const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
 
 export function useFcm() {
   const { user } = useAuth();
@@ -30,12 +28,12 @@ export function useFcm() {
     }
 
     try {
-      console.log('FCM: Service worker is ready. Requesting permission...');
+      // 1. Request permission
+      console.log('FCM: Requesting permission...');
       const permission = await Notification.requestPermission();
 
       if (permission !== 'granted') {
         console.log('FCM: Notification permission not granted. Status:', permission);
-        // Do not toast if user just dismissed it. Only if it's denied.
         if (permission === 'denied') {
           toast({
             title: "通知權限已被封鎖",
@@ -47,13 +45,11 @@ export function useFcm() {
       }
       
       console.log('FCM: Notification permission granted. Requesting token...');
-            
-      // Get token
-      const currentToken = await getToken(messaging, {
-          vapidKey: VAPID_KEY,
-          // The service worker is now loaded from /firebase-messaging-sw.js
-          // so we don't need to specify scope.
-      });
+      
+      // 2. Get token
+      // We no longer provide a VAPID key here. The SDK will use the one from the firebase-messaging-sw.js file's config.
+      // This is the crucial change to let Firebase handle the key automatically.
+      const currentToken = await getToken(messaging);
 
       if (currentToken) {
           console.log('FCM: Token successfully retrieved:', currentToken);
@@ -64,7 +60,7 @@ export function useFcm() {
           });
           console.log('FCM: Token saved to Firestore.');
       } else {
-          console.error('FCM Error: No registration token available. This often means the VAPID key is invalid or there is a configuration issue.');
+          console.error('FCM Error: No registration token available. This can happen if the service worker registration fails or if there is a misconfiguration.');
            toast({
             title: "獲取推播權杖失敗",
             description: "無法獲取權杖，請確認您的瀏覽器設定或稍後再試。",
