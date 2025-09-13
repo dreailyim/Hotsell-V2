@@ -474,7 +474,3 @@ export function ListingForm() {
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           刊登物品
         </Button>
-      </form>
-    </Form>
-  );
-}
