@@ -1,8 +1,8 @@
 
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
-import { collection, query, getDocs, orderBy, limit } from 'firebase/firestore';
+import { useEffect, useState, useRef, Suspense } from 'react';
+import { collection, query, getDocs, orderBy, limit, where, startAt, endAt } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -18,6 +18,10 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
+import { useSearchParams } from 'next/navigation';
+import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 
 function ProductGridSkeleton() {
@@ -36,7 +40,10 @@ function ProductGridSkeleton() {
     );
 }
 
-export default function HomePage() {
+function HomePageContent() {
+  const searchParams = useSearchParams();
+  const searchTerm = searchParams.get('q');
+  
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const plugin = useRef(
@@ -54,7 +61,21 @@ export default function HomePage() {
       setLoading(true);
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
+        let q;
+
+        if (searchTerm) {
+          // Firestore does not support case-insensitive search natively.
+          // This is a common workaround but has limitations.
+          // For a robust solution, a third-party search service like Algolia or Typesense is recommended.
+          q = query(productsRef, 
+              orderBy('name'), 
+              startAt(searchTerm), 
+              endAt(searchTerm + '\uf8ff')
+          );
+        } else {
+          q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
+        }
+
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
         setProducts(productsData);
@@ -65,12 +86,37 @@ export default function HomePage() {
       }
     };
     fetchProducts();
-  }, []);
+  }, [searchTerm]);
 
-  return (
+  const renderSearchResults = () => (
+     <main className="container mx-auto px-4 md:px-6 pb-6">
+       <div className="flex justify-between items-center mb-4">
+         <h2 className="text-xl font-bold">搜尋結果</h2>
+         <Button variant="link" asChild>
+            <Link href="/">清除搜尋</Link>
+         </Button>
+       </div>
+        {loading ? (
+          <ProductGridSkeleton />
+        ) : products.length > 0 ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {products.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
+            <Search className="h-16 w-16 text-muted-foreground/50" />
+            <p className="font-semibold text-lg">找不到「{searchTerm}」的相關商品</p>
+            <p>試試其他關鍵字吧！</p>
+          </div>
+        )}
+      </main>
+  );
+
+  const renderDefaultView = () => (
     <>
-      <Header showSearch showUserAvatar />
-       <div className="container mx-auto px-4 md:px-6 py-6">
+        <div className="container mx-auto px-4 md:px-6 py-6">
         <Carousel 
             plugins={[plugin.current]}
             className="w-full"
@@ -104,8 +150,8 @@ export default function HomePage() {
             <CarouselNext className="absolute right-4 hidden sm:flex" />
         </Carousel>
       </div>
-
-      <main className="container mx-auto px-4 md:px-6 pb-6">
+       <main className="container mx-auto px-4 md:px-6 pb-6">
+        <h2 className="text-xl font-bold mb-4">最新上架</h2>
         {loading ? (
           <ProductGridSkeleton />
         ) : (
@@ -118,4 +164,21 @@ export default function HomePage() {
       </main>
     </>
   );
+
+  return (
+    <>
+      <Header showSearch showUserAvatar />
+      {searchTerm ? renderSearchResults() : renderDefaultView()}
+    </>
+  );
 }
+
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={<ProductGridSkeleton />}>
+      <HomePageContent />
+    </Suspense>
+  )
+}
+
