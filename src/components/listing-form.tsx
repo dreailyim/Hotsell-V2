@@ -259,7 +259,7 @@ export function ListingForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
           <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormDescription>最多上傳 ${MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {imagesData.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
@@ -445,15 +445,10 @@ export function ListingForm() {
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerateDescription}
-              disabled={isAiPending}
+              disabled
             >
-              {isAiPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="mr-2 h-4 w-4" />
-              )}
-              AI 生成描述
+              <Wand2 className="mr-2 h-4 w-4" />
+              AI 生成描述 (稍後推出)
             </Button>
           </div>
           <FormField

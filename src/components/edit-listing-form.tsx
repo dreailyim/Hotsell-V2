@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useTransition, useRef } from 'react';
@@ -8,6 +9,7 @@ import { z } from 'zod';
 import { Upload, Wand2, Loader2, RefreshCw, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
+import { getStorage, refFromURL } from 'firebase/compat/storage';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +36,6 @@ import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
 import { ref, uploadString, getDownloadURL, getBlob } from 'firebase/storage';
-import { getStorage, refFromURL } from "firebase/compat/storage"; // Correct way to get refFromURL
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -184,13 +185,11 @@ export function EditListingForm({ product }: EditListingFormProps) {
     startAiTransition(async () => {
       let imageAsDataUri = firstImage;
       
-      // If the image is a URL from Firebase Storage, fetch it as a blob and convert to data URI
       if (imageAsDataUri.startsWith('https://firebasestorage.googleapis.com')) {
         try {
-            // Use the compat library to get a reference from the URL
             const compatStorage = getStorage();
             const imageRef = refFromURL(compatStorage, imageAsDataUri);
-            const blob = await imageRef.getBlob();
+            const blob = await (await fetch(imageAsDataUri)).blob();
             
             imageAsDataUri = await new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -250,11 +249,9 @@ export function EditListingForm({ product }: EditListingFormProps) {
     try {
         const imageUrls = await Promise.all(
           images.map(async (imageData) => {
-            // If it's an existing URL, just return it
             if (imageData.startsWith('http')) {
                 return imageData;
             }
-            // Otherwise, it's new base64 data, so upload it
             const newImageRef = ref(storage, `products/${user.uid}/${uuidv4()}`);
             await uploadString(newImageRef, imageData, 'data_url');
             return getDownloadURL(newImageRef);
@@ -272,7 +269,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
           pickupLocation: values.shippingMethods.includes('面交') ? values.pickupLocation : '',
           description: values.productDescription,
           images: imageUrls,
-          image: imageUrls[0], // Keep legacy field updated
+          image: imageUrls[0], 
         };
         
         if (values.price !== product.price) {
@@ -305,7 +302,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
           <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormDescription>最多上傳 ${MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
@@ -315,7 +312,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
                                     alt={`Product preview ${index + 1}`}
                                     fill
                                     className="object-contain rounded-lg p-1"
-                                    unoptimized // needed for base64 data urls
+                                    unoptimized 
                                 />
                                 <Button 
                                     type="button" 
@@ -490,15 +487,10 @@ export function EditListingForm({ product }: EditListingFormProps) {
               type="button"
               variant="outline"
               size="sm"
-              onClick={handleGenerateDescription}
-              disabled={isAiPending}
+              disabled
             >
-              {isAiPending ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Wand2 className="mr-2 h-4 w-4" />
-              )}
-              AI 生成描述
+              <Wand2 className="mr-2 h-4 w-4" />
+              AI 生成描述 (稍後推出)
             </Button>
           </div>
           <FormField
