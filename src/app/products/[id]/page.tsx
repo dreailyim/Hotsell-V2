@@ -603,7 +603,7 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen">
-        <Header showBackButton={true} />
+        <Header showBackButton={true} showUserAvatar />
         <div className="relative">
           <Carousel
             className="w-full"

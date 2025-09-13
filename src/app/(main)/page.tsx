@@ -69,7 +69,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header showSearch />
+      <Header showSearch showUserAvatar />
        <div className="container mx-auto px-4 md:px-6 py-6">
         <Carousel 
             plugins={[plugin.current]}

@@ -30,7 +30,7 @@ export default function ListPage() {
 
   return (
     <>
-      <Header title="刊登物品" />
+      <Header title="刊登物品" showUserAvatar />
       <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8">
         <ListingForm />
       </div>

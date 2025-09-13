@@ -12,7 +12,7 @@ import { EditListingForm } from '@/components/edit-listing-form';
 function EditPageSkeleton() {
   return (
     <>
-      <Header title="編輯物品" showBackButton />
+      <Header title="編輯物品" showBackButton showUserAvatar />
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="max-w-2xl mx-auto space-y-8">
             {/* Image Skeleton */}
@@ -77,7 +77,7 @@ export default function EditProductPage() {
 
   return (
     <>
-      <Header title="編輯物品" showBackButton />
+      <Header title="編輯物品" showBackButton showUserAvatar />
       <div className="container mx-auto px-4 md:px-6 py-8">
         <div className="max-w-2xl mx-auto">
           <EditListingForm product={product} />

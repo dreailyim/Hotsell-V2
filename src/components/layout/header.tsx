@@ -5,12 +5,15 @@ import { Search, ArrowLeft, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/use-auth';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 type HeaderProps = {
   showSearch?: boolean;
   title?: string;
   showBackButton?: boolean;
   showSettingsButton?: boolean;
+  showUserAvatar?: boolean;
 };
 
 export function Header({
@@ -18,8 +21,10 @@ export function Header({
   title,
   showBackButton = false,
   showSettingsButton = false,
+  showUserAvatar = false,
 }: HeaderProps) {
   const router = useRouter();
+  const { user } = useAuth();
 
   return (
     <header className="sticky top-0 z-40 w-full border-b-0 bg-background/50 backdrop-blur-sm">
@@ -61,6 +66,14 @@ export function Header({
               <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full">
                 <Settings className="h-6 w-6" />
               </Button>
+            </Link>
+          )}
+          {showUserAvatar && user && (
+             <Link href="/profile">
+              <Avatar className="h-8 w-8 cursor-pointer">
+                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
+                <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
             </Link>
           )}
         </div>

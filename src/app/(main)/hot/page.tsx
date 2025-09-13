@@ -54,7 +54,7 @@ export default function HotPage() {
 
   return (
     <>
-      <Header title="熱賣商品" />
+      <Header title="熱賣商品" showUserAvatar />
       <main className="container mx-auto px-4 md:px-6 py-6">
         {loading ? (
           <ProductGridSkeleton />

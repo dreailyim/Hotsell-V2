@@ -452,7 +452,7 @@ export default function MessagesPage() {
 
   return (
     <>
-      <Header title="訊息" showBackButton />
+      <Header title="訊息" showUserAvatar />
       <div className={cn("container mx-auto px-0 md:px-6 pt-4 pb-8", isManaging && "pb-24")}>
         <div className="flex items-center gap-2 mb-4 px-4 md:px-0">
             <div className="relative flex-1">
