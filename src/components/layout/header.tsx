@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { Search, ArrowLeft, Settings } from 'lucide-react';
+import { ArrowLeft, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
-import { Input } from '@/components/ui/input';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Search } from './search';
 
 type HeaderProps = {
   showSearch?: boolean;
@@ -45,15 +45,7 @@ export function Header({
 
         {/* Center Section */}
         <div className="flex w-3/5 items-center justify-center">
-          {showSearch && (
-            <div className="relative w-full max-w-md">
-              <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="搜尋商品..."
-                className="w-full rounded-full pl-10"
-              />
-            </div>
-          )}
+          {showSearch && <Search />}
           {!showSearch && title && (
             <h1 className="whitespace-nowrap text-xl font-bold">{title}</h1>
           )}
