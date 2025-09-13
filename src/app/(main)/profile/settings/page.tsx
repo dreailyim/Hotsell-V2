@@ -217,7 +217,7 @@ export default function SettingsPage() {
                   className="min-h-[120px]"
                 />
               </div>
-              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto">
+              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full">
                 {(isPending || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 儲存變更
               </Button>
