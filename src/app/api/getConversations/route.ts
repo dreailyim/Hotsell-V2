@@ -4,25 +4,26 @@ import * as admin from 'firebase-admin';
 import type { Conversation, FullUser } from '@/lib/types';
 import { getAuth } from 'firebase-admin/auth';
 
-// Initialize Firebase Admin SDK if not already initialized
-if (!admin.apps.length) {
-    try {
-        admin.initializeApp({
-            credential: admin.credential.cert({
-                projectId: process.env.FIREBASE_PROJECT_ID,
-                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-            }),
-        });
-    } catch (error: any) {
-        console.error('Firebase admin initialization error', error.stack);
-    }
-}
-
-
-const db = admin.firestore();
-
 export async function GET(request: NextRequest) {
+    // Initialize Firebase Admin SDK inside the function if not already initialized.
+    // This ensures it only runs on the server when the function is invoked, not during build time.
+    if (!admin.apps.length) {
+        try {
+            admin.initializeApp({
+                credential: admin.credential.cert({
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+                }),
+            });
+        } catch (error: any) {
+            console.error('Firebase admin initialization error', error.stack);
+            return NextResponse.json({ error: 'Firebase initialization failed' }, { status: 500 });
+        }
+    }
+    
+    const db = admin.firestore();
+
     try {
         const authHeader = request.headers.get('Authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
