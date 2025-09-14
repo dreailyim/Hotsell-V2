@@ -177,10 +177,9 @@ export function ProductCard({ product }: ProductCardProps) {
             {status && (
               <Badge
                 className={cn(
-                  'absolute top-2 text-[10px] px-2 py-0.5 font-semibold',
-                   isDiscounted ? 'left-16' : 'left-2', // Adjust position if discount badge is present
+                  'absolute bottom-2 right-2 text-xs px-2.5 py-1 font-bold z-10',
                   status === 'sold' && 'bg-destructive text-destructive-foreground',
-                  status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground'
+                  status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground dark:text-black'
                 )}
               >
                 {status === 'sold' ? '已售出' : '已預留'}
@@ -202,16 +201,18 @@ export function ProductCard({ product }: ProductCardProps) {
                 <span>{product.favorites || 0}</span>
             </button>
             
-            <div className="absolute bottom-2 right-2">
-                 <Button 
-                    variant="ghost" 
-                    size="icon" 
-                    className="h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white"
-                    onClick={handleShare}
-                >
-                    <Share2 className="h-4 w-4" />
-                </Button>
-            </div>
+             {!status && (
+                <div className="absolute bottom-2 left-2">
+                    <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 rounded-full bg-black/40 text-white hover:bg-black/60 hover:text-white"
+                        onClick={handleShare}
+                    >
+                        <Share2 className="h-4 w-4" />
+                    </Button>
+                </div>
+             )}
         </div>
         <CardContent className="p-3 space-y-2">
           <Link href={`/products/${id}`} aria-label={safeName} className="space-y-1">
