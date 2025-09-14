@@ -492,29 +492,6 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        {isOwnProfile && (
-            <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700/50">
-                <AlertTitle className="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
-                    <DatabaseZap className="h-5 w-5" />
-                    啟用所有產品的搜尋功能
-                </AlertTitle>
-                <AlertDescription className="text-blue-700/90 dark:text-blue-400/90">
-                    點擊按鈕，為您所有舊產品一次性更新數據，讓它們可以被用戶搜尋到。
-                </AlertDescription>
-                <div className="mt-3">
-                    <Button 
-                        size="sm" 
-                        onClick={handleBackfillSearchData} 
-                        disabled={isProcessing}
-                        className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
-                    >
-                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseZap className="mr-2 h-4 w-4" />}
-                        立即更新產品數據
-                    </Button>
-                </div>
-            </Alert>
-        )}
-
         <div className="flex items-center gap-4 mb-6">
              <Avatar className="h-20 w-20">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
