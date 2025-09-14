@@ -164,28 +164,30 @@ export function ProductCard({ product }: ProductCardProps) {
                 onError={(e) => { e.currentTarget.src = 'https://picsum.photos/600/400'; }}
               />
             </Link>
-             {isDiscounted && (
-                 <Badge
-                    className={cn(
-                        'absolute top-2 left-2 text-[10px] px-2 py-0.5 font-semibold',
-                        'bg-destructive text-destructive-foreground'
-                    )}
-                 >
-                    特價中
-                 </Badge>
-            )}
-            {status && (
-              <Badge
-                className={cn(
-                  'absolute bottom-2 left-2 text-xs px-2.5 py-1 font-bold z-10',
-                  status === 'sold' && 'bg-destructive text-destructive-foreground',
-                  status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground dark:text-black'
+            <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
+                {isDiscounted && (
+                    <Badge
+                        className={cn(
+                            'text-xs px-2.5 py-1 font-bold z-10',
+                            'bg-destructive text-destructive-foreground'
+                        )}
+                    >
+                        特價中
+                    </Badge>
                 )}
-              >
-                {status === 'sold' ? '已售出' : '已預留'}
-              </Badge>
-            )}
-
+                {status && (
+                    <Badge
+                        className={cn(
+                        'text-xs px-2.5 py-1 font-bold z-10',
+                        status === 'sold' && 'bg-destructive text-destructive-foreground',
+                        status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground dark:text-black'
+                        )}
+                    >
+                        {status === 'sold' ? '已售出' : '已預留'}
+                    </Badge>
+                )}
+            </div>
+            
             <button
                 onClick={handleFavoriteToggle}
                 disabled={isPending || authLoading}
