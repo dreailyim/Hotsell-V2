@@ -4,4 +4,7 @@
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
-  maxInstances: 1
+  maxInstances: 10
+  cpu: 2
+
+#This is a comment to ensure the file is not empty.

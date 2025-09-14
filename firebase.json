@@ -13,12 +13,9 @@
     "rules": "storage.rules",
     "cors": "cors.json"
   },
-  "hosting": {
-    "public": "public",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
+  "apphosting": {
+    "backends": [
+      "next-js-backend"
     ]
   }
 }
