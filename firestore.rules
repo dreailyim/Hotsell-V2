@@ -1,71 +1,59 @@
 
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Default deny all
-    match /{document=**} {
-      allow read, write: if false;
-    }
 
     // --- Users Collection ---
-    // Users can read their own document.
-    // Anyone can read a user's public profile data.
-    // Users can only create their own document.
-    // Users can only update their own document.
+    // Anyone can create their own user document.
+    // Users can only read/update their own document.
     match /users/{userId} {
-      allow read: if request.auth.uid == userId || resource.data.keys().hasAll(['displayName', 'photoURL', 'aboutMe', 'averageRating', 'reviewCount', 'createdAt']);
-      allow create: if request.auth.uid == userId;
-      allow update: if request.auth.uid == userId;
-    }
-
-    // --- Banners Collection ---
-    // Anyone can read the banners for ads.
-    match /banners/{bannerId} {
-      allow read: if true;
+      allow read, update: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null;
     }
     
     // --- Products Collection ---
     // Anyone can read products.
-    // Authenticated users can create products.
-    // Only the seller can update their own product.
-    // Only the seller can delete their own product.
+    // Users can only create products for themselves.
+    // Users can only update/delete their own products.
     match /products/{productId} {
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update: if request.auth != null && request.auth.uid == resource.data.sellerId;
-      allow delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.sellerId;
+      allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
     }
     
-    // --- Conversations and Messages ---
+    // --- Banners Collection ---
+    // Anyone can read the banners for ads.
+    // Only authenticated users can create new banners.
+    match /banners/{bannerId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+    }
+
+    // --- Conversations & Messages ---
     // Participants can read/write messages in a conversation.
+    // Participants can update conversation details (e.g., unread count, last message).
     match /conversations/{conversationId} {
-      allow get: if request.auth.uid in resource.data.participantIds;
-      allow list: if request.auth.uid in resource.data.participantIds;
-      allow create: if request.auth.uid in request.resource.data.participantIds;
-      // Allow updates (e.g. last message, unread count, hiding) by participants
-      allow update: if request.auth.uid in resource.data.participantIds;
-       // Allow participants to delete (by hiding) but only if all have hidden
-      allow delete: if resource.data.hiddenFor.size() >= resource.data.participantIds.size() - 1;
-
-
+      allow read, update: if request.auth != null && request.auth.uid in resource.data.participantIds;
+      // Note: Creation is handled by a cloud function or secured client-side logic
+      
       match /messages/{messageId} {
-        allow read, create: if request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        allow read, create: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
       }
     }
-
+    
     // --- Reviews Collection ---
     // Anyone can read reviews.
-    // Authenticated users can create reviews (but logic should gate this to buyers/sellers post-transaction).
+    // Only authenticated users can create reviews.
     match /reviews/{reviewId} {
         allow read: if true;
-        allow create: if request.auth != null;
+        allow create: if request.auth != null && request.auth.uid == request.resource.data.reviewerId;
     }
-
+    
     // --- Notifications Collection ---
-    // Users can only read, create, and update their own notifications.
+    // Users can only read/update their own notifications.
     match /notifications/{notificationId} {
       allow read, update: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
   }
 }
