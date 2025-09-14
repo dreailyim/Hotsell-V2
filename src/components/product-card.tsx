@@ -166,14 +166,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
                 {isDiscounted && (
-                    <Badge
-                        className={cn(
-                            'text-xs px-2.5 py-1 font-bold z-10',
-                            'bg-destructive text-destructive-foreground'
-                        )}
-                    >
-                        特價中
-                    </Badge>
+                  <Badge className="text-xs px-2.5 py-1 font-bold z-10 bg-destructive text-destructive-foreground">
+                      特價中
+                  </Badge>
                 )}
                 {status && (
                     <Badge
@@ -226,6 +221,11 @@ export function ProductCard({ product }: ProductCardProps) {
                  )}>
                     ${(price || 0).toLocaleString()}
                 </p>
+                {isDiscounted && originalPrice && (
+                  <p className="text-sm text-muted-foreground line-through">
+                    ${originalPrice.toLocaleString()}
+                  </p>
+                )}
               </div>
               {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground">{condition}</div>}
             </div>

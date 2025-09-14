@@ -675,6 +675,11 @@ export default function ProductPage() {
               <p className={cn("text-3xl font-bold", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
                   ${displayPrice.toLocaleString()}
               </p>
+              {isDiscounted && product.originalPrice && (
+                <p className="text-xl text-muted-foreground line-through">
+                  ${product.originalPrice.toLocaleString()}
+                </p>
+              )}
           </div>
 
           <Separator className="my-4" />
