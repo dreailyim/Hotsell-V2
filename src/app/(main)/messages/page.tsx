@@ -14,7 +14,7 @@ import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db, functions } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
-import { httpsCallable } from 'firebase/functions';
+import { httpsCallable, FunctionsError } from 'firebase/functions';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -162,7 +162,8 @@ export default function MessagesPage() {
       setLoadingConversations(true);
       setErrorConversations(null);
       try {
-        const getConversations = httpsCallable(functions, 'getConversationsForUser');
+        // Specify the function from the 'custom-functions' codebase
+        const getConversations = httpsCallable(functions, 'custom-functions-getConversationsForUser');
         const result = await getConversations();
         const convosData = result.data as EnrichedConversation[];
         
@@ -180,7 +181,9 @@ export default function MessagesPage() {
         setConversations(enrichedConvos);
       } catch (err: any) {
         console.error("Failed to fetch conversations:", err);
-        setErrorConversations(`讀取聊天列表失敗: ${err.message || '請檢查您的權限或網路連線。'}`);
+        const code = err.code || 'unknown';
+        const message = err.message || '請檢查您的權限或網路連線。';
+        setErrorConversations(`讀取聊天列表失敗: ${code}`);
       } finally {
         setLoadingConversations(false);
       }

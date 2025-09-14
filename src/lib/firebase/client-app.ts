@@ -1,9 +1,10 @@
+
 // @ts-nocheck
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getFunctions } from 'firebase/functions';
+import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
 import 'firebase/compat/storage'; // Import the compat library
 
@@ -25,7 +26,17 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);
 const storage = getStorage(app);
-const functions = getFunctions(app, 'us-central1');
+
+// Use a single region for all functions
+const functionsRegion = 'us-central1';
+const functions = getFunctions(app, functionsRegion);
+
+// When running in the emulator, connect to it
+if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && window.location.hostname === "localhost") {
+  console.log("Connecting to Firebase Emulators");
+  // Point functions to the emulator
+  connectFunctionsEmulator(functions, "localhost", 5001);
+}
 
 
 // It's crucial to check for support and only initialize messaging on the client.

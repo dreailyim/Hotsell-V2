@@ -1,6 +1,7 @@
 
 import * as admin from 'firebase-admin';
-import type { FullUser, Conversation } from '@/lib/types';
+import * as functions from 'firebase-functions';
+import type { FullUser, Conversation } from '../../src/lib/types';
 
 // Initialize Firebase Admin SDK if not already initialized
 if (!admin.apps.length) {
@@ -13,10 +14,10 @@ const db = admin.firestore();
  * about the other participant and the associated product.
  * This function is designed to be called from the client via HTTPS onCall.
  */
-export const getConversationsForUser = async (data: any, context: any) => {
+export const getConversationsForUser = functions.https.onCall(async (data, context) => {
     // 1. Authentication check
     if (!context.auth) {
-        throw new Error('Authentication required: You must be logged in to view conversations.');
+        throw new functions.https.HttpsError('unauthenticated', 'Authentication required: You must be logged in to view conversations.');
     }
     const userId = context.auth.uid;
 
@@ -92,6 +93,6 @@ export const getConversationsForUser = async (data: any, context: any) => {
     } catch (error: any) {
         console.error('Error in getConversationsForUser:', error);
         // Throw a generic error to the client
-        throw new Error(`Failed to fetch conversations. Error code: ${error.code || 'UNKNOWN'}`);
+        throw new functions.https.HttpsError('internal', `Failed to fetch conversations. Error code: ${error.code || 'UNKNOWN'}`);
     }
-};
+});
