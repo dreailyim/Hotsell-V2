@@ -9,13 +9,10 @@ export async function GET(request: NextRequest) {
     // This ensures it only runs on the server when the function is invoked, not during build time.
     if (!admin.apps.length) {
         try {
-            admin.initializeApp({
-                credential: admin.credential.cert({
-                    projectId: process.env.FIREBASE_PROJECT_ID,
-                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-                    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-                }),
-            });
+            // When deployed to a Google Cloud environment, initializeApp() with no parameters
+            // will automatically discover service account credentials.
+            // For local development, GOOGLE_APPLICATION_CREDENTIALS env var or gcloud auth is used.
+            admin.initializeApp();
         } catch (error: any) {
             console.error('Firebase admin initialization error', error.stack);
             return NextResponse.json({ error: 'Firebase initialization failed' }, { status: 500 });
