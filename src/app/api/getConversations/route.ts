@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
         try {
             // When deployed to a Google Cloud environment, initializeApp() with no parameters
             // will automatically discover service account credentials.
-            // For local development, GOOGLE_APPLICATION_CREDENTIALS env var or gcloud auth is used.
+            // For local development, it will use the GCLOUD_PROJECT from the .env file.
             admin.initializeApp();
         } catch (error: any) {
             console.error('Firebase admin initialization error', error.stack);
