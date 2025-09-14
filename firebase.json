@@ -30,7 +30,7 @@
         "source": "**",
         "function": {
           "functionId": "webApi",
-          "codebase": "default"
+          "region": "us-central1"
         }
       }
     ]

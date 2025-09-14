@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db, auth } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
@@ -81,7 +81,7 @@ const NOTIFICATION_ICONS: { [key: string]: React.ReactNode } = {
 
 
 type EnrichedConversation = Conversation & {
-  otherUserDetails: FullUser; // Made non-optional to simplify rendering logic
+  otherUserDetails?: FullUser;
 };
 
 // Dedicated component to manage the indicator's state and animation.
@@ -149,56 +149,64 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState('private');
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-  // Effect for fetching conversations via API Route
+  // Effect for fetching conversations directly from Firestore
   useEffect(() => {
     if (!user?.uid) {
       if (!authLoading) setLoadingConversations(false);
       return;
     }
 
-    const fetchConversations = async () => {
-      setLoadingConversations(true);
-      setErrorConversations(null);
-      try {
-        const currentUser = auth.currentUser;
-        if (!currentUser) {
-          throw new Error('用戶未登入，無法獲取權杖。');
-        }
-        const token = await currentUser.getIdToken();
-        const response = await fetch('/api/getConversations', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
+    setLoadingConversations(true);
+    setErrorConversations(null);
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || 'Failed to fetch conversations');
-        }
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+      conversationsRef,
+      where('participantIds', 'array-contains', user.uid),
+      orderBy('lastActivity', 'desc')
+    );
 
-        const convosData = await response.json();
-        
-        // The data from the function is already enriched.
-        // Timestamps need to be converted client-side if they are strings.
-        const enrichedConvos = convosData.map((convo: any) => ({
-            ...convo,
-            lastActivity: convo.lastActivity ? new Timestamp(convo.lastActivity._seconds, convo.lastActivity._nanoseconds) : null,
-            lastMessage: convo.lastMessage ? {
-                ...convo.lastMessage,
-                timestamp: convo.lastMessage.timestamp ? new Timestamp(convo.lastMessage.timestamp._seconds, convo.lastMessage.timestamp._nanoseconds) : null
-            } : null,
-        }));
-        
-        setConversations(enrichedConvos);
-      } catch (err: any) {
-        console.error("Failed to fetch conversations:", err);
-        setErrorConversations(`讀取聊天列表失敗: ${err.message}`);
-      } finally {
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+      if (snapshot.empty) {
+        setConversations([]);
         setLoadingConversations(false);
+        return;
       }
-    };
+      
+      const convosData = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as Conversation))
+        .filter(convo => !convo.hiddenFor || !convo.hiddenFor.includes(user.uid));
+
+      // Enrich conversations with other user's details
+      const enrichedConvos = await Promise.all(
+        convosData.map(async (convo) => {
+          const otherUserId = convo.participantIds.find(pId => pId !== user.uid);
+          let otherUserDetails: FullUser | undefined = undefined;
+
+          if (otherUserId) {
+             try {
+                const userDoc = await getDoc(doc(db, 'users', otherUserId));
+                if (userDoc.exists()) {
+                    otherUserDetails = userDoc.data() as FullUser;
+                }
+            } catch (e) {
+                console.error(`Failed to fetch user details for ${otherUserId}`, e);
+            }
+          }
+          return { ...convo, otherUserDetails };
+        })
+      );
+      
+      setConversations(enrichedConvos);
+      setLoadingConversations(false);
+
+    }, (err) => {
+      console.error("Failed to fetch conversations from Firestore:", err);
+      setErrorConversations(`讀取聊天列表失敗: ${err.message}`);
+      setLoadingConversations(false);
+    });
     
-    fetchConversations();
+    return () => unsubscribe();
     
   }, [user, authLoading]);
 
@@ -263,9 +271,7 @@ export default function MessagesPage() {
       });
       await batch.commit();
       
-      // Optimistically update the UI
-      setConversations(prev => prev.filter(c => !selectedConversations.has(c.id)));
-      
+      // Optimistic update is handled by the real-time listener now
       setSelectedConversations(new Set());
       setIsManaging(false);
     });
@@ -351,6 +357,10 @@ export default function MessagesPage() {
       <div className="divide-y divide-border">
         {conversations.map((convo) => {
           const otherUser = convo.otherUserDetails;
+          if (!otherUser) {
+            // Render a placeholder or skip if user details aren't loaded yet
+            return null; 
+          }
           const lastMessageText = convo.lastMessage?.text || '還沒有訊息';
           const unreadCount = user?.uid ? (convo.unreadCounts?.[user.uid] || 0) : 0;
           const isUnread = unreadCount > 0;
@@ -512,5 +522,3 @@ export default function MessagesPage() {
     </>
   );
 }
-
-    
