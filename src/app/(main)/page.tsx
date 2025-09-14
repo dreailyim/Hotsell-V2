@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp, doc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -81,7 +81,7 @@ function HomePageContent() {
           ];
 
           defaultBanners.forEach(banner => {
-              const docRef = collection(db, 'banners').doc();
+              const docRef = doc(collection(db, 'banners'));
               batch.set(docRef, { ...banner, createdAt: Timestamp.now() });
           });
 
@@ -97,7 +97,7 @@ function HomePageContent() {
     const fetchBanners = async () => {
         setLoadingBanners(true);
         try {
-            const seeded = await seedBanners();
+            await seedBanners();
             const bannersRef = collection(db, 'banners');
             const q = query(bannersRef, orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(q);
