@@ -22,10 +22,16 @@
     "cors": "cors.json"
   },
   "hosting": {
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
     "rewrites": [
       {
         "source": "**",
-        "function": "next-js-backend"
+        "function": "webApi"
       }
     ]
   }
