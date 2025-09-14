@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
@@ -7,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -33,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 function ProductGridSkeleton() {
     return (
@@ -374,6 +376,47 @@ export default function UserProfilePage() {
     });
   };
 
+  const handleBackfillSearchData = () => {
+    if (!currentUser || !isOwnProfile) return;
+
+    startTransition(async () => {
+        toast({ title: "開始更新產品數據...", description: "這可能需要幾秒鐘，請稍候。" });
+        const productsRef = collection(db, 'products');
+        const q = query(productsRef, where('sellerId', '==', currentUser.uid));
+        
+        try {
+            const querySnapshot = await getDocs(q);
+            if (querySnapshot.empty) {
+                toast({ title: "沒有需要更新的產品" });
+                return;
+            }
+
+            const batch = writeBatch(db);
+            let updatedCount = 0;
+
+            querySnapshot.forEach(productDoc => {
+                const productData = productDoc.data() as Product;
+                // Only update if the field is missing
+                if (productData.name && !productData.name_lowercase) {
+                    batch.update(productDoc.ref, { name_lowercase: productData.name.toLowerCase() });
+                    updatedCount++;
+                }
+            });
+
+            if (updatedCount > 0) {
+                await batch.commit();
+                toast({ title: "更新成功！", description: `已成功為 ${updatedCount} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
+            } else {
+                toast({ title: "無需更新", description: "您所有的產品都已經支援搜尋功能了。" });
+            }
+
+        } catch (error: any) {
+            console.error("Error backfilling product data:", error);
+            toast({ title: "更新失敗", description: error.message, variant: 'destructive' });
+        }
+    });
+  };
+
 
   if (loadingProfile) {
     return (
@@ -448,6 +491,30 @@ export default function UserProfilePage() {
     <>
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
+        
+        {isOwnProfile && (
+            <Alert className="mb-4 bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-700/50">
+                <AlertTitle className="flex items-center gap-2 font-semibold text-blue-800 dark:text-blue-300">
+                    <DatabaseZap className="h-5 w-5" />
+                    啟用所有產品的搜尋功能
+                </AlertTitle>
+                <AlertDescription className="text-blue-700/90 dark:text-blue-400/90">
+                    點擊按鈕，為您所有舊產品一次性更新數據，讓它們可以被用戶搜尋到。
+                </AlertDescription>
+                <div className="mt-3">
+                    <Button 
+                        size="sm" 
+                        onClick={handleBackfillSearchData} 
+                        disabled={isProcessing}
+                        className="bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 dark:text-white"
+                    >
+                        {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <DatabaseZap className="mr-2 h-4 w-4" />}
+                        立即更新產品數據
+                    </Button>
+                </div>
+            </Alert>
+        )}
+
         <div className="flex items-center gap-4 mb-6">
              <Avatar className="h-20 w-20">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
@@ -599,3 +666,5 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    

@@ -415,9 +415,9 @@ export function ListingForm() {
                             checked={field.value?.includes(item.id)}
                             onCheckedChange={(checked) => {
                               return checked
-                                ? field.onChange([...field.value, item.id])
+                                ? field.onChange([...(field.value || []), item.id])
                                 : field.onChange(
-                                    field.value?.filter(
+                                    (field.value || [])?.filter(
                                       (value) => value !== item.id
                                     )
                                   )
@@ -474,3 +474,9 @@ export function ListingForm() {
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           刊登物品
         </Button>
+      </form>
+    </Form>
+  );
+}
+
+    

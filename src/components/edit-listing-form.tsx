@@ -418,4 +418,107 @@ export function EditListingForm({ product }: EditListingFormProps) {
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="選擇新舊程度" />
-                  </T...
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="全新">全新</SelectItem>
+                  <SelectItem value="幾乎全新">幾乎全新</SelectItem>
+                  <SelectItem value="較少使用">較少使用</SelectItem>
+                  <SelectItem value="狀況良好">狀況良好</SelectItem>
+                  <SelectItem value="狀況尚可">狀況尚可</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="shippingMethods"
+          render={() => (
+            <FormItem>
+              <div className="mb-4">
+                <FormLabel className="text-base">交收方式</FormLabel>
+              </div>
+              {shippingMethodOptions.map((item) => (
+                <FormField
+                  key={item.id}
+                  control={form.control}
+                  name="shippingMethods"
+                  render={({ field }) => {
+                    return (
+                      <FormItem
+                        key={item.id}
+                        className="flex flex-row items-start space-x-3 space-y-0"
+                      >
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value?.includes(item.id)}
+                            onCheckedChange={(checked) => {
+                              return checked
+                                ? field.onChange([...(field.value || []), item.id])
+                                : field.onChange(
+                                    (field.value || [])?.filter(
+                                      (value) => value !== item.id
+                                    )
+                                  )
+                            }}
+                          />
+                        </FormControl>
+                        <FormLabel className="font-normal">
+                          {item.label}
+                        </FormLabel>
+                      </FormItem>
+                    )
+                  }}
+                />
+              ))}
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <ShippingMethodWatcher control={form.control} />
+        
+        <FormItem>
+          <div className="flex items-center justify-between">
+            <FormLabel>產品描述</FormLabel>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              disabled
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              AI 生成描述 (稍後推出)
+            </Button>
+          </div>
+          <FormField
+            control={form.control}
+            name="productDescription"
+            render={({ field }) => (
+             <>
+              <FormControl>
+                <Textarea
+                  placeholder="描述您的產品..."
+                  className="min-h-[150px]"
+                  {...field}
+                />
+              </FormControl>
+               <FormMessage />
+              </>
+            )}
+          />
+        </FormItem>
+
+        <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" disabled={isSubmitting}>
+           {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+          儲存變更
+        </Button>
+      </form>
+    </Form>
+  );
+}
+
+    
