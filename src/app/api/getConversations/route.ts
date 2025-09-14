@@ -1,28 +1,42 @@
 
+import { NextRequest, NextResponse } from 'next/server';
 import * as admin from 'firebase-admin';
-import * as functions from 'firebase-functions';
-import type { FullUser, Conversation } from '../../src/lib/types';
+import type { Conversation, FullUser } from '@/lib/types';
+import { getAuth } from 'firebase-admin/auth';
 
 // Initialize Firebase Admin SDK if not already initialized
 if (!admin.apps.length) {
-    admin.initializeApp();
+    try {
+        admin.initializeApp({
+            credential: admin.credential.cert({
+                projectId: process.env.FIREBASE_PROJECT_ID,
+                clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+            }),
+        });
+    } catch (error: any) {
+        console.error('Firebase admin initialization error', error.stack);
+    }
 }
+
+
 const db = admin.firestore();
 
-/**
- * Fetches all conversations for a given user, enriching them with details
- * about the other participant and the associated product.
- * This function is designed to be called from the client via HTTPS onCall.
- */
-export const getConversationsForUser = functions.https.onCall(async (data, context) => {
-    // 1. Authentication check
-    if (!context.auth) {
-        throw new functions.https.HttpsError('unauthenticated', 'Authentication required: You must be logged in to view conversations.');
-    }
-    const userId = context.auth.uid;
-
+export async function GET(request: NextRequest) {
     try {
-        // 2. Query conversations where the user is a participant
+        const authHeader = request.headers.get('Authorization');
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return NextResponse.json({ error: 'Unauthorized: No token provided' }, { status: 401 });
+        }
+        
+        const idToken = authHeader.split('Bearer ')[1];
+        const decodedToken = await getAuth().verifyIdToken(idToken);
+        const userId = decodedToken.uid;
+
+        if (!userId) {
+             return NextResponse.json({ error: 'Unauthorized: Invalid token' }, { status: 401 });
+        }
+        
         const conversationsRef = db.collection('conversations');
         const querySnapshot = await conversationsRef
             .where('participantIds', 'array-contains', userId)
@@ -30,12 +44,10 @@ export const getConversationsForUser = functions.https.onCall(async (data, conte
             .get();
 
         if (querySnapshot.empty) {
-            return [];
+            return NextResponse.json([], { status: 200 });
         }
 
-        // 3. Fetch details for all other participants and products in parallel
         const userPromises: Promise<admin.firestore.DocumentSnapshot>[] = [];
-        
         const participantIds = new Set<string>();
 
         querySnapshot.docs.forEach(doc => {
@@ -48,11 +60,9 @@ export const getConversationsForUser = functions.https.onCall(async (data, conte
         
         participantIds.forEach(id => {
              userPromises.push(db.collection('users').doc(id).get());
-        })
-
+        });
 
         const userSnapshots = await Promise.all(userPromises);
-
         const usersCache = new Map<string, FullUser>();
         userSnapshots.forEach(snap => {
             if (snap.exists) {
@@ -60,18 +70,16 @@ export const getConversationsForUser = functions.https.onCall(async (data, conte
             }
         });
 
-        // 4. Construct the final enriched conversation list
         const enrichedConversations = querySnapshot.docs
             .map(doc => {
                 const convo = doc.data() as Conversation;
 
-                // Filter out conversations hidden by the user
                 if (convo.hiddenFor && convo.hiddenFor.includes(userId)) {
                     return null;
                 }
                 
                 const otherUserId = convo.participantIds.find(pId => pId !== userId);
-                if (!otherUserId) return null; // Should not happen in a valid conversation
+                if (!otherUserId) return null;
 
                 const otherUserDetails = usersCache.get(otherUserId) || {
                     uid: otherUserId,
@@ -82,17 +90,21 @@ export const getConversationsForUser = functions.https.onCall(async (data, conte
                 return {
                     ...convo,
                     id: doc.id,
-                    otherUserDetails, // Add the enriched details
+                    otherUserDetails,
                 };
             })
-            .filter(Boolean); // Remove null entries (e.g. hidden conversations)
+            .filter(Boolean);
 
-
-        return enrichedConversations;
+        return NextResponse.json(enrichedConversations, { status: 200 });
 
     } catch (error: any) {
-        console.error('Error in getConversationsForUser:', error);
-        // Throw a generic error to the client
-        throw new functions.https.HttpsError('internal', `Failed to fetch conversations. Error code: ${error.code || 'UNKNOWN'}`);
+        console.error('Error in getConversations API route:', error);
+        if (error.code === 'auth/id-token-expired') {
+            return NextResponse.json({ error: 'Token expired, please re-authenticate.' }, { status: 401 });
+        }
+        if (error.code === 'auth/argument-error') {
+             return NextResponse.json({ error: 'Unauthorized: Invalid token format' }, { status: 401 });
+        }
+        return NextResponse.json({ error: `Internal Server Error: ${error.message}` }, { status: 500 });
     }
-});
+}

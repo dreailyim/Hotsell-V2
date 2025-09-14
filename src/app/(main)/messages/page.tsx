@@ -12,9 +12,8 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db, functions } from '@/lib/firebase/client-app';
+import { db } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
-import { httpsCallable, FunctionsError } from 'firebase/functions';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -151,7 +150,7 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState('private');
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-  // Effect for fetching conversations via Cloud Function
+  // Effect for fetching conversations via API Route
   useEffect(() => {
     if (!user?.uid) {
       if (!authLoading) setLoadingConversations(false);
@@ -162,28 +161,35 @@ export default function MessagesPage() {
       setLoadingConversations(true);
       setErrorConversations(null);
       try {
-        // Specify the function from the 'custom-functions' codebase
-        const getConversations = httpsCallable(functions, 'custom-functions-getConversationsForUser');
-        const result = await getConversations();
-        const convosData = result.data as EnrichedConversation[];
+        const token = await user.getIdToken();
+        const response = await fetch('/api/getConversations', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to fetch conversations');
+        }
+
+        const convosData = await response.json();
         
         // The data from the function is already enriched.
         // Timestamps need to be converted client-side if they are strings.
-        const enrichedConvos = convosData.map(convo => ({
+        const enrichedConvos = convosData.map((convo: any) => ({
             ...convo,
-            lastActivity: convo.lastActivity ? new Timestamp((convo.lastActivity as any)._seconds, (convo.lastActivity as any)._nanoseconds) : null,
+            lastActivity: convo.lastActivity ? new Timestamp(convo.lastActivity._seconds, convo.lastActivity._nanoseconds) : null,
             lastMessage: convo.lastMessage ? {
                 ...convo.lastMessage,
-                timestamp: convo.lastMessage.timestamp ? new Timestamp((convo.lastMessage.timestamp as any)._seconds, (convo.lastMessage.timestamp as any)._nanoseconds) : null
+                timestamp: convo.lastMessage.timestamp ? new Timestamp(convo.lastMessage.timestamp._seconds, convo.lastMessage.timestamp._nanoseconds) : null
             } : null,
         }));
         
         setConversations(enrichedConvos);
       } catch (err: any) {
         console.error("Failed to fetch conversations:", err);
-        const code = err.code || 'unknown';
-        const message = err.message || '請檢查您的權限或網路連線。';
-        setErrorConversations(`讀取聊天列表失敗: ${code}`);
+        setErrorConversations(`讀取聊天列表失敗: ${err.message}`);
       } finally {
         setLoadingConversations(false);
       }
@@ -191,8 +197,6 @@ export default function MessagesPage() {
     
     fetchConversations();
     
-    // Since we're fetching, we can't use onSnapshot for real-time updates in this model.
-    // The list will refresh when the component mounts or user changes.
   }, [user, authLoading]);
 
   // Effect for fetching notifications
