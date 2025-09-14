@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db } from '@/lib/firebase/client-app';
+import { db, auth } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
@@ -161,7 +161,11 @@ export default function MessagesPage() {
       setLoadingConversations(true);
       setErrorConversations(null);
       try {
-        const token = await user.getIdToken();
+        const currentUser = auth.currentUser;
+        if (!currentUser) {
+          throw new Error('用戶未登入，無法獲取權杖。');
+        }
+        const token = await currentUser.getIdToken();
         const response = await fetch('/api/getConversations', {
             headers: {
                 'Authorization': `Bearer ${token}`
