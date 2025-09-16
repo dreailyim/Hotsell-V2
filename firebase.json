@@ -2,7 +2,7 @@
 {
   "functions": [
     {
-      "source": ".",
+      "source": "workspace",
       "codebase": "default",
       "runtime": "nodejs18",
       "ignore": [
