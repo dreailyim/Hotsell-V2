@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
@@ -12,8 +11,7 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db, functions } from '@/lib/firebase/client-app';
-import { httpsCallable } from 'firebase/functions';
+import { db } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
@@ -151,7 +149,7 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState('private');
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-  // Effect for fetching conversations using a Callable Cloud Function
+  // Effect for fetching conversations directly on the client
   useEffect(() => {
     if (authLoading || !user?.uid) {
         if (!authLoading) setLoadingConversations(false);
@@ -161,19 +159,56 @@ export default function MessagesPage() {
     setLoadingConversations(true);
     setErrorConversations(null);
 
-    const getConversations = httpsCallable(functions, 'getConversations');
-    getConversations()
-        .then((result) => {
-            const convoData = result.data as EnrichedConversation[];
-            setConversations(convoData);
-        })
-        .catch((error) => {
-            console.error("Failed to fetch conversations via function:", error);
-            setErrorConversations(`讀取聊天列表失敗: ${error.message}`);
-        })
-        .finally(() => {
+    const conversationsRef = collection(db, 'conversations');
+    const q = query(
+        conversationsRef, 
+        where('participantIds', 'array-contains', user.uid), 
+        orderBy('lastActivity', 'desc')
+    );
+
+    const unsubscribe = onSnapshot(q, async (snapshot) => {
+        if (snapshot.empty) {
+            setConversations([]);
             setLoadingConversations(false);
+            return;
+        }
+
+        const convosData = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() } as Conversation))
+            .filter(convo => !convo.hiddenFor || !convo.hiddenFor.includes(user.uid!));
+
+        const enrichedConvosPromises = convosData.map(async (convo) => {
+            const otherUserId = convo.participantIds.find(pId => pId !== user.uid);
+            let otherUserDetails: FullUser | undefined = undefined;
+
+            if (otherUserId) {
+                 if (convo.participantDetails && convo.participantDetails[otherUserId]) {
+                    otherUserDetails = { uid: otherUserId, ...convo.participantDetails[otherUserId] } as FullUser;
+                 } else {
+                    try {
+                        const userDoc = await getDoc(doc(db, 'users', otherUserId));
+                        if (userDoc.exists()) {
+                            otherUserDetails = userDoc.data() as FullUser;
+                        }
+                    } catch (e) {
+                        console.error(`Failed to fetch user details for ${otherUserId}`, e);
+                    }
+                }
+            }
+            return { ...convo, otherUserDetails };
         });
+
+        const enrichedConvos = await Promise.all(enrichedConvosPromises);
+        setConversations(enrichedConvos);
+        setLoadingConversations(false);
+
+    }, (error) => {
+        console.error("Failed to fetch conversations from Firestore:", error);
+        setErrorConversations(`讀取聊天列表失敗: ${error.message}`);
+        setLoadingConversations(false);
+    });
+
+    return () => unsubscribe();
     
   }, [user?.uid, authLoading]);
 
