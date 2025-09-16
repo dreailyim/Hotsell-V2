@@ -4,13 +4,7 @@
     {
       "source": "src/functions",
       "codebase": "default",
-      "runtime": "nodejs18",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log"
-      ]
+      "runtime": "nodejs20"
     }
   ],
   "firestore": {
