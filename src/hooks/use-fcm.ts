@@ -5,9 +5,8 @@ import { useEffect, useCallback } from 'react';
 import { getToken, onMessage } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db } from '@/lib/firebase/client-app';
+import { db, messaging as getMessagingInstance } from '@/lib/firebase/client-app'; // Updated import
 import { useToast } from './use-toast';
-import { getMessagingInstance } from '@/lib/firebase/client-app';
 
 
 export function useFcm() {
@@ -20,7 +19,7 @@ export function useFcm() {
       return;
     }
     
-    const messaging = await getMessagingInstance();
+    const messaging = await getMessagingInstance; // Updated to use the imported promise
     if (!messaging) {
       console.log("FCM: Aborted. Messaging not supported in this browser.");
       return;
@@ -89,7 +88,7 @@ export function useFcm() {
   useEffect(() => {
     if (user) {
       const setupListener = async () => {
-        const messagingInstance = await getMessagingInstance();
+        const messagingInstance = await getMessagingInstance; // Updated to use the imported promise
         if (messagingInstance) {
           const unsubscribe = onMessage(messagingInstance, (payload) => {
             console.log('FCM: Foreground message received.', payload);

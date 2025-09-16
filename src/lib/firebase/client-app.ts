@@ -1,12 +1,10 @@
-
 // @ts-nocheck
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getFunctions, connectFunctionsEmulator } from 'firebase/functions';
+import { getFunctions } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
-import 'firebase/compat/storage'; // Import the compat library
 
 // This configuration is safe to be exposed on the client-side.
 const firebaseConfig = {
@@ -23,31 +21,19 @@ const firebaseConfig = {
 // A robust way to initialize Firebase on the client, ensuring it only happens once.
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 const storage = getStorage(app);
+// Explicitly connect to the correct function region.
+const functions = getFunctions(app, 'us-central1');
 
-// Use a single region for all functions
-const functionsRegion = 'us-central1';
-const functions = getFunctions(app, functionsRegion);
-
-// When running in the emulator, connect to it
-if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined' && window.location.hostname === "localhost") {
-  console.log("Connecting to Firebase Emulators");
-  // Point functions to the emulator
-  connectFunctionsEmulator(functions, "localhost", 5001);
-}
-
-
-// It's crucial to check for support and only initialize messaging on the client.
-// We export a function that can be called safely from a useEffect hook.
-const getMessagingInstance = async () => {
-  const isMessagingSupported = await isSupported();
-  if (typeof window !== 'undefined' && isMessagingSupported) {
-    return getMessaging(app);
-  }
-  return null;
-};
+// Initialize messaging only if the browser supports it
+const messaging = (async () => {
+    if (typeof window !== 'undefined' && await isSupported()) {
+        return getMessaging(app);
+    }
+    return null;
+})();
 
 
-export { app, db, auth, storage, functions, getMessagingInstance };
+export { app, db, auth, storage, functions, messaging };
