@@ -1,11 +1,6 @@
 
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
-const next = require("next");
-
-const dev = process.env.NODE_ENV !== "production";
-const nextApp = next({ dev, conf: { distDir: ".next" } });
-const handle = nextApp.getRequestHandler();
 
 // Initialize Firebase Admin SDK only if it hasn't been initialized yet.
 if (admin.apps.length === 0) {
@@ -13,11 +8,6 @@ if (admin.apps.length === 0) {
 }
 
 const db = admin.firestore();
-
-// Main web API that serves the Next.js app
-exports.webApi = functions.region("us-central1").https.onRequest((req, res) => {
-  return nextApp.prepare().then(() => handle(req, res));
-});
 
 // Callable function to get user conversations
 exports.getConversations = functions.region("us-central1").https.onCall(async (data, context) => {
