@@ -51,7 +51,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               photoURL: firestoreData.photoURL || firebaseUser.photoURL,
               aboutMe: firestoreData.aboutMe || '',
               createdAt: (firestoreData.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
-              totalUnreadCount: firestoreData.totalUnreadCount || 0,
               averageRating: firestoreData.averageRating || 0,
               reviewCount: firestoreData.reviewCount || 0,
             };
@@ -66,7 +65,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               photoURL: firebaseUser.photoURL,
               aboutMe: '',
               createdAt: new Date().toISOString(),
-              totalUnreadCount: 0,
               averageRating: 0,
               reviewCount: 0,
             };
@@ -108,7 +106,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL: firebaseUser.photoURL,
         createdAt: serverTimestamp(),
         aboutMe: '',
-        totalUnreadCount: 0,
         averageRating: 0,
         reviewCount: 0,
     });

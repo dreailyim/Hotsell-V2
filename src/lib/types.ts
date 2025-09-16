@@ -32,7 +32,6 @@ export interface FullUser {
     photoURL: string | null;
     createdAt: Timestamp | string; // Stored as ISO string in state, Timestamp from Firestore
     aboutMe?: string;
-    totalUnreadCount?: number;
     // New fields for reviews
     averageRating?: number;
     reviewCount?: number;
