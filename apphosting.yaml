@@ -7,4 +7,7 @@ runConfig:
   maxInstances: 2
   cpu: 1
 
-#This is a comment to ensure the file is not empty.
+# Add environment variables to control the build process.
+env:
+  - variable: NEXT_BUILD_CACHE
+    value: "false"
