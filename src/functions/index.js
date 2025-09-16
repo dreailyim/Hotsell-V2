@@ -31,6 +31,41 @@ function convertTimestamps(data) {
 }
 
 exports.getConversations = functions.https.onCall(async (data, context) => {
+    // DEBUG STEP 1: Return hardcoded data to isolate the problem.
+    // If this works, the problem is with the Firestore query or data processing.
+    // If this fails, the problem is with the function setup/deployment itself.
+    return [
+        {
+            id: "debug-convo-1",
+            participantIds: ["user1", "user2"],
+            participantDetails: {
+                user1: { displayName: "偵錯用戶一號", photoURL: "https://i.pravatar.cc/150?u=debug1" },
+                user2: { displayName: "偵錯用戶二號", photoURL: "https://i.pravatar.cc/150?u=debug2" }
+            },
+            product: {
+                id: "debug-prod-1",
+                name: "偵錯專用產品",
+                image: "https://picsum.photos/seed/debug/200/200",
+                price: 999,
+                sellerId: "user2",
+            },
+            lastMessage: {
+                text: "這是一則偵錯訊息。",
+                senderId: "user2",
+                timestamp: new Date().toISOString(),
+            },
+            lastActivity: new Date().toISOString(),
+            unreadCounts: { user1: 1 },
+            otherUserDetails: {
+                uid: "user2",
+                displayName: "偵錯用戶二號",
+                photoURL: "https://i.pravatar.cc/150?u=debug2"
+            }
+        }
+    ];
+
+    /*
+    // Original Code - Temporarily Disabled
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
     }
@@ -78,4 +113,5 @@ exports.getConversations = functions.https.onCall(async (data, context) => {
         console.error('Error fetching conversations:', error);
         throw new functions.https.HttpsError('internal', 'Could not fetch conversations.');
     }
+    */
 });
