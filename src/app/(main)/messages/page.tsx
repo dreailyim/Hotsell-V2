@@ -12,7 +12,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase/client-app';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion, increment } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
