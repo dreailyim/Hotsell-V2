@@ -3,7 +3,6 @@ const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
 admin.initializeApp();
-
 const db = admin.firestore();
 
 /**
@@ -31,8 +30,7 @@ function convertTimestamps(data) {
   return data;
 }
 
-
-exports.getConversations = functions.region("us-central1").https.onCall(async (data, context) => {
+exports.getConversations = functions.https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
     }
