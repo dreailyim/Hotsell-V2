@@ -3,7 +3,6 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
-  output: 'standalone',
   typescript: {
     ignoreBuildErrors: true,
   },
@@ -31,13 +30,6 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ],
-  },
-  webpack: (config, { isServer }) => {
-    // This is to allow 'firebase/messaging/sw' to be imported in the service worker.
-    if (!isServer) {
-        config.resolve.alias['firebase/messaging/sw'] = 'firebase/messaging/sw';
-    }
-    return config;
   },
 };
 
