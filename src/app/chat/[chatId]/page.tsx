@@ -12,7 +12,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase/client-app';
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, Timestamp, doc, updateDoc, writeBatch, setDoc, where, getDocs, limit } from 'firebase/firestore';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, Timestamp, doc, updateDoc, writeBatch, setDoc, where, getDocs, limit, increment } from 'firebase/firestore';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -271,15 +271,20 @@ export default function ChatPage() {
   
   const sendMessage = useCallback(async (text: string) => {
     const trimmedText = text.trim();
-    if (trimmedText === '' || authLoading || !user || !conversationId) return;
+    if (trimmedText === '' || authLoading || !user || !conversationId || !conversation) return;
     
+    const otherUserId = conversation.participantIds.find(id => id !== user.uid);
+    if (!otherUserId) {
+        console.error("Could not find other user in conversation");
+        return;
+    }
+
     const convoRef = doc(db, 'conversations', conversationId);
     const messagesColRef = collection(convoRef, 'messages');
     
     try {
       const batch = writeBatch(db);
       
-      // 1. Add the new message document
       const newMessageRef = doc(messagesColRef);
       batch.set(newMessageRef, {
         text: trimmedText,
@@ -287,10 +292,10 @@ export default function ChatPage() {
         timestamp: serverTimestamp(),
       });
       
-      // 2. Update the parent conversation document
       batch.update(convoRef, {
           lastMessage: { text: trimmedText, senderId: user.uid, timestamp: serverTimestamp() },
           lastActivity: serverTimestamp(),
+          [`unreadCounts.${otherUserId}`]: increment(1),
       });
 
       await batch.commit();
@@ -303,7 +308,7 @@ export default function ChatPage() {
       console.error("Error sending message:", error);
       setError(`訊息傳送失敗: ${error.message}`);
     }
-  }, [user, conversationId, message, authLoading]);
+  }, [user, conversationId, conversation, message, authLoading]);
   
   
   useEffect(() => {
@@ -330,7 +335,6 @@ export default function ChatPage() {
     }
 
     setLoading(true);
-    // Listener for the conversation document itself
     const convoUnsubscribe = onSnapshot(doc(db, 'conversations', conversationId), (docSnap) => {
         if (docSnap.exists()) {
             const convoData = docSnap.data() as Omit<Conversation, 'id'>;
@@ -359,7 +363,6 @@ export default function ChatPage() {
     });
 
 
-    // Listener for messages subcollection
     const messagesColRef = collection(db, 'conversations', conversationId, 'messages');
     const q = query(messagesColRef, orderBy('timestamp', 'asc'));
 
