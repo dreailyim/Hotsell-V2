@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
 import {
   onAuthStateChanged,
   User,
@@ -14,13 +13,14 @@ import {
   sendPasswordResetEmail,
 } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase/client-app';
-import { doc, setDoc, getDoc, Timestamp, serverTimestamp, onSnapshot } from 'firebase/firestore';
-import type { FullUser } from '@/lib/types';
+import { doc, setDoc, getDoc, Timestamp, serverTimestamp, onSnapshot, collection, query, where } from 'firebase/firestore';
+import type { FullUser, Conversation } from '@/lib/types';
 
 
 interface AuthContextType {
   user: FullUser | null;
   loading: boolean;
+  totalUnreadCount: number; // Add this to the context
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -34,14 +34,17 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<FullUser | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  const [totalUnreadCount, setTotalUnreadCount] = useState(0);
+
+  // Unread count logic moved here
+  const convoUnreadRef = useRef(0);
+  const notifUnreadRef = useRef(0);
+
   useEffect(() => {
-    const unsubscribeFromAuth = onAuthStateChanged(auth, (firebaseUser) => {
+    const authUnsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // When auth state changes, set up a real-time listener for the user's document.
-        // This ensures the UI always has the latest user profile data.
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const unsubscribeFromFirestore = onSnapshot(userDocRef, (docSnap) => {
+        const firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
             const firestoreData = docSnap.data();
             const fullUser: FullUser = {
@@ -56,8 +59,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             };
             setUser(fullUser);
           } else {
-            // This case handles a new user (e.g., first-time Google sign-in)
-            // where the Firestore doc might not exist yet. We create it.
             const newUser: FullUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -69,28 +70,54 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               reviewCount: 0,
             };
             setUser(newUser);
-            setDoc(userDocRef, {
-                ...newUser,
-                createdAt: serverTimestamp(),
-            }).catch(e => console.error("Error creating user doc:", e));
+            setDoc(userDocRef, { ...newUser, createdAt: serverTimestamp() })
+              .catch(e => console.error("Error creating user doc:", e));
           }
           setLoading(false);
         }, (error) => {
           console.error("Error with Firestore snapshot:", error);
           setLoading(false);
         });
-        
-        // Return a cleanup function to unsubscribe from the Firestore listener
-        // when the auth state changes (e.g., user signs out).
-        return () => unsubscribeFromFirestore();
+
+        // --- Start unread count listeners ---
+        const conversationsRef = collection(db, 'conversations');
+        const convosQuery = query(conversationsRef, where('participantIds', 'array-contains', firebaseUser.uid));
+        const convosUnsubscribe = onSnapshot(convosQuery, (snapshot) => {
+          let privateUnread = 0;
+          snapshot.forEach(doc => {
+            const convo = doc.data() as Conversation;
+            if (!convo.hiddenFor || !convo.hiddenFor.includes(firebaseUser.uid)) {
+              privateUnread += convo.unreadCounts?.[firebaseUser.uid] || 0;
+            }
+          });
+          convoUnreadRef.current = privateUnread;
+          setTotalUnreadCount(convoUnreadRef.current + notifUnreadRef.current);
+        });
+
+        const notificationsRef = collection(db, 'notifications');
+        const notifsQuery = query(notificationsRef, where('userId', '==', firebaseUser.uid), where('isRead', '==', false));
+        const notifsUnsubscribe = onSnapshot(notifsQuery, (snapshot) => {
+          notifUnreadRef.current = snapshot.size;
+          setTotalUnreadCount(convoUnreadRef.current + notifUnreadRef.current);
+        });
+        // --- End unread count listeners ---
+
+        return () => {
+          firestoreUnsubscribe();
+          convosUnsubscribe();
+          notifsUnsubscribe();
+        };
 
       } else {
         setUser(null);
         setLoading(false);
+        setTotalUnreadCount(0); // Reset on logout
+        convoUnreadRef.current = 0;
+        notifUnreadRef.current = 0;
       }
     });
 
-    return () => unsubscribeFromAuth();
+    return () => authUnsubscribe();
   }, []);
   
   const signUp = async (email: string, password: string, displayName: string) => {
@@ -109,18 +136,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         averageRating: 0,
         reviewCount: 0,
     });
-    // onAuthStateChanged will handle setting the user state.
   };
 
   const signIn = async (email: string, password: string) => {
     await signInWithEmailAndPassword(auth, email, password);
-    // onAuthStateChanged will handle the user state update.
   };
   
   const signInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithPopup(auth, provider);
-    // onAuthStateChanged will handle creating/updating the user state and firestore doc.
   };
 
   const signOut = async () => {
@@ -138,8 +162,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await sendPasswordResetEmail(auth, email);
   }
 
+  const value = {
+      user,
+      loading,
+      totalUnreadCount,
+      signUp,
+      signIn,
+      signOut,
+      signInWithGoogle,
+      updateAuthProfile,
+      sendPasswordReset,
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut, signInWithGoogle, updateAuthProfile, sendPasswordReset }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );
