@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useRef } from 'react';
@@ -20,7 +21,7 @@ import type { FullUser, Conversation } from '@/lib/types';
 interface AuthContextType {
   user: FullUser | null;
   loading: boolean;
-  totalUnreadCount: number; // Add this to the context
+  totalUnreadCount: number;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
@@ -36,7 +37,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
 
-  // Unread count logic moved here
   const convoUnreadRef = useRef(0);
   const notifUnreadRef = useRef(0);
 
@@ -86,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           let privateUnread = 0;
           snapshot.forEach(doc => {
             const convo = doc.data() as Conversation;
+            // CRITICAL FIX: Only count unread messages from conversations that are NOT hidden for the current user.
             if (!convo.hiddenFor || !convo.hiddenFor.includes(firebaseUser.uid)) {
               privateUnread += convo.unreadCounts?.[firebaseUser.uid] || 0;
             }
@@ -188,3 +189,4 @@ export const useAuth = () => {
   }
   return context;
 };
+
