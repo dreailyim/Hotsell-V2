@@ -1,19 +1,5 @@
 
 {
-  "functions": [
-    {
-      "source": "workspace",
-      "codebase": "default",
-      "runtime": "nodejs18",
-      "ignore": [
-        "node_modules",
-        ".git",
-        "firebase-debug.log",
-        "firebase-debug.*.log",
-        "src"
-      ]
-    }
-  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
@@ -21,16 +7,6 @@
   "storage": {
     "rules": "storage.rules",
     "cors": "cors.json"
-  },
-  "hosting": {
-    "rewrites": [
-      {
-        "source": "**",
-        "function": {
-          "functionId": "webApi",
-          "region": "us-central1"
-        }
-      }
-    ]
   }
 }
+
