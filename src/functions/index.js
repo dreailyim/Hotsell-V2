@@ -1,15 +1,38 @@
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
-// Initialize Firebase Admin SDK only if it hasn't been initialized yet.
 if (admin.apps.length === 0) {
   admin.initializeApp();
 }
 
 const db = admin.firestore();
 
-// Callable function to get user conversations
+/**
+ * Recursively converts Firestore Timestamps to ISO strings.
+ * @param {any} data The data to convert.
+ * @returns {any} The converted data.
+ */
+function convertTimestamps(data) {
+  if (data === null || data === undefined) {
+    return data;
+  }
+  if (typeof data.toDate === 'function') { // Cheaper check for Timestamp
+    return data.toDate().toISOString();
+  }
+  if (Array.isArray(data)) {
+    return data.map(convertTimestamps);
+  }
+  if (typeof data === 'object') {
+    const res = {};
+    for (const key in data) {
+      res[key] = convertTimestamps(data[key]);
+    }
+    return res;
+  }
+  return data;
+}
+
+
 exports.getConversations = functions.region("us-central1").https.onCall(async (data, context) => {
     if (!context.auth) {
         throw new functions.https.HttpsError('unauthenticated', 'The function must be called while authenticated.');
@@ -24,7 +47,7 @@ exports.getConversations = functions.region("us-central1").https.onCall(async (d
         if (snapshot.empty) {
             return [];
         }
-        
+
         const convosData = snapshot.docs
             .map(doc => ({ id: doc.id, ...doc.data() }))
             .filter(convo => !convo.hiddenFor || !convo.hiddenFor.includes(uid));
@@ -36,8 +59,7 @@ exports.getConversations = functions.region("us-central1").https.onCall(async (d
             if (otherUserId && convo.participantDetails && convo.participantDetails[otherUserId]) {
                  otherUserDetails = { uid: otherUserId, ...convo.participantDetails[otherUserId] };
             } else if (otherUserId) {
-                // Fallback to fetch from 'users' collection if not in convo details
-                 try {
+                try {
                     const userDoc = await db.collection('users').doc(otherUserId).get();
                     if (userDoc.exists) {
                         const { displayName, photoURL } = userDoc.data();
@@ -51,7 +73,9 @@ exports.getConversations = functions.region("us-central1").https.onCall(async (d
         });
 
         const enrichedConvos = await Promise.all(enrichedConvosPromises);
-        return enrichedConvos;
+        
+        // Convert all timestamps before returning
+        return convertTimestamps(enrichedConvos);
 
     } catch (error) {
         console.error('Error fetching conversations:', error);
