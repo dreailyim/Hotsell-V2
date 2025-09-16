@@ -6,8 +6,3 @@ runConfig:
   # more instances in response to increased traffic.
   maxInstances: 2
   cpu: 1
-
-# Add environment variables to control the build process.
-env:
-  - variable: NEXT_BUILD_CACHE
-    value: "false"
