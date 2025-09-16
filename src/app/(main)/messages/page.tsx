@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
@@ -11,7 +12,8 @@ import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
-import { db } from '@/lib/firebase/client-app';
+import { db, functions } from '@/lib/firebase/client-app';
+import { httpsCallable } from 'firebase/functions';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
@@ -149,66 +151,32 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState('private');
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-  // Effect for fetching conversations directly from Firestore
+  // Effect for fetching conversations using a Callable Cloud Function
   useEffect(() => {
-    if (!user?.uid) {
-      if (!authLoading) setLoadingConversations(false);
-      return;
+    if (authLoading || !user?.uid) {
+        if (!authLoading) setLoadingConversations(false);
+        return;
     }
 
     setLoadingConversations(true);
     setErrorConversations(null);
 
-    const conversationsRef = collection(db, 'conversations');
-    const q = query(
-      conversationsRef,
-      where('participantIds', 'array-contains', user.uid),
-      orderBy('lastActivity', 'desc')
-    );
-
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      if (snapshot.empty) {
-        setConversations([]);
-        setLoadingConversations(false);
-        return;
-      }
-      
-      const convosData = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as Conversation))
-        .filter(convo => !convo.hiddenFor || !convo.hiddenFor.includes(user.uid));
-
-      // Enrich conversations with other user's details
-      const enrichedConvos = await Promise.all(
-        convosData.map(async (convo) => {
-          const otherUserId = convo.participantIds.find(pId => pId !== user.uid);
-          let otherUserDetails: FullUser | undefined = undefined;
-
-          if (otherUserId) {
-             try {
-                const userDoc = await getDoc(doc(db, 'users', otherUserId));
-                if (userDoc.exists()) {
-                    otherUserDetails = userDoc.data() as FullUser;
-                }
-            } catch (e) {
-                console.error(`Failed to fetch user details for ${otherUserId}`, e);
-            }
-          }
-          return { ...convo, otherUserDetails };
+    const getConversations = httpsCallable(functions, 'getConversations');
+    getConversations()
+        .then((result) => {
+            const convoData = result.data as EnrichedConversation[];
+            setConversations(convoData);
         })
-      );
-      
-      setConversations(enrichedConvos);
-      setLoadingConversations(false);
+        .catch((error) => {
+            console.error("Failed to fetch conversations via function:", error);
+            setErrorConversations(`讀取聊天列表失敗: ${error.message}`);
+        })
+        .finally(() => {
+            setLoadingConversations(false);
+        });
+    
+  }, [user?.uid, authLoading]);
 
-    }, (err) => {
-      console.error("Failed to fetch conversations from Firestore:", err);
-      setErrorConversations(`讀取聊天列表失敗: ${err.message}`);
-      setLoadingConversations(false);
-    });
-    
-    return () => unsubscribe();
-    
-  }, [user, authLoading]);
 
   // Effect for fetching notifications
   useEffect(() => {
@@ -271,7 +239,8 @@ export default function MessagesPage() {
       });
       await batch.commit();
       
-      // Optimistic update is handled by the real-time listener now
+      // Optimistically filter the conversations from the UI
+      setConversations(prev => prev.filter(c => !selectedConversations.has(c.id)));
       setSelectedConversations(new Set());
       setIsManaging(false);
     });
@@ -326,7 +295,7 @@ export default function MessagesPage() {
    const getFormattedTime = (timestamp: any) => {
     if (!timestamp) return '';
     try {
-      const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
+      const date = timestamp.seconds ? new Timestamp(timestamp.seconds, timestamp.nanoseconds).toDate() : new Date(timestamp);
       return formatDistanceToNow(date, { addSuffix: true, locale: zhHK });
     } catch (error) {
       console.error("Error formatting date:", error, "with value:", timestamp);

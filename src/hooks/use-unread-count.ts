@@ -1,7 +1,6 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import { useAuth } from './use-auth';
@@ -11,9 +10,17 @@ export function useUnreadCount() {
   const { user, loading } = useAuth();
   const [totalUnreadCount, setTotalUnreadCount] = useState(0);
 
+  // Refs to store the latest counts from each listener to prevent race conditions
+  const convoUnreadRef = useRef(0);
+  const notifUnreadRef = useRef(0);
+
   useEffect(() => {
     if (loading || !user?.uid) {
-      if (!loading) setTotalUnreadCount(0);
+      if (!loading) {
+        setTotalUnreadCount(0);
+        convoUnreadRef.current = 0;
+        notifUnreadRef.current = 0;
+      }
       return;
     }
 
@@ -31,12 +38,8 @@ export function useUnreadCount() {
         }
       });
       
-      // Update total count using a function to get the latest state from other listeners
-      setTotalUnreadCount(prev => {
-          const currentSystemUnread = prev - (convoUnreadRef.current);
-          convoUnreadRef.current = privateUnread;
-          return privateUnread + currentSystemUnread;
-      });
+      convoUnreadRef.current = privateUnread;
+      setTotalUnreadCount(convoUnreadRef.current + notifUnreadRef.current);
     });
 
     // --- Listener for System Notifications Unread Count ---
@@ -45,17 +48,9 @@ export function useUnreadCount() {
 
     const unsubscribeNotifs = onSnapshot(notifsQuery, (snapshot) => {
         const systemUnread = snapshot.size;
-
-        setTotalUnreadCount(prev => {
-            const currentPrivateUnread = prev - (notifUnreadRef.current);
-            notifUnreadRef.current = systemUnread;
-            return systemUnread + currentPrivateUnread;
-        });
+        notifUnreadRef.current = systemUnread;
+        setTotalUnreadCount(convoUnreadRef.current + notifUnreadRef.current);
     });
-
-    // Refs to store the latest counts from each listener to prevent race conditions
-    const convoUnreadRef = { current: 0 };
-    const notifUnreadRef = { current: 0 };
 
     return () => {
       unsubscribeConvos();
