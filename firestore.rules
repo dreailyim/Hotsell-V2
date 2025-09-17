@@ -1,64 +1,79 @@
-
 rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Helper function to check if a user is authenticated
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Helper function to check if the user is the owner of a document
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
     // --- Users Collection ---
-    // Anyone can read a user's public profile.
-    // Only the user themselves can update their own data.
     match /users/{userId} {
+      // Anyone can read a user's public profile
       allow read: if true;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      // Only the user themselves can create or update their own profile
+      allow write: if isSignedIn() && isOwner(userId);
     }
 
     // --- Products Collection ---
-    // Anyone can read products.
-    // Only authenticated users can create products.
-    // Only the seller can update or delete their own products.
     match /products/{productId} {
+      // Anyone can read products
       allow read: if true;
-      allow create: if request.auth != null;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.sellerId;
-    }
-
-    // --- Conversations Collection ---
-    // Users can only access conversations they are a part of.
-    // This rule now correctly allows background functions (admin SDK) to write to conversations
-    // while ensuring client-side writes are restricted to participants.
-    match /conversations/{conversationId} {
-        allow read, write: if request.auth != null && request.auth.uid in resource.data.participantIds;
-        
-        // Explicitly allow access to the messages subcollection if the user is a participant.
-        match /messages/{messageId} {
-            allow read, create: if request.auth != null && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds.hasAny([request.auth.uid]);
-        }
+      // Only the seller can delete their own product
+      allow delete: if isSignedIn() && isOwner(resource.data.sellerId);
+      // Only the seller can create a new product
+      allow create: if isSignedIn() && isOwner(request.resource.data.sellerId);
+      // Allow users to favorite/unfavorite, but not change other fields.
+      // Allow the seller to update any field of their own product.
+      allow update: if isSignedIn() && (
+                    (isOwner(resource.data.sellerId)) ||
+                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['favoritedBy']))
+                  );
     }
     
-    // --- Reviews Collection ---
-    // Anyone can read reviews.
-    // Only authenticated users can create reviews.
-    // A user cannot write a review for themselves.
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if request.auth != null && request.resource.data.reviewerId == request.auth.uid && request.resource.data.ratedUserId != request.auth.uid;
-    }
-
-    // --- Notifications Collection ---
-    // Users can only read their own notifications.
-    // Users can only update the isRead status of their own notifications.
-    match /notifications/{notificationId} {
-       allow read: if request.auth != null && resource.data.userId == request.auth.uid;
-       allow update: if request.auth != null && resource.data.userId == request.auth.uid && request.resource.data.keys().hasOnly(['isRead']);
-    }
-
     // --- Banners Collection ---
-    // Anyone can read banners.
-    // Allow anyone to create initial seed data. This is safe because
-    // the app logic only writes to it if the collection is empty.
     match /banners/{bannerId} {
+      // Anyone can read banners
       allow read: if true;
-      allow create: if true;
+      // Writing banners is restricted (e.g., admin only, not defined here for simplicity)
+      allow write: if false; 
+    }
+
+    // --- Conversations and Messages ---
+    match /conversations/{conversationId} {
+      // Only participants can read or write to a conversation document
+      allow read, write: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+      
+      match /messages/{messageId} {
+         // Only participants can read messages
+         allow read: if isSignedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds.hasAny([request.auth.uid]);
+         // A user can only create a message if they are a participant and the senderId matches their own uid
+         allow create: if isSignedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds.hasAny([request.auth.uid]) && request.resource.data.senderId == request.auth.uid;
+         // Messages are immutable
+         allow update, delete: if false;
+      }
+    }
+    
+     // --- Reviews Collection ---
+    match /reviews/{reviewId} {
+      // Anyone can read reviews
+      allow read: if true;
+      // Only authenticated users can write reviews, and they must be the author
+      allow create: if isSignedIn() && isOwner(request.resource.data.reviewerId);
+      // Reviews are immutable once created
+      allow update, delete: if false;
+    }
+    
+    // --- Notifications Collection ---
+    match /notifications/{notificationId} {
+        // A user can only read or write their own notifications
+        allow read, write: if isSignedIn() && isOwner(resource.data.userId);
     }
   }
 }
