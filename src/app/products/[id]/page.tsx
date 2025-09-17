@@ -394,10 +394,12 @@ export default function ProductPage() {
         if (newFavoritedState) {
           await updateDoc(productRef, {
             favoritedBy: arrayUnion(user.uid),
+            favorites: increment(1),
           });
         } else {
           await updateDoc(productRef, {
             favoritedBy: arrayRemove(user.uid),
+            favorites: increment(-1),
           });
         }
       } catch (error: any) {

@@ -17,7 +17,7 @@ import { Button } from './ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot, increment } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 
@@ -92,10 +92,12 @@ export function ProductCard({ product }: ProductCardProps) {
         if (newFavoritedState) {
           await updateDoc(productRef, {
             favoritedBy: arrayUnion(currentUser.uid),
+            favorites: increment(1),
           });
         } else {
           await updateDoc(productRef, {
             favoritedBy: arrayRemove(currentUser.uid),
+            favorites: increment(-1),
           });
         }
       } catch (error: any) {
@@ -166,14 +168,14 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
                 {isDiscounted && (
-                  <Badge className="text-[10px] px-1.5 font-semibold z-10 bg-destructive text-destructive-foreground">
+                  <Badge className="text-[10px] px-1.5 py-0.5 font-semibold z-10 bg-destructive text-destructive-foreground">
                       特價中
                   </Badge>
                 )}
                 {status && (
                     <Badge
                         className={cn(
-                        'text-[10px] px-1.5 font-semibold z-10',
+                        'text-[10px] px-1.5 py-0.5 font-semibold z-10',
                         status === 'sold' && 'bg-destructive text-destructive-foreground',
                         status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground dark:text-black'
                         )}
