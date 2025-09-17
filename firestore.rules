@@ -1,86 +1,52 @@
-rules_version = '2';
 
+rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Helper function to check if a user is authenticated
-    function isAuthenticated() {
-      return request.auth != null;
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
     }
 
-    // Helper function to check if the user is the owner of a document
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-    
-    // --- Users Collection ---
-    // Logged-in users can read their own profile.
-    // Users can only create their own profile.
-    // Users can only update their own profile, and cannot change core fields.
-    match /users/{userId} {
-      allow read: if isAuthenticated();
-      allow create: if isOwner(userId);
-      allow update: if isOwner(userId) && !("createdAt" in request.resource.data);
-    }
-    
-    // --- Products Collection ---
-    // Anyone can read products.
-    // Logged-in users can create products.
-    // Only the seller can update most product fields.
-    // Any logged-in user can update the 'favoritedBy' and 'favorites' fields for the favorite feature.
-    // Only the seller can delete their own product.
+    // Allow public read for products and users
     match /products/{productId} {
       allow read: if true;
-      allow create: if isAuthenticated();
-      
-      // Allow seller to update, but not change the sellerId or createdAt
-      allow update: if isAuthenticated() && resource.data.sellerId == request.auth.uid 
-      				    && !("sellerId" in request.resource.data)
-                && !("createdAt" in request.resource.data);
-      
-      // Allow any logged-in user to update ONLY the favoritedBy and favorites fields
-      allow update: if isAuthenticated()
-      				    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['favoritedBy', 'favorites']);
-                      
-      allow delete: if isAuthenticated() && resource.data.sellerId == request.auth.uid;
+      allow create: if request.auth != null;
+      // Allow logged-in users to update only the 'favoritedBy' and 'favorites' fields.
+      // The update must contain at least one of these keys and no more than these two keys.
+      allow update: if request.auth != null && 
+                       request.resource.data.diff(resource.data).affectedKeys().hasAny(['favoritedBy', 'favorites']) &&
+                       request.resource.data.diff(resource.data).affectedKeys().size() <= 2;
+      allow delete: if request.auth != null && resource.data.sellerId == request.auth.uid;
     }
-
-    // --- Conversations Collection ---
-    // Participants can read/write messages and update conversation details.
-    match /conversations/{conversationId} {
-      allow read, update, delete: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
-      
-      match /messages/{messageId} {
-        allow read, create: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
-      }
+    match /users/{userId} {
+        allow read: if true;
+        allow create: if request.auth.uid == userId;
+        allow update: if request.auth.uid == userId;
     }
     
-    // --- Reviews Collection ---
-    // Any authenticated user can create a review.
-    // Anyone can read reviews.
-    // Users cannot update or delete reviews after posting.
+    // Allow read/write for owners of conversations
+    match /conversations/{conversationId} {
+        allow read, create, update: if request.auth != null && request.auth.uid in resource.data.participantIds;
+    }
+    
+    match /conversations/{conversationId}/messages/{messageId} {
+        allow read, create: if request.auth != null && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+    }
+    
+    // Allow users to create reviews
     match /reviews/{reviewId} {
-        allow read: if true;
-        allow create: if isAuthenticated();
-        allow update, delete: if false; // Reviews are immutable
+      allow read: if true;
+      allow create: if request.auth != null;
+    }
+    
+    // Notifications can be read and updated (to mark as read) by the owner
+    match /notifications/{notificationId} {
+        allow read, update: if request.auth != null && resource.data.userId == request.auth.uid;
     }
 
-    // --- Banners Collection (for homepage) ---
-    // Anyone can read banners.
-    // (Content management for banners would typically be handled by an admin role, not covered here)
+    // Banners can be read by anyone
     match /banners/{bannerId} {
         allow read: if true;
-        allow create, update, delete: if false; // For now, prevent client-side modification
-    }
-    
-    // --- Notifications Collection ---
-    // Users can only read their own notifications.
-    // Users can update the isRead status of their own notifications.
-    // Notifications are created by server-side logic (Cloud Functions), not clients.
-    match /notifications/{notificationId} {
-      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
-      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
-      allow create, delete: if false;
     }
   }
 }
