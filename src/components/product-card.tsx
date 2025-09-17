@@ -166,14 +166,14 @@ export function ProductCard({ product }: ProductCardProps) {
             </Link>
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
                 {isDiscounted && (
-                  <Badge className="text-xs px-2.5 py-1 font-bold z-10 bg-destructive text-destructive-foreground">
+                  <Badge className="text-xs px-2 py-0.5 font-semibold z-10 bg-destructive text-destructive-foreground">
                       特價中
                   </Badge>
                 )}
                 {status && (
                     <Badge
                         className={cn(
-                        'text-xs px-2.5 py-1 font-bold z-10',
+                        'text-xs px-2 py-0.5 font-semibold z-10',
                         status === 'sold' && 'bg-destructive text-destructive-foreground',
                         status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground dark:text-black'
                         )}
