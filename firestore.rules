@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // Helper function to check if a user is authenticated
-    function isSignedIn() {
+    function isAuthenticated() {
       return request.auth != null;
     }
 
@@ -14,66 +14,73 @@ service cloud.firestore {
     }
     
     // --- Users Collection ---
+    // Logged-in users can read their own profile.
+    // Users can only create their own profile.
+    // Users can only update their own profile, and cannot change core fields.
     match /users/{userId} {
-      // Anyone can read a user's public profile
-      allow read: if true;
-      // Only the user themselves can create or update their own profile
-      allow write: if isSignedIn() && isOwner(userId);
-    }
-
-    // --- Products Collection ---
-    match /products/{productId} {
-      // Anyone can read products
-      allow read: if true;
-      // Only the seller can delete their own product
-      allow delete: if isSignedIn() && isOwner(resource.data.sellerId);
-      // Only the seller can create a new product
-      allow create: if isSignedIn() && isOwner(request.resource.data.sellerId);
-      // Allow users to favorite/unfavorite, but not change other fields.
-      // Allow the seller to update any field of their own product.
-      allow update: if isSignedIn() && (
-                    (isOwner(resource.data.sellerId)) ||
-                    (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['favoritedBy']))
-                  );
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && !("createdAt" in request.resource.data);
     }
     
-    // --- Banners Collection ---
-    match /banners/{bannerId} {
-      // Anyone can read banners
+    // --- Products Collection ---
+    // Anyone can read products.
+    // Logged-in users can create products.
+    // Only the seller can update most product fields.
+    // Any logged-in user can update the 'favoritedBy' and 'favorites' fields for the favorite feature.
+    // Only the seller can delete their own product.
+    match /products/{productId} {
       allow read: if true;
-      // Writing banners is restricted (e.g., admin only, not defined here for simplicity)
-      allow write: if false; 
+      allow create: if isAuthenticated();
+      
+      // Allow seller to update, but not change the sellerId or createdAt
+      allow update: if isAuthenticated() && resource.data.sellerId == request.auth.uid 
+      				    && !("sellerId" in request.resource.data)
+                && !("createdAt" in request.resource.data);
+      
+      // Allow any logged-in user to update ONLY the favoritedBy and favorites fields
+      allow update: if isAuthenticated()
+      				    && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['favoritedBy', 'favorites']);
+                      
+      allow delete: if isAuthenticated() && resource.data.sellerId == request.auth.uid;
     }
 
-    // --- Conversations and Messages ---
+    // --- Conversations Collection ---
+    // Participants can read/write messages and update conversation details.
     match /conversations/{conversationId} {
-      // Only participants can read or write to a conversation document
-      allow read, write: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+      allow read, update, delete: if isAuthenticated() && request.auth.uid in resource.data.participantIds;
       
       match /messages/{messageId} {
-         // Only participants can read messages
-         allow read: if isSignedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds.hasAny([request.auth.uid]);
-         // A user can only create a message if they are a participant and the senderId matches their own uid
-         allow create: if isSignedIn() && get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds.hasAny([request.auth.uid]) && request.resource.data.senderId == request.auth.uid;
-         // Messages are immutable
-         allow update, delete: if false;
+        allow read, create: if isAuthenticated() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
       }
     }
     
-     // --- Reviews Collection ---
+    // --- Reviews Collection ---
+    // Any authenticated user can create a review.
+    // Anyone can read reviews.
+    // Users cannot update or delete reviews after posting.
     match /reviews/{reviewId} {
-      // Anyone can read reviews
-      allow read: if true;
-      // Only authenticated users can write reviews, and they must be the author
-      allow create: if isSignedIn() && isOwner(request.resource.data.reviewerId);
-      // Reviews are immutable once created
-      allow update, delete: if false;
+        allow read: if true;
+        allow create: if isAuthenticated();
+        allow update, delete: if false; // Reviews are immutable
+    }
+
+    // --- Banners Collection (for homepage) ---
+    // Anyone can read banners.
+    // (Content management for banners would typically be handled by an admin role, not covered here)
+    match /banners/{bannerId} {
+        allow read: if true;
+        allow create, update, delete: if false; // For now, prevent client-side modification
     }
     
     // --- Notifications Collection ---
+    // Users can only read their own notifications.
+    // Users can update the isRead status of their own notifications.
+    // Notifications are created by server-side logic (Cloud Functions), not clients.
     match /notifications/{notificationId} {
-        // A user can only read or write their own notifications
-        allow read, write: if isSignedIn() && isOwner(resource.data.userId);
+      allow read: if isAuthenticated() && resource.data.userId == request.auth.uid;
+      allow update: if isAuthenticated() && resource.data.userId == request.auth.uid && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+      allow create, delete: if false;
     }
   }
 }
