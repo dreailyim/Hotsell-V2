@@ -456,7 +456,7 @@ export default function UserProfilePage() {
                 <AlertDialogTrigger asChild>
                     <Button
                         variant="destructive"
-                        className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                        className="rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
                         disabled={isProcessing || selectedProducts.size === 0}
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
@@ -471,10 +471,10 @@ export default function UserProfilePage() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="rounded-full">取消</AlertDialogCancel>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => handleBulkAction('delete')}
-                            className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                            className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
                         >
                             確認刪除
                         </AlertDialogAction>

@@ -216,7 +216,7 @@ export default function SettingsPage() {
                   className="min-h-[120px]"
                 />
               </div>
-              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full">
+              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">
                 {(isPending || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 儲存變更
               </Button>
@@ -263,7 +263,7 @@ export default function SettingsPage() {
         <div className="flex flex-col items-center gap-4 pt-4">
              <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
+                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">登出</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -273,10 +273,10 @@ export default function SettingsPage() {
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel className="rounded-full">取消</AlertDialogCancel>
+                  <AlertDialogCancel>取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={signOut}
-                    className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                    className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
                   >
                    確認登出
                   </AlertDialogAction>

@@ -470,7 +470,7 @@ export function ListingForm() {
           />
         </FormItem>
 
-        <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity" disabled={isSubmitting}>
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           刊登物品
         </Button>
