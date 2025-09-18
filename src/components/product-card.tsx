@@ -222,16 +222,16 @@ export function ProductCard({ product }: ProductCardProps) {
           <Link href={`/products/${id}`} aria-label={safeName} className="space-y-1">
             <h3 className="font-semibold truncate text-base">{safeName}</h3>
             
-            <div className="flex justify-between items-center">
-              <div className="flex items-baseline gap-2">
+            <div className="flex justify-between items-end">
+              <div>
                  <p className={cn(
-                    "text-lg font-bold",
+                    "text-lg font-bold leading-tight",
                     isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary"
                  )}>
                     ${(price || 0).toLocaleString()}
                 </p>
                 {isDiscounted && originalPrice && (
-                  <p className="text-sm text-muted-foreground line-through">
+                  <p className="text-xs text-muted-foreground line-through">
                     ${originalPrice.toLocaleString()}
                   </p>
                 )}
