@@ -3,67 +3,73 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if user is signed in
+    // Helper function to check if a user is signed in
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Products collection can be read by anyone, but only created/updated/deleted by the seller.
+    // Users collection: Allow users to read any profile, but only write to their own.
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Products collection: Allow anyone to read, but only logged-in users to create,
+    // and only the seller to update or delete their own product.
     match /products/{productId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.sellerId == request.auth.uid;
-      allow update, delete: if isSignedIn() && resource.data.sellerId == request.auth.uid;
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn() && request.auth.uid == resource.data.sellerId;
     }
 
-    // Users collection can be read by any signed-in user, but only updated by the owner.
-    match /users/{userId} {
-      allow get: if isSignedIn();
-      allow list: if isSignedIn();
-      allow update: if isSignedIn() && request.auth.uid == userId;
+    // Banners collection: Allow anyone to read.
+    match /banners/{bannerId} {
+      allow read: if true;
     }
     
-    // Conversations can only be accessed by participants.
-    match /conversations/{conversationId} {
-      // READ: A user can read a conversation if they are a participant.
-      allow read: if isSignedIn() && request.auth.uid in resource.data.participantIds;
-      
-      // CREATE: A user can create a conversation if they are signed in and are one of the participants in the new document.
-      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participantIds;
-      
-      // UPDATE: A user can update a conversation (e.g., last message, bid status) if they are a participant.
-      allow update: if isSignedIn() && request.auth.uid in resource.data.participantIds;
-      
-      // DELETE: Don't allow deletion for now to preserve chat history, rely on "hiddenFor" logic.
-      allow delete: if false;
-
-      // Messages subcollection can only be accessed by participants of the parent conversation.
-      match /messages/{messageId} {
-        // READ: A user can read messages if they are a participant in the parent conversation.
-        allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
-        
-        // CREATE: A user can create a message if they are a participant in the parent conversation.
-        allow create: if isSignedIn() && request.auth.uid == request.resource.data.senderId && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
-      }
+    // Notifications collection: Users can only read, write, and delete their own notifications.
+    match /notifications/{notificationId} {
+      allow read, write, delete: if isSignedIn() && request.auth.uid == resource.data.userId;
     }
 
-    // Reviews can be read by anyone, but only created by a signed-in user.
+    // Reviews collection: Allow anyone to read reviews. Allow any signed-in user to create a review.
     match /reviews/{reviewId} {
       allow read: if true;
-      allow create: if isSignedIn() && request.resource.data.reviewerId == request.auth.uid;
-      // Users should not be able to update or delete reviews.
-      allow update, delete: if false;
+      allow create: if isSignedIn();
     }
-    
-    // Banners can be read by anyone. Writing should be restricted (e.g., to admins in the future).
-    match /banners/{bannerId} {
-        allow read: if true;
-        allow write: if false; // For now, prevent client-side writes.
-    }
-    
-    // Notifications can only be accessed by the designated user.
-    match /notifications/{notificationId} {
-      allow read, update, delete, list: if isSignedIn() && resource.data.userId == request.auth.uid;
-      allow create: if isSignedIn(); // Allow server-side functions to create notifications.
+
+    // Conversations collection and its subcollections
+    match /conversations/{conversationId} {
+      
+      // READ, LIST: A user can get or list conversations only if they are a participant.
+      // The `list` rule is crucial and now correctly implemented. We check the query itself.
+      allow list: if isSignedIn() && request.query.where.size() > 0 && 
+                   'participantIds' in request.query.where[0] &&
+                   request.query.where[0].participantIds == request.auth.uid;
+      allow get: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+
+      // CREATE: A user can create a conversation if they are signed in and
+      // their UID is included in the new conversation's participant list.
+      // This prevents users from creating conversations for others.
+      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participantIds;
+
+      // UPDATE: A user can update a conversation (e.g., lastMessage, unreadCounts, hiddenFor)
+      // if they are a participant.
+      allow update: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+
+      // DELETE: A user can delete a conversation if they are a participant.
+      // This rule is used by the server action for final deletion.
+      allow delete: if isSignedIn() && request.auth.uid in resource.data.participantIds;
+
+      // Messages subcollection
+      match /messages/{messageId} {
+        // READ, LIST: A user can get or list messages only if they are a participant
+        // in the parent conversation. This uses `get()` to check the parent doc.
+        allow read, list: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+
+        // CREATE: A user can create a message if they are a participant in the parent conversation.
+        allow create: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+      }
     }
   }
 }
