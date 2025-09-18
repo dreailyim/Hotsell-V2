@@ -6,7 +6,8 @@
       "http://localhost:9002",
       "https://hotsell-dolw2.web.app",
       "https://hotsell-dolw2.firebaseapp.com",
-      "https://*.cloudworkstations.dev"
+      "https://*.cloudworkstations.dev",
+      "https://hotsell.dpdns.org"
     ],
     "method": [
       "GET"
