@@ -248,7 +248,7 @@ export default function ProductPage() {
     });
   };
   
-  const findOrCreateConversation = async (): Promise<{ conversationId: string; isNew: boolean } | null> => {
+  const findOrCreateConversation = async (): Promise<string | null> => {
     if (authLoading || !user) {
         if (!authLoading) {
             toast({ title: "請先登入", variant: "destructive" });
@@ -265,26 +265,25 @@ export default function ProductPage() {
 
     const conversationsRef = collection(db, "conversations");
     
-    // Construct a predictable ID for the query to ensure security rules pass
     const participantIds = [user.uid, seller.uid].sort();
-    const q = query(
+    const q1 = query(
         conversationsRef,
         where('product.id', '==', product.id),
         where('participantIds', '==', participantIds)
     );
-
+    
     try {
-        const existingConvosSnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(q1);
 
-        if (!existingConvosSnapshot.empty) {
-            const convo = existingConvosSnapshot.docs[0];
-            return { conversationId: convo.id, isNew: false };
+        if (!querySnapshot.empty) {
+            const convo = querySnapshot.docs[0];
+            return convo.id;
         }
 
         // --- Create a new conversation ---
-        const newConversationId = doc(collection(db, 'conversations')).id;
-        const convoDocRef = doc(db, "conversations", newConversationId);
-        const messageDocRef = doc(collection(convoDocRef, 'messages'));
+        const newConversationRef = doc(collection(db, 'conversations'));
+        const messageRef = doc(collection(newConversationRef, 'messages'));
+        
         const batch = writeBatch(db);
 
         const greetingMessage = `你好，我對這件商品「${product.name}」有興趣。`;
@@ -312,16 +311,16 @@ export default function ProductPage() {
             unreadCounts: { [user.uid]: 0, [seller.uid]: 1 },
         };
 
-        batch.set(convoDocRef, conversationData);
+        batch.set(newConversationRef, conversationData);
         
-        batch.set(messageDocRef, {
+        batch.set(messageRef, {
             text: greetingMessage,
             senderId: user.uid,
             timestamp: serverTimestamp(),
         });
 
         await batch.commit();
-        return { conversationId: newConversationId, isNew: true };
+        return newConversationRef.id;
         
     } catch (error: any) {
         console.error("Error finding or creating conversation:", error);
@@ -337,10 +336,9 @@ export default function ProductPage() {
   const handleBid = (bidPrice: number) => {
     if (authLoading || !user) return;
     startTransition(async () => {
-      const convoResult = await findOrCreateConversation();
-      if (!convoResult) return; // Error handled in findOrCreateConversation
+      const conversationId = await findOrCreateConversation();
+      if (!conversationId) return; // Error handled in findOrCreateConversation
 
-      const { conversationId } = convoResult;
       const convoRef = doc(db, 'conversations', conversationId);
       const messagesColRef = collection(convoRef, 'messages');
       const autoMessage = `你好，我出價 $${bidPrice}。`;
@@ -352,6 +350,9 @@ export default function ProductPage() {
           bidStatus: 'pending',
           bidPrice: bidPrice,
           bidderId: user.uid,
+          lastMessage: { text: autoMessage, senderId: user.uid, timestamp: serverTimestamp() },
+          lastActivity: serverTimestamp(),
+          [`unreadCounts.${seller.uid}`]: increment(1)
         });
 
         // 2. Add the automated bid message
@@ -373,9 +374,9 @@ export default function ProductPage() {
   const handleStartChat = () => {
     if (authLoading || !user) return;
     startTransition(async () => {
-        const convoResult = await findOrCreateConversation();
-        if (convoResult) {
-            router.push(`/chat/${convoResult.conversationId}`);
+        const conversationId = await findOrCreateConversation();
+        if (conversationId) {
+            router.push(`/chat/${conversationId}`);
         }
     });
   };
