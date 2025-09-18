@@ -263,90 +263,25 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         return null;
     }
 
-    // --- DEBUG STEP 1: Always create, never query ---
-    try {
-        const newConversationRef = doc(collection(db, 'conversations'));
-        const messageRef = doc(collection(newConversationRef, 'messages'));
-        const batch = writeBatch(db);
-
-        const greetingMessage = `你好，我對這件商品「${product.name}」有興趣。`;
-        const participantIds = [user.uid, seller.uid].sort();
-
-        const conversationData: Omit<Conversation, 'id'> = {
-            participantIds: participantIds,
-            participantDetails: {
-                [user.uid]: { displayName: user.displayName || "用戶", photoURL: user.photoURL || "" },
-                [seller.uid]: { displayName: seller.displayName || "賣家", photoURL: seller.photoURL || "" },
-            },
-            product: {
-                id: product.id,
-                name: product.name,
-                image: product.images?.[0] || product.image,
-                price: product.price,
-                sellerId: product.sellerId,
-                ...(product.status && { status: product.status }),
-            },
-            lastMessage: {
-                text: greetingMessage,
-                senderId: user.uid,
-                timestamp: serverTimestamp(),
-            },
-            lastActivity: serverTimestamp(),
-            unreadCounts: { [user.uid]: 0, [seller.uid]: 1 },
-        };
-
-        batch.set(newConversationRef, conversationData);
-        
-        batch.set(messageRef, {
-            text: greetingMessage,
-            senderId: user.uid,
-            timestamp: serverTimestamp(),
-        });
-
-        await batch.commit();
-        return newConversationRef.id;
-        
-    } catch (error: any) {
-        console.error("Error creating conversation (Debug Step 1):", error);
-        toast({
-            title: "無法建立對話",
-            description: error.message || '發生未知錯誤，請檢查權限設定。',
-            variant: "destructive"
-        });
-        return null;
-    }
-    // --- END DEBUG STEP 1 ---
-
-
-    /*
-    // --- ORIGINAL LOGIC TO BE RESTORED LATER ---
     const conversationsRef = collection(db, "conversations");
-    const participantIds = [user.uid, seller.uid].sort();
+    // Ensure consistent ordering for the query
+    const participantIds = [user.uid, seller.uid].sort(); 
 
-    const q1 = query(
+    const q = query(
         conversationsRef, 
         where('product.id', '==', product.id),
         where('participantIds', '==', participantIds)
     );
-    const q2 = query(
-        conversationsRef, 
-        where('product.id', '==', product.id),
-        where('participantIds', '==', [seller.uid, user.uid])
-    );
-
 
     try {
-        const querySnapshot1 = await getDocs(q1);
-        const querySnapshot2 = await getDocs(q2);
-        const allDocs = [...querySnapshot1.docs, ...querySnapshot2.docs];
-        const uniqueDocs = Array.from(new Set(allDocs.map(doc => doc.id))).map(id => allDocs.find(doc => doc.id === id));
-
-
-        if (uniqueDocs.length > 0 && uniqueDocs[0]) {
-             return uniqueDocs[0].id;
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+             // Conversation already exists
+             return querySnapshot.docs[0].id;
         }
 
-        // --- Create a new conversation ---
+        // --- Create a new conversation if it doesn't exist ---
         const newConversationRef = doc(collection(db, 'conversations'));
         const messageRef = doc(collection(newConversationRef, 'messages'));
         
@@ -397,7 +332,6 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         });
         return null;
     }
-    */
 };
   
   const handleBid = (bidPrice: number) => {
