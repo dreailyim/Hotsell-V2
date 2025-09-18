@@ -223,7 +223,7 @@ export function ProductCard({ product }: ProductCardProps) {
             <h3 className="font-semibold truncate text-base">{safeName}</h3>
             
             <div className="flex justify-between items-end">
-              <div className="min-h-[36px]">
+              <div>
                  <p className={cn(
                     "text-lg font-bold leading-tight",
                     isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary"
