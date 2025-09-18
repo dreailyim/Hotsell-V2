@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
@@ -29,6 +30,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import { useToast } from '@/hooks/use-toast';
 
 // --- Skeletons ---
 
@@ -129,6 +131,7 @@ function TabIndicator({ tabsListRef, activeTab }: { tabsListRef: React.RefObject
 export default function MessagesPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { toast } = useToast();
 
   // --- States for Private Messages ---
   const [conversations, setConversations] = useState<EnrichedConversation[]>([]);
@@ -265,19 +268,34 @@ export default function MessagesPage() {
 
   const handleDeleteSelected = () => {
     if (!user?.uid || selectedConversations.size === 0) return;
+    const selectionCount = selectedConversations.size;
 
     startDeleteTransition(async () => {
-      const batch = writeBatch(db);
-      selectedConversations.forEach(convoId => {
-        const convoRef = doc(db, 'conversations', convoId);
-        batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
-      });
-      await batch.commit();
-      
-      // Optimistically filter the conversations from the UI
-      setConversations(prev => prev.filter(c => !selectedConversations.has(c.id)));
-      setSelectedConversations(new Set());
-      setIsManaging(false);
+      try {
+        const batch = writeBatch(db);
+        selectedConversations.forEach(convoId => {
+          const convoRef = doc(db, 'conversations', convoId);
+          batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
+        });
+        await batch.commit();
+        
+        // Optimistically filter the conversations from the UI
+        setConversations(prev => prev.filter(c => !selectedConversations.has(c.id)));
+        setSelectedConversations(new Set());
+        setIsManaging(false);
+
+        toast({
+          title: "操作成功",
+          description: `已成功隱藏 ${selectionCount} 個對話。`,
+        });
+
+      } catch (error: any) {
+        toast({
+          title: "刪除失敗",
+          description: error.message || "發生未知錯誤，請稍後再試。",
+          variant: "destructive",
+        });
+      }
     });
   };
 
