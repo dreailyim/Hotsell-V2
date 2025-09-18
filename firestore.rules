@@ -4,88 +4,73 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper function to check if a user is signed in.
     function isSignedIn() {
       return request.auth != null;
     }
 
-    // Helper function to check if the user is the owner of a resource.
-    function isOwner(userId) {
-      return request.auth.uid == userId;
-    }
-
-    // Helper function to check if the user is a participant in a conversation.
-    // This is for reading existing documents where `resource.data` is available.
-    function isParticipant(conversation) {
-      return request.auth.uid in conversation.data.participantIds;
-    }
-
-    // Products can be read by anyone, created/updated/deleted only by the seller.
-    match /products/{productId} {
-      allow read: if true;
-      allow create: if isSignedIn() && isOwner(request.resource.data.sellerId);
-      allow update, delete: if isSignedIn() && isOwner(resource.data.sellerId);
-    }
-
-    // Banners can be read by anyone. Writing is restricted.
-    match /banners/{bannerId} {
-      allow read: if true;
-      allow write: if false; // Typically managed via Admin SDK
-    }
-
-    // Users can read public profiles. Only the user can write to their own document.
+    // USERS
+    // Users can read anyone's public profile.
+    // Users can only create and update their own profile.
     match /users/{userId} {
-      allow read: if true;
-      allow write: if isSignedIn() && isOwner(userId);
+      allow read;
+      allow create, update: if isSignedIn() && request.auth.uid == userId;
     }
 
-    // Reviews can be read by anyone. Creation and modification are restricted.
-    match /reviews/{reviewId} {
-      allow read: if true;
-      // Allow creation only if the reviewer is the authenticated user.
-      allow create: if isSignedIn() && isOwner(request.resource.data.reviewerId);
-      allow update, delete: if false; // Prevent modification after posting.
+    // PRODUCTS
+    // Anyone can read products.
+    // Logged in users can create products.
+    // Only the seller can update product details (except for favorites).
+    // Any logged in user can update the favorites.
+    // Only the seller can delete their own product.
+    match /products/{productId} {
+      allow read;
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && 
+                      (request.auth.uid == resource.data.sellerId && onlySellerFieldsChanged()) ||
+                      (onlyFavoritesChanged());
+      allow delete: if isSignedIn() && request.auth.uid == resource.data.sellerId;
+
+      function onlySellerFieldsChanged() {
+        return !(request.resource.data.diff(resource.data).affectedKeys.hasAny(['favorites', 'favoritedBy']));
+      }
+
+      function onlyFavoritesChanged() {
+        let changedKeys = request.resource.data.diff(resource.data).affectedKeys;
+        return changedKeys.hasOnly(['favorites', 'favoritedBy']);
+      }
+    }
+
+    // CONVERSATIONS
+    // Participants can read, create, and update conversations.
+    match /conversations/{conversationId} {
+      allow read, update, create: if isSignedIn() && request.auth.uid in request.resource.data.participantIds;
+      
+      // MESSAGES Subcollection
+      // Participants can read and create messages.
+      match /messages/{messageId} {
+        allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        allow create: if isSignedIn() && request.resource.data.senderId == request.auth.uid;
+      }
     }
     
-    // Notifications can only be accessed by the user they are intended for.
-    match /notifications/{notificationId} {
-      allow read, write: if isSignedIn() && isOwner(resource.data.userId);
-      // For queries (e.g., listing notifications for the current user)
-      allow list: if isSignedIn() && request.auth.uid == request.query.where.userId;
+    // REVIEWS
+    // Anyone can read reviews.
+    // Logged in users can create reviews.
+    match /reviews/{reviewId} {
+        allow read;
+        allow create: if isSignedIn() && request.auth.uid == request.resource.data.reviewerId;
     }
-
-    // Conversations and their sub-collections
-    match /conversations/{conversationId} {
-      // READ: You can read a conversation IF you are a participant.
-      allow read: if isSignedIn() && isParticipant(resource);
-
-      // UPDATE: You can update a conversation (e.g., mark as read, soft-delete) IF you are a participant.
-      allow update: if isSignedIn() && isParticipant(resource);
-      
-      // DELETE: You can delete a conversation IF you are a participant.
-      // Note: This rule is simple, the logic for hard vs soft delete is in the Server Action.
-      allow delete: if isSignedIn() && isParticipant(resource);
-
-      // CREATE: You can create a conversation IF you are signed in AND your UID is part of the initial participant list.
-      allow create: if isSignedIn() && request.auth.uid in request.resource.data.participantIds;
-
-      // LIST (Query): Securely allow querying conversations.
-      // A user can only query for conversations where their UID is in the participantIds array.
-      allow list: if isSignedIn() && request.auth.uid == request.query.where.participantIds[0];
-
-      // Messages sub-collection
-      match /messages/{messageId} {
-        // READ/LIST: Allow if the user is a participant of the parent conversation.
-        allow read: if isSignedIn() && isParticipant(get(/databases/$(database)/documents/conversations/$(conversationId)));
-        
-        // CREATE: Allow if the user is signed in and is the sender of the message.
-        // The security of WHO can write is primarily enforced by the parent conversation's rules.
-        // Once a conversation is created, only participants can access it to get to the subcollection.
-        allow create: if isSignedIn() && isOwner(request.resource.data.senderId);
-
-        // UPDATE/DELETE: Messages are immutable.
-        allow update, delete: if false;
-      }
+    
+    // NOTIFICATIONS
+    // Users can only access their own notifications.
+    match /notifications/{notificationId} {
+        allow read, update, list: if isSignedIn() && request.auth.uid == resource.data.userId;
+    }
+    
+    // BANNERS
+    // Anyone can read banners.
+    match /banners/{bannerId} {
+      allow read;
     }
   }
 }
