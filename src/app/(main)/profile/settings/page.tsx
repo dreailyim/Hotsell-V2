@@ -217,7 +217,7 @@ export default function SettingsPage() {
                   className="min-h-[120px]"
                 />
               </div>
-              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-sky-500 dark:text-primary-foreground hover:opacity-90 transition-opacity">
+              <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
                 {(isPending || isUploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 儲存變更
               </Button>
@@ -277,7 +277,7 @@ export default function SettingsPage() {
                   <AlertDialogCancel>取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={signOut}
-                    className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                    className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                   >
                    確認登出
                   </AlertDialogAction>

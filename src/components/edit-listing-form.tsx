@@ -512,7 +512,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
           />
         </FormItem>
 
-        <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 dark:text-primary-foreground hover:opacity-90 transition-opacity" disabled={isSubmitting}>
+        <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" disabled={isSubmitting}>
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
           儲存變更
         </Button>
