@@ -469,7 +469,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     if (isSold) {
       return (
         <div className={cn(
-            'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
+            'fixed inset-x-0 bottom-24 z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
           <div className="glass-morphism flex items-center gap-2">
@@ -523,7 +523,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
     return (
        <div className={cn(
-            'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
+            'fixed inset-x-0 bottom-24 z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
         <div className="flex items-center gap-2">
@@ -616,7 +616,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
   const BuyerActionBar = () => (
      <div className={cn(
-        'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
+        'fixed inset-x-0 bottom-24 z-50 flex justify-center transition-transform duration-300 md:hidden',
         scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
       )}>
         <div className="glass-morphism flex items-center gap-2">
