@@ -27,7 +27,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Heart,
@@ -87,7 +86,7 @@ function BidDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-red-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
           disabled={disabled}
         >
           <HandCoins className="h-5 w-5" />
@@ -601,7 +600,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
-              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-yellow-400 to-amber-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
           >
               {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
               <span>傾傾</span>
