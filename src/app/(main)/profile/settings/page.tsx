@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback } from 'react';
@@ -264,7 +263,7 @@ export default function SettingsPage() {
         <div className="flex flex-col items-center gap-4 pt-4">
              <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full max-w-xs rounded-full">登出</Button>
+                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -277,7 +276,7 @@ export default function SettingsPage() {
                   <AlertDialogCancel className="rounded-full">取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={signOut}
-                    className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                   >
                    確認登出
                   </AlertDialogAction>
@@ -289,3 +288,5 @@ export default function SettingsPage() {
     </>
   );
 }
+
+    

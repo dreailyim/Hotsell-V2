@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -264,26 +262,26 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     }
 
     const conversationsRef = collection(db, "conversations");
-    // Ensure consistent ordering for the query
-    const participantIds = [user.uid, seller.uid].sort(); 
-
-    const q = query(
-        conversationsRef, 
-        where('product.id', '==', product.id),
-        where('participantIds', '==', participantIds)
+    const q1 = query(
+      conversationsRef,
+      where('product.id', '==', product.id),
+      where('participantIds', 'array-contains', user.uid)
     );
 
     try {
-        const querySnapshot = await getDocs(q);
+        const querySnapshot = await getDocs(q1);
+        // More robustly find the conversation that includes both users
+        const existingConvo = querySnapshot.docs.find(doc => doc.data().participantIds.includes(seller.uid));
         
-        if (!querySnapshot.empty) {
+        if (existingConvo) {
              // Conversation already exists
-             return querySnapshot.docs[0].id;
+             return existingConvo.id;
         }
 
         // --- Create a new conversation if it doesn't exist ---
         const newConversationRef = doc(collection(db, 'conversations'));
         const messageRef = doc(collection(newConversationRef, 'messages'));
+        const participantIds = [user.uid, seller.uid].sort();
         
         const batch = writeBatch(db);
 
@@ -474,7 +472,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                   <AlertDialogCancel className="rounded-full">取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
-                    className="rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                   >
                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     確認刪除
@@ -564,7 +562,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               <Button
                 variant="destructive"
                 size="icon"
-                className="h-14 w-14 flex-shrink-0 rounded-full"
+                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 disabled={isPending || isSold}
               >
                 <Trash2 className="h-5 w-5" />
@@ -805,3 +803,5 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
+    

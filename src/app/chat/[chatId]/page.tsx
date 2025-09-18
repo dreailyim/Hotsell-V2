@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
@@ -761,3 +760,5 @@ export default function ChatPage() {
     </div>
   );
 }
+
+    
