@@ -1,17 +1,18 @@
+// This file must be in the public directory.
+// It allows the app to receive push notifications when in the background.
 
-// Version: 202408011000
+// IMPORTANT: Do not use any functions or variables from the main app code here.
+// This script is run in a separate environment from the rest of the app.
 
-// This file must use the 'compat' version of the SDK and 'importScripts'
-// to ensure maximum browser compatibility for the Service Worker.
+import { initializeApp } from 'firebase/app';
+import { getMessaging, onBackgroundMessage } from 'firebase/messaging/sw';
 
-importScripts("https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js");
-importScripts("https://www.gstatic.com/firebasejs/9.22.1/firebase-messaging-compat.js");
-
-// This configuration is safe to be exposed on the client-side.
+// This configuration is duplicated from the main app's Firebase client setup.
+// It's safe to be exposed here.
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
-  "storageBucket": "hotsell-dolw2.firebasestorage.app",
+  "storageBucket": "hotsell-dolw2.appspot.com",
   "apiKey": "AIzaSyAZChqV6v73lcJBCMVXIdd4VlREq7tdDVo",
   "authDomain": "hotsell-dolw2.firebaseapp.com",
   "messagingSenderId": "25821240563",
@@ -19,39 +20,19 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-firebase.initializeApp(firebaseConfig);
 
-const messaging = firebase.messaging();
+const app = initializeApp(firebaseConfig);
+const messaging = getMessaging(app);
 
-// Optional: The onBackgroundMessage handler is used for custom logic
-// when the app is in the background. For simple notifications, this
-// is not strictly necessary as Firebase handles the display automatically.
-messaging.onBackgroundMessage((payload) => {
-  console.log(
-    "[firebase-messaging-sw.js] Received background message ",
-    payload
-  );
+// This handler is called when a push notification is received and the app is in the background.
+onBackgroundMessage(messaging, (payload) => {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
   
-  // Customize notification here
-  const notificationTitle = payload.notification.title;
+  const notificationTitle = payload.notification?.title || 'New Message';
   const notificationOptions = {
-    body: payload.notification.body,
-    icon: "/favicon.ico", // Ensure you have this icon
-    data: {
-        click_action: payload.fcmOptions.link || '/'
-    }
+    body: payload.notification?.body,
+    icon: payload.notification?.image || '/icon-192x192.png'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-self.addEventListener('notificationclick', (event) => {
-  console.log('[firebase-messaging-sw.js] Notification click Received.', event.notification.data);
-
-  event.notification.close();
-
-  const clickAction = event.notification.data.click_action;
-  if (clickAction) {
-    event.waitUntil(clients.openWindow(clickAction));
-  }
 });
