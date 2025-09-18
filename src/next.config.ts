@@ -1,5 +1,6 @@
 
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -30,6 +31,15 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       }
     ],
+  },
+  webpack: (config, { isServer, dev }) => {
+    if (!isServer && dev) {
+      config.entry['firebase-messaging-sw-logic'] = path.resolve(
+        __dirname,
+        './lib/firebase/messaging-sw.ts'
+      );
+    }
+    return config;
   },
 };
 
