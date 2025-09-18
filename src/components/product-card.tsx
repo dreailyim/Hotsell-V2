@@ -34,12 +34,15 @@ export function ProductCard({ product }: ProductCardProps) {
   const [seller, setSeller] = useState<FullUser | null>(null);
   
   const [isFavorited, setIsFavorited] = useState(false);
+  const [optimisticFavorites, setOptimisticFavorites] = useState(product.favorites || 0);
+
   
   // Effect to set initial favorited state from product data when it loads or user changes
   useEffect(() => {
     if (user && product) {
       setIsFavorited(product.favoritedBy?.includes(user.uid));
     }
+    setOptimisticFavorites(product.favorites || 0);
   }, [product, user]);
 
 
@@ -83,9 +86,12 @@ export function ProductCard({ product }: ProductCardProps) {
 
     const productRef = doc(db, 'products', product.id);
     const newFavoritedState = !isFavorited;
+    const originalFavorites = optimisticFavorites;
     
-    // Optimistic UI update
+    // Optimistic UI update for both state and count
     setIsFavorited(newFavoritedState);
+    setOptimisticFavorites(prev => newFavoritedState ? prev + 1 : prev - 1);
+
 
     startTransition(async () => {
       try {
@@ -103,6 +109,7 @@ export function ProductCard({ product }: ProductCardProps) {
       } catch (error: any) {
         // Revert UI on error
         setIsFavorited(!newFavoritedState);
+        setOptimisticFavorites(originalFavorites);
         console.error('Error toggling favorite status:', error);
         toast({ title: '操作失敗', description: "請檢查您的網絡連線或稍後再試。", variant: 'destructive' });
       }
@@ -197,7 +204,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 aria-label={isFavorited ? "取消收藏" : "加入收藏"}
             >
                 <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
-                <span>{product.favorites || 0}</span>
+                <span>{optimisticFavorites}</span>
             </button>
             
             <div className="absolute bottom-2 right-2">
