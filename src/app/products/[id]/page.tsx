@@ -560,9 +560,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                variant="destructive"
                 size="icon"
-                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 disabled={isPending || isSold}
               >
                 <Trash2 className="h-5 w-5" />
@@ -803,3 +802,5 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
+    
