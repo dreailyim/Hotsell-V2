@@ -77,10 +77,7 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      const timer = setTimeout(() => {
-         requestPermissionAndToken();
-      }, 3000); 
-      return () => clearTimeout(timer);
+      requestPermissionAndToken();
     }
   }, [user, requestPermissionAndToken]);
 
