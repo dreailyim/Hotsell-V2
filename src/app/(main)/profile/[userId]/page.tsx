@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
@@ -437,7 +438,7 @@ export default function UserProfilePage() {
   }
 
    const ManagementFooter = () => (
-    <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t z-50 md:hidden">
+    <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/10 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">
             {selectedProducts.size === userProducts.length ? '取消全選' : '全選'}
