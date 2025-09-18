@@ -249,87 +249,90 @@ export default function ProductPage() {
   };
   
   const findOrCreateConversation = async (): Promise<{ conversationId: string; isNew: boolean } | null> => {
-     if (authLoading || !user) {
-      if (!authLoading) {
-        toast({ title: "請先登入", variant: "destructive" });
-        router.push('/login');
-      }
-      return null;
+    if (authLoading || !user) {
+        if (!authLoading) {
+            toast({ title: "請先登入", variant: "destructive" });
+            router.push('/login');
+        }
+        return null;
     }
-    if (!product) return null;
+    if (!product || !seller) return null;
 
     if (user.uid === product.sellerId) {
-      toast({ title: "這是您自己的商品", variant: "default" });
-      return null;
+        toast({ title: "這是您自己的商品", variant: "default" });
+        return null;
     }
 
     const conversationsRef = collection(db, "conversations");
+    
+    // Construct a predictable ID for the query to ensure security rules pass
+    const participantIds = [user.uid, seller.uid].sort();
     const q = query(
-      conversationsRef,
-      where('participantIds', 'array-contains', user.uid),
-      where('product.id', '==', product.id)
+        conversationsRef,
+        where('product.id', '==', product.id),
+        where('participantIds', '==', participantIds)
     );
-    const existingConvosSnapshot = await getDocs(q);
-    const existingConvo = existingConvosSnapshot.docs.find(doc => doc.data().participantIds.includes(product.sellerId));
 
-    if (existingConvo) {
-      return { conversationId: existingConvo.id, isNew: false };
-    }
-
-    // --- Create a new conversation ---
-    const conversationId = doc(collection(db, 'conversations')).id;
     try {
-      const batch = writeBatch(db);
-      const convoDocRef = doc(db, "conversations", conversationId);
-      const messageDocRef = doc(collection(convoDocRef, 'messages'));
-      
-      const buyerData = user;
-      const sellerName = seller?.displayName || product.sellerName || '用戶';
-      const sellerAvatar = seller?.photoURL || product.sellerAvatar || '';
-      const greetingMessage = `你好，我對這件商品「${product?.name || ''}」有興趣。`;
+        const existingConvosSnapshot = await getDocs(q);
 
-      const productForConvo = {
-        id: product.id,
-        name: product.name,
-        image: product.images?.[0] || product.image,
-        price: product.price,
-        sellerId: product.sellerId,
-        ...(product.status && { status: product.status }),
-      };
+        if (!existingConvosSnapshot.empty) {
+            const convo = existingConvosSnapshot.docs[0];
+            return { conversationId: convo.id, isNew: false };
+        }
 
-      const conversationData = {
-        id: conversationId,
-        participantIds: [user.uid, product.sellerId],
-        participantDetails: {
-          [user.uid]: { displayName: buyerData.displayName || "用戶", photoURL: buyerData.photoURL || "" },
-          [product.sellerId]: { displayName: sellerName, photoURL: sellerAvatar },
-        },
-        product: productForConvo,
-        lastActivity: serverTimestamp(),
-        unreadCounts: { [user.uid]: 0, [product.sellerId]: 1 },
-        lastMessage: {
-          text: greetingMessage,
-          senderId: user.uid,
-          timestamp: serverTimestamp(),
-        },
-      };
+        // --- Create a new conversation ---
+        const newConversationId = doc(collection(db, 'conversations')).id;
+        const convoDocRef = doc(db, "conversations", newConversationId);
+        const messageDocRef = doc(collection(convoDocRef, 'messages'));
+        const batch = writeBatch(db);
 
-      batch.set(convoDocRef, conversationData);
-      
-      batch.set(messageDocRef, {
-        text: greetingMessage,
-        senderId: user.uid,
-        timestamp: serverTimestamp(),
-      });
+        const greetingMessage = `你好，我對這件商品「${product.name}」有興趣。`;
 
-      await batch.commit();
-      return { conversationId, isNew: true };
+        const conversationData: Omit<Conversation, 'id'> = {
+            participantIds: participantIds,
+            participantDetails: {
+                [user.uid]: { displayName: user.displayName || "用戶", photoURL: user.photoURL || "" },
+                [seller.uid]: { displayName: seller.displayName || "賣家", photoURL: seller.photoURL || "" },
+            },
+            product: {
+                id: product.id,
+                name: product.name,
+                image: product.images?.[0] || product.image,
+                price: product.price,
+                sellerId: product.sellerId,
+                ...(product.status && { status: product.status }),
+            },
+            lastMessage: {
+                text: greetingMessage,
+                senderId: user.uid,
+                timestamp: serverTimestamp(),
+            },
+            lastActivity: serverTimestamp(),
+            unreadCounts: { [user.uid]: 0, [seller.uid]: 1 },
+        };
+
+        batch.set(convoDocRef, conversationData);
+        
+        batch.set(messageDocRef, {
+            text: greetingMessage,
+            senderId: user.uid,
+            timestamp: serverTimestamp(),
+        });
+
+        await batch.commit();
+        return { conversationId: newConversationId, isNew: true };
+        
     } catch (error: any) {
-      console.error("Error creating chat document:", error);
-      toast({ title: "無法開始對話", description: error.message, variant: "destructive" });
-      return null;
+        console.error("Error finding or creating conversation:", error);
+        toast({
+            title: "無法開始對話",
+            description: error.message || '發生未知錯誤，請檢查權限設定。',
+            variant: "destructive"
+        });
+        return null;
     }
-  };
+};
   
   const handleBid = (bidPrice: number) => {
     if (authLoading || !user) return;
@@ -800,4 +803,3 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
-
