@@ -63,8 +63,9 @@
 
 @layer components {
   .glass-morphism {
-    @apply rounded-full p-2 backdrop-blur-sm transition-all;
+    @apply rounded-full p-2 transition-all;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+    backdrop-filter: blur(2px);
     box-shadow:
       /* External shadow (for floating effect) */
       0 8px 32px 0 rgba(0, 0, 0, 0.37),
