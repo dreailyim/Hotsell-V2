@@ -13,7 +13,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase/client-app';
-import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion, increment } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion, increment, getDocs } from 'firebase/firestore';
 import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -31,7 +31,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
-import { deleteConversationsAction } from './actions';
+import { revalidatePath } from 'next/cache';
+
 
 // --- Skeletons ---
 
@@ -268,30 +269,48 @@ export default function MessagesPage() {
   };
 
   const handleDeleteSelected = () => {
-    if (!user?.uid || selectedConversations.size === 0) return;
-    const selectionCount = selectedConversations.size;
-    const conversationIdsToDelete = Array.from(selectedConversations);
-
+    if (!user || selectedConversations.size === 0) return;
+    
     startDeleteTransition(async () => {
-      const result = await deleteConversationsAction(conversationIdsToDelete);
+        const conversationIdsToDelete = Array.from(selectedConversations);
+        const batch = writeBatch(db);
+        let processedCount = 0;
+        
+        try {
+            for (const convoId of conversationIdsToDelete) {
+                const convoRef = doc(db, 'conversations', convoId);
+                const convoSnap = await getDoc(convoRef);
 
-      if (result.success) {
-        // The onSnapshot listener will automatically update the UI.
-        // We just need to clear the local selection state.
-        setSelectedConversations(new Set());
-        setIsManaging(false);
+                if (!convoSnap.exists()) continue;
 
-        toast({
-          title: "操作成功",
-          description: result.message,
-        });
-      } else {
-        toast({
-          title: "刪除失敗",
-          description: result.message,
-          variant: "destructive",
-        });
-      }
+                const conversation = convoSnap.data() as Conversation;
+                const otherParticipantId = conversation.participantIds.find(id => id !== user.uid);
+                const isOtherParticipantHidden = otherParticipantId ? conversation.hiddenFor?.includes(otherParticipantId) : false;
+
+                if (isOtherParticipantHidden) {
+                    batch.delete(convoRef);
+                } else {
+                    batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
+                }
+                processedCount++;
+            }
+
+            await batch.commit();
+
+            setSelectedConversations(new Set());
+            setIsManaging(false);
+
+            toast({
+                title: "操作成功",
+                description: `已成功處理 ${processedCount} 個對話。`,
+            });
+        } catch (error: any) {
+             toast({
+                title: "刪除失敗",
+                description: error.message || '刪除對話時發生未知錯誤。',
+                variant: "destructive",
+            });
+        }
     });
   };
 
@@ -540,3 +559,5 @@ export default function MessagesPage() {
     </>
   );
 }
+
+    
