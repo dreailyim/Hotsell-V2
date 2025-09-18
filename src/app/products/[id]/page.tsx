@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -277,11 +278,15 @@ export default function ProductPage() {
 
     // --- Create a new conversation ---
     const conversationId = doc(collection(db, 'conversations')).id;
-    const convoDocRef = doc(db, "conversations", conversationId);
     try {
-      const buyerData = user; // We already have the full user object from useAuth
+      const batch = writeBatch(db);
+      const convoDocRef = doc(db, "conversations", conversationId);
+      const messageDocRef = doc(collection(convoDocRef, 'messages'));
+      
+      const buyerData = user;
       const sellerName = seller?.displayName || product.sellerName || '用戶';
       const sellerAvatar = seller?.photoURL || product.sellerAvatar || '';
+      const greetingMessage = `你好，我對這件商品「${product?.name || ''}」有興趣。`;
 
       const productForConvo = {
         id: product.id,
@@ -301,11 +306,23 @@ export default function ProductPage() {
         },
         product: productForConvo,
         lastActivity: serverTimestamp(),
-        unreadCounts: { [user.uid]: 0, [product.sellerId]: 0 },
-        lastMessage: null,
+        unreadCounts: { [user.uid]: 0, [product.sellerId]: 1 },
+        lastMessage: {
+          text: greetingMessage,
+          senderId: user.uid,
+          timestamp: serverTimestamp(),
+        },
       };
 
-      await setDoc(convoDocRef, conversationData);
+      batch.set(convoDocRef, conversationData);
+      
+      batch.set(messageDocRef, {
+        text: greetingMessage,
+        senderId: user.uid,
+        timestamp: serverTimestamp(),
+      });
+
+      await batch.commit();
       return { conversationId, isNew: true };
     } catch (error: any) {
       console.error("Error creating chat document:", error);
@@ -355,18 +372,7 @@ export default function ProductPage() {
     startTransition(async () => {
         const convoResult = await findOrCreateConversation();
         if (convoResult) {
-            const { conversationId, isNew } = convoResult;
-            if (isNew) {
-                // Send a default greeting if it's a new conversation
-                const messagesColRef = collection(db, 'conversations', conversationId, 'messages');
-                const greetingMessage = `你好，我對這件商品「${product?.name || ''}」有興趣。`;
-                await addDoc(messagesColRef, {
-                    text: greetingMessage,
-                    senderId: user.uid,
-                    timestamp: serverTimestamp(),
-                });
-            }
-            router.push(`/chat/${conversationId}`);
+            router.push(`/chat/${convoResult.conversationId}`);
         }
     });
   };
@@ -794,3 +800,4 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
