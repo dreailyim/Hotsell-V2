@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
@@ -736,7 +737,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      <div className="bg-background/50 backdrop-blur-sm border-t p-2">
+      <div className="bg-background/50 backdrop-blur-sm border-t p-2 border-white/10">
         <form onSubmit={handleSubmit} className="container mx-auto flex items-center gap-2 px-4">
           <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
             <Label htmlFor="file-upload">

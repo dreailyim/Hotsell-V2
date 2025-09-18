@@ -56,7 +56,7 @@ export function BottomNav() {
         scrollDirection === 'down' ? 'translate-y-32' : 'translate-y-0'
       )}
     >
-      <div className="relative flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm" ref={navRef}>
+      <div className="relative flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm border border-white/10" ref={navRef}>
         <div 
           className="absolute h-14 w-14 rounded-full bg-gradient-to-br from-orange-500 to-red-600 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
           style={indicatorStyle}

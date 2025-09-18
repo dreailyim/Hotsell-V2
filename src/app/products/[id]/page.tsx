@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -471,7 +472,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
-          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm border border-white/10">
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
@@ -527,7 +528,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
           )}>
         <div className="flex items-center gap-2">
           {/* Action buttons group */}
-          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm">
+          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm border border-white/10">
             {/* Edit Button */}
             <Link href={`/products/${product.id}/edit`}>
               <Button
@@ -618,7 +619,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
         scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
       )}>
-        <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm">
+        <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-lg backdrop-blur-sm border border-white/10">
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
