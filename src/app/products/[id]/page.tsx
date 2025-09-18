@@ -265,19 +265,23 @@ export default function ProductPage() {
 
     const conversationsRef = collection(db, "conversations");
     
-    const participantIds = [user.uid, seller.uid].sort();
-    const q1 = query(
+    // This query is now aligned with the security rules.
+    const q = query(
         conversationsRef,
-        where('product.id', '==', product.id),
-        where('participantIds', '==', participantIds)
+        where('participantIds', 'array-contains', user.uid),
+        where('product.id', '==', product.id)
     );
     
     try {
-        const querySnapshot = await getDocs(q1);
+        const querySnapshot = await getDocs(q);
+        
+        // Find the specific conversation that includes both users.
+        const existingConvo = querySnapshot.docs.find(doc => 
+            doc.data().participantIds.includes(seller.uid)
+        );
 
-        if (!querySnapshot.empty) {
-            const convo = querySnapshot.docs[0];
-            return convo.id;
+        if (existingConvo) {
+            return existingConvo.id;
         }
 
         // --- Create a new conversation ---
@@ -287,6 +291,7 @@ export default function ProductPage() {
         const batch = writeBatch(db);
 
         const greetingMessage = `你好，我對這件商品「${product.name}」有興趣。`;
+        const participantIds = [user.uid, seller.uid].sort();
 
         const conversationData: Omit<Conversation, 'id'> = {
             participantIds: participantIds,
@@ -334,7 +339,7 @@ export default function ProductPage() {
 };
   
   const handleBid = (bidPrice: number) => {
-    if (authLoading || !user) return;
+    if (authLoading || !user || !seller) return;
     startTransition(async () => {
       const conversationId = await findOrCreateConversation();
       if (!conversationId) return; // Error handled in findOrCreateConversation
