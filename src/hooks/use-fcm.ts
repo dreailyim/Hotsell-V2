@@ -2,10 +2,10 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { getToken, onMessage } from "firebase/messaging";
+import { getMessaging, getToken, onMessage, isSupported } from "firebase/messaging";
 import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './use-auth';
-import { db, messaging as getMessagingInstance } from '@/lib/firebase/client-app'; // Updated import
+import { db, app } from '@/lib/firebase/client-app';
 import { useToast } from './use-toast';
 
 
@@ -19,11 +19,13 @@ export function useFcm() {
       return;
     }
     
-    const messaging = await getMessagingInstance; // Updated to use the imported promise
-    if (!messaging) {
+    const supported = await isSupported();
+    if (!supported) {
       console.log("FCM: Aborted. Messaging not supported in this browser.");
       return;
     }
+    
+    const messaging = getMessaging(app);
 
     // The VAPID key is required by getToken() to authorize the request.
     // This key is public and safe to be in client-side code.
@@ -85,8 +87,9 @@ export function useFcm() {
   useEffect(() => {
     if (user) {
       const setupListener = async () => {
-        const messagingInstance = await getMessagingInstance; // Updated to use the imported promise
-        if (messagingInstance) {
+        const supported = await isSupported();
+        if (supported) {
+          const messagingInstance = getMessaging(app);
           const unsubscribe = onMessage(messagingInstance, (payload) => {
             console.log('FCM: Foreground message received.', payload);
             toast({
