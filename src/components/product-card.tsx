@@ -218,29 +218,28 @@ export function ProductCard({ product }: ProductCardProps) {
                 </Button>
             </div>
         </div>
-        <CardContent className="p-3 space-y-2">
-          <Link href={`/products/${id}`} aria-label={safeName} className="space-y-1">
-            <h3 className="font-semibold truncate text-base">{safeName}</h3>
-            
-            <div className="flex justify-between items-end">
-              <div>
-                 <p className={cn(
-                    "text-lg font-bold leading-tight",
-                    isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary"
-                 )}>
-                    ${(price || 0).toLocaleString()}
-                </p>
-                {isDiscounted && originalPrice && (
-                  <p className="text-xs text-muted-foreground line-through">
-                    ${originalPrice.toLocaleString()}
+        <CardContent className="p-3 flex flex-col justify-between flex-1">
+            <div>
+              <h3 className="font-semibold truncate text-base">{safeName}</h3>
+              <div className="flex justify-between items-end mt-1">
+                <div>
+                   <p className={cn(
+                      "text-lg font-bold leading-tight",
+                      isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary"
+                   )}>
+                      ${(price || 0).toLocaleString()}
                   </p>
-                )}
+                  {isDiscounted && originalPrice && (
+                    <p className="text-xs text-muted-foreground line-through">
+                      ${originalPrice.toLocaleString()}
+                    </p>
+                  )}
+                </div>
+                {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground">{condition}</div>}
               </div>
-              {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground">{condition}</div>}
             </div>
-          </Link>
 
-          <div className="flex justify-between items-center pt-1">
+          <div className="flex justify-between items-center pt-2">
              <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-2 min-w-0">
                 <Avatar className="h-6 w-6">
                     <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
