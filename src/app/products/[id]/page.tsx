@@ -87,7 +87,7 @@ function BidDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-2 text-xs text-primary-foreground shadow-md transition-colors hover:opacity-90 gap-1"
+          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
           disabled={disabled}
         >
           <HandCoins className="h-5 w-5" />
@@ -454,7 +454,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
-                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black hover:opacity-90 transition-opacity gap-1"
+                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black hover:opacity-90 transition-opacity gap-1"
                     disabled={isPending}
                  >
                     <Trash2 className="h-5 w-5" />
@@ -481,7 +481,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               </AlertDialogContent>
             </AlertDialog>
             <Button
-                className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-500 p-2 text-xs text-primary-foreground shadow-md transition-colors hover:opacity-90 gap-1"
+                className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
                 onClick={() => handleStatusUpdate(null)}
                 disabled={isPending}
             >
@@ -601,7 +601,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
-              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-2 text-xs text-primary-foreground shadow-md transition-colors hover:opacity-90 gap-1"
+              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
           >
               {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
               <span>傾傾</span>
