@@ -217,7 +217,7 @@ export default function LoginPage() {
                                 </div>
                                 <AlertDialogFooter>
                                 <AlertDialogCancel>取消</AlertDialogCancel>
-                                <AlertDialogAction onClick={handlePasswordReset} disabled={loading} className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">
+                                <AlertDialogAction onClick={handlePasswordReset} disabled={loading} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
                                      {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                     傳送重設郵件
                                 </AlertDialogAction>
@@ -229,7 +229,7 @@ export default function LoginPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-4">
-                <Button className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
+                <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   登入
                 </Button>
@@ -263,7 +263,7 @@ export default function LoginPage() {
                 </div>
               </CardContent>
               <CardFooter className="flex-col gap-4">
-                <Button className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
+                <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
                    {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   註冊
                 </Button>

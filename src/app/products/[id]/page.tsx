@@ -87,7 +87,7 @@ function BidDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-sky-500 p-2 text-xs text-primary-foreground shadow-md transition-colors hover:opacity-90 gap-1"
+          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-400 p-2 text-xs text-primary-foreground shadow-md transition-colors hover:opacity-90 gap-1"
           disabled={disabled}
         >
           <HandCoins className="h-5 w-5" />
@@ -106,7 +106,7 @@ function BidDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>取消</AlertDialogCancel>
-          <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">
+          <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
             {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '確認出價'}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -472,7 +472,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                   <AlertDialogCancel>取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleDelete}
-                    className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                   >
                     {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     確認刪除
@@ -562,7 +562,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               <Button
                 variant="destructive"
                 size="icon"
-                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
+                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 disabled={isPending || isSold}
               >
                 <Trash2 className="h-5 w-5" />
@@ -579,7 +579,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                 <AlertDialogCancel>取消</AlertDialogCancel>
                 <AlertDialogAction
                   onClick={handleDelete}
-                  className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
+                  className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 >
                   {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                   刪除

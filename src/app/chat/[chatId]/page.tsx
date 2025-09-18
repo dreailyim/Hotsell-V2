@@ -60,7 +60,7 @@ function BidDialog({
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                 <Button className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">
+                 <Button className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-blue-500 to-cyan-400 text-primary-foreground hover:opacity-90 transition-opacity">
                     <HandCoins className="mr-1 h-4 w-4" />
                     {isReBid ? '重新出價' : '出價'}
                 </Button>
@@ -77,7 +77,7 @@ function BidDialog({
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>取消</AlertDialogCancel>
-                    <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">
+                    <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
                        {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '確認出價'}
                     </AlertDialogAction>
                 </AlertDialogFooter>
@@ -235,7 +235,7 @@ function ReviewDialog({
             <AlertDialogAction 
                 onClick={handleSubmitReview} 
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
+                className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 >
                 {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '送出評價'}
             </AlertDialogAction>

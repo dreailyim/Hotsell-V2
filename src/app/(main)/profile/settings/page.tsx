@@ -263,7 +263,7 @@ export default function SettingsPage() {
         <div className="flex flex-col items-center gap-4 pt-4">
              <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity">登出</Button>
+                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
@@ -276,7 +276,7 @@ export default function SettingsPage() {
                   <AlertDialogCancel>取消</AlertDialogCancel>
                   <AlertDialogAction
                     onClick={signOut}
-                    className="bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground hover:opacity-90 transition-opacity"
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                   >
                    確認登出
                   </AlertDialogAction>
