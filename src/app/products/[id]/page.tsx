@@ -469,10 +469,10 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     if (isSold) {
       return (
         <div className={cn(
-            'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
+            'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
-          <div className="flex items-center gap-2 glass-morphism">
+          <div className="glass-morphism flex items-center gap-2">
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
@@ -523,12 +523,12 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
     return (
        <div className={cn(
-            'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
+            'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
         <div className="flex items-center gap-2">
           {/* Action buttons group */}
-          <div className="flex items-center gap-2 glass-morphism">
+          <div className="glass-morphism flex items-center gap-2">
             {/* Edit Button */}
             <Link href={`/products/${product.id}/edit`}>
               <Button
@@ -616,10 +616,10 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
   const BuyerActionBar = () => (
      <div className={cn(
-        'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
+        'fixed inset-x-0 bottom-[120px] z-50 flex justify-center transition-transform duration-300 md:hidden',
         scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
       )}>
-        <div className="flex items-center gap-2 glass-morphism">
+        <div className="glass-morphism flex items-center gap-2">
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
