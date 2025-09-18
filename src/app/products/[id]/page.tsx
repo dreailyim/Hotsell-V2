@@ -475,7 +475,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
-                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black hover:opacity-90 transition-opacity gap-1"
+                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
                     disabled={isPending}
                  >
                     <Trash2 className="h-5 w-5" />
@@ -532,7 +532,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             <Link href={`/products/${product.id}/edit`}>
               <Button
                 variant="ghost"
-                className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-foreground hover:bg-transparent hover:text-foreground gap-1"
+                className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1"
                 disabled={isPending || isSold}
               >
                 <Pencil className="h-5 w-5" />
@@ -545,7 +545,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               <Button
                 variant="ghost"
                 className={cn(
-                  'z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-foreground hover:bg-transparent hover:text-foreground gap-1',
+                  'z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1',
                   product.status === 'reserved' && 'text-primary-foreground'
                 )}
                 onClick={() => handleStatusUpdate(product.status === 'reserved' ? null : 'reserved')}
@@ -564,7 +564,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             {/* Sold Button */}
             <Button
               variant="ghost"
-              className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-foreground hover:bg-transparent hover:text-foreground gap-1"
+              className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1"
               onClick={() => handleStatusUpdate('sold')}
               disabled={isPending || isSold}
             >
