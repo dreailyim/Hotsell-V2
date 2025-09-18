@@ -642,7 +642,3 @@ export default function UserProfilePage() {
     </>
   );
 }
-
-    
-
-    

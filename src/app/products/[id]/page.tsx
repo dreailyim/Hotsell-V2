@@ -803,5 +803,3 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
-
-    
