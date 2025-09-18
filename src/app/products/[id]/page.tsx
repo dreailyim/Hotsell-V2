@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import {
   Heart,
-  Share,
+  Share2 as Share,
   MessageCircle,
   Pencil,
   Archive,
@@ -420,6 +420,27 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     });
   }
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent navigating to product page
+    e.stopPropagation();
+    if (!product) return;
+    const shareData = {
+      title: product.name,
+      text: `來看看這個超讚的商品：${product.name}`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        console.error('分享失敗或被取消:', error);
+      }
+    } else {
+       toast({ title: '分享失敗', description: '您的瀏覽器不支援分享功能。', variant: 'destructive' });
+    }
+  };
+
 
   if (authLoading) {
     return <ProductPageSkeleton scrollDirection={scrollDirection} />;
@@ -661,20 +682,32 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                   </Badge>
                 )}
             </div>
-             <button
-                onClick={handleFavoriteToggle}
-                disabled={isPending || authLoading}
-                className={cn(
-                    "absolute top-2 right-2 flex items-center justify-center gap-1 rounded-full bg-black/40 text-white text-xs font-bold transition-colors h-7 px-2",
-                    "hover:bg-black/60",
-                    isFavorited && "text-red-500",
-                    (isPending || authLoading) && "animate-pulse"
-                )}
-                aria-label={isFavorited ? "取消收藏" : "加入收藏"}
-            >
-                <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
-                <span>{product.favorites || 0}</span>
-            </button>
+            <div className="absolute top-2 right-2 flex items-center gap-2">
+                <button
+                    onClick={handleShare}
+                    className={cn(
+                        "flex items-center justify-center rounded-full bg-black/40 text-white transition-colors h-7 w-7",
+                        "hover:bg-black/60",
+                    )}
+                    aria-label="分享"
+                >
+                    <Share className="h-4 w-4" />
+                </button>
+                <button
+                    onClick={handleFavoriteToggle}
+                    disabled={isPending || authLoading}
+                    className={cn(
+                        "flex items-center justify-center gap-1 rounded-full bg-black/40 text-white text-xs font-bold transition-colors h-7 px-2",
+                        "hover:bg-black/60",
+                        isFavorited && "text-red-500",
+                        (isPending || authLoading) && "animate-pulse"
+                    )}
+                    aria-label={isFavorited ? "取消收藏" : "加入收藏"}
+                >
+                    <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
+                    <span>{product.favorites || 0}</span>
+                </button>
+            </div>
           </Carousel>
         </div>
 
