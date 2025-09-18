@@ -88,7 +88,7 @@ function BidDialog({
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
-          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-red-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+          className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-red-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1 active:scale-95"
           disabled={disabled}
         >
           <HandCoins className="h-5 w-5" />
@@ -472,11 +472,11 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
-          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-xl backdrop-blur-sm ring-1 ring-inset ring-white/20">
+          <div className="flex items-center gap-2 glass-morphism">
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
-                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+                    className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-r from-red-500 to-pink-600 p-1 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1 active:scale-95"
                     disabled={isPending}
                  >
                     <Trash2 className="h-5 w-5" />
@@ -503,7 +503,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               </AlertDialogContent>
             </AlertDialog>
             <Button
-                className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+                className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-emerald-500 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1 active:scale-95"
                 onClick={() => handleStatusUpdate(null)}
                 disabled={isPending}
             >
@@ -528,12 +528,12 @@ const findOrCreateConversation = async (): Promise<string | null> => {
           )}>
         <div className="flex items-center gap-2">
           {/* Action buttons group */}
-          <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-xl backdrop-blur-sm ring-1 ring-inset ring-white/20">
+          <div className="flex items-center gap-2 glass-morphism">
             {/* Edit Button */}
             <Link href={`/products/${product.id}/edit`}>
               <Button
                 variant="ghost"
-                className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1"
+                className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1 active:scale-95"
                 disabled={isPending || isSold}
               >
                 <Pencil className="h-5 w-5" />
@@ -546,7 +546,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               <Button
                 variant="ghost"
                 className={cn(
-                  'z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1',
+                  'z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1 active:scale-95',
                   product.status === 'reserved' && 'text-primary-foreground'
                 )}
                 onClick={() => handleStatusUpdate(product.status === 'reserved' ? null : 'reserved')}
@@ -565,7 +565,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             {/* Sold Button */}
             <Button
               variant="ghost"
-              className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1"
+              className="flex h-14 w-14 flex-col items-center justify-center rounded-full p-1 text-xs text-muted-foreground hover:bg-transparent hover:text-muted-foreground/80 gap-1 active:scale-95"
               onClick={() => handleStatusUpdate('sold')}
               disabled={isPending || isSold}
             >
@@ -583,7 +583,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             <AlertDialogTrigger asChild>
               <Button
                 size="icon"
-                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity active:scale-95"
                 disabled={isPending || isSold}
               >
                 <Trash2 className="h-5 w-5" />
@@ -619,11 +619,11 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         'fixed inset-x-0 bottom-20 z-50 flex justify-center transition-transform duration-300 md:hidden',
         scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
       )}>
-        <div className="flex items-center gap-2 rounded-full bg-background/50 p-2 shadow-xl backdrop-blur-sm ring-1 ring-inset ring-white/20">
+        <div className="flex items-center gap-2 glass-morphism">
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
-              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1"
+              className="flex h-14 w-14 flex-col items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 p-2 text-xs text-primary-foreground dark:text-black shadow-md transition-colors hover:opacity-90 gap-1 active:scale-95"
           >
               {isPending ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
               <span>傾傾</span>
@@ -689,6 +689,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                     className={cn(
                         "flex items-center justify-center rounded-full bg-black/40 text-white transition-colors h-7 w-7",
                         "hover:bg-black/60",
+                        "active:scale-95"
                     )}
                     aria-label="分享"
                 >
@@ -701,7 +702,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                         "flex items-center justify-center gap-1 rounded-full bg-black/40 text-white text-xs font-bold transition-colors h-7 px-2",
                         "hover:bg-black/60",
                         isFavorited && "text-red-500",
-                        (isPending || authLoading) && "animate-pulse"
+                        (isPending || authLoading) && "animate-pulse",
+                        "active:scale-95"
                     )}
                     aria-label={isFavorited ? "取消收藏" : "加入收藏"}
                 >
