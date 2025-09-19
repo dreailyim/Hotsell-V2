@@ -16,6 +16,7 @@ import {
 import { auth, db } from '@/lib/firebase/client-app';
 import { doc, setDoc, getDoc, Timestamp, serverTimestamp, onSnapshot } from 'firebase/firestore';
 import type { FullUser } from '@/lib/types';
+import { useFcm } from './use-fcm';
 
 
 interface AuthContextType {
