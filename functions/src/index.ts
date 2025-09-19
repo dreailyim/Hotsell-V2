@@ -7,6 +7,16 @@ admin.initializeApp();
 const db = admin.firestore();
 const fcm = admin.messaging();
 
+// Placeholder for getConversations to prevent deletion.
+// The actual logic for this function needs to be added back.
+export const getConversations = functions.region("us-central1").https.onCall((data, context) => {
+    console.log("getConversations was called, but is currently a placeholder.");
+    // This function needs its original implementation.
+    // For now, it returns an empty array to avoid breaking client-side code.
+    return { conversations: [] };
+});
+
+
 // A simple callable function for testing backend connectivity.
 export const helloWorld = functions.region("asia-east2").https.onCall((data, context) => {
     console.log("helloWorld function was called");
@@ -198,7 +208,6 @@ export const createNotificationOnUpdate = functions.region("asia-east2").firesto
         // --- Logic for New Reviews ---
         if (collectionId === "reviews") {
             // This assumes reviews are only created, not updated.
-            // For simplicity, we'll use the onUpdate hook here.
             // A more robust solution would use onCreate for reviews.
             const review = after;
             const notificationId = `${review.ratedUserId}_newreview_${docId}`;
@@ -251,5 +260,3 @@ export const onConversationUpdate = functions
 
         return null;
     });
-
-    

@@ -6,13 +6,13 @@
     "dev": "next dev --turbopack -p 9002",
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
+    "build": "next build && tsc -p tsconfig.functions.json",
     "build:functions": "tsc -p tsconfig.functions.json",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "deploy:firestore": "firebase deploy --only firestore",
-    "deploy:functions": "npm run build:functions && firebase deploy --only functions"
+    "deploy:functions": "npm run build && firebase deploy --only functions"
   },
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",

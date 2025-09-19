@@ -25,9 +25,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-// By removing the region parameter, we default to 'us-central1',
-// which should match the default Firestore and Functions deployment region.
-const functions = getFunctions(app);
+// Explicitly connect to the correct function region.
+const functions = getFunctions(app, 'asia-east2');
 
 // Initialize messaging only if the browser supports it
 const messaging = (async () => {

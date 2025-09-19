@@ -4,7 +4,7 @@
     "module": "commonjs",
     "noImplicitReturns": true,
     "noUnusedLocals": true,
-    "outDir": "build",
+    "outDir": "lib",
     "sourceMap": true,
     "strict": true,
     "target": "es2017",
@@ -22,10 +22,6 @@
   ],
   "exclude": [
     "node_modules",
-    ".next",
-    "src/app",
-    "src/components",
-    "src/hooks",
-    "src/lib"
+    ".next"
   ]
 }

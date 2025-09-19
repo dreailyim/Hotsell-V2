@@ -7,12 +7,30 @@ admin.initializeApp();
 const db = admin.firestore();
 const fcm = admin.messaging();
 
+// Placeholder for getConversations to prevent deletion.
+// The actual logic for this function needs to be added back.
+export const getConversations = functions.region("us-central1").https.onCall((data, context) => {
+    console.log("getConversations was called, but is currently a placeholder.");
+    // This function needs its original implementation.
+    // For now, it returns an empty array to avoid breaking client-side code.
+    return { conversations: [] };
+});
+
+
+// A simple callable function for testing backend connectivity.
+export const helloWorld = functions.region("asia-east2").https.onCall((data, context) => {
+    console.log("helloWorld function was called");
+    return {
+        message: "Hello from asia-east2!",
+    };
+});
+
 export const onNewMessage = functions
     .region("asia-east2")
     .firestore.document("conversations/{conversationId}/messages/{messageId}")
     .onCreate(async (snapshot, context) => {
         const messageData = snapshot.data();
-        const {conversationId, messageId} = context.params;
+        const { conversationId, messageId } = context.params;
 
         if (!messageData) {
             console.log("No message data found.");
@@ -108,7 +126,7 @@ export const onNewMessage = functions
 export const createNotificationOnUpdate = functions.region("asia-east2").firestore
     .document("{collectionId}/{docId}")
     .onUpdate(async (change, context) => {
-        const {collectionId, docId} = context.params;
+        const { collectionId, docId } = context.params;
         const before = change.before.data();
         const after = change.after.data();
         const batch = db.batch();
@@ -190,7 +208,6 @@ export const createNotificationOnUpdate = functions.region("asia-east2").firesto
         // --- Logic for New Reviews ---
         if (collectionId === "reviews") {
             // This assumes reviews are only created, not updated.
-            // For simplicity, we'll use the onUpdate hook here.
             // A more robust solution would use onCreate for reviews.
             const review = after;
             const notificationId = `${review.ratedUserId}_newreview_${docId}`;
