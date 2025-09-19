@@ -7,8 +7,9 @@ admin.initializeApp();
 const db = admin.firestore();
 const fcm = admin.messaging();
 
+// By removing .region("asia-east2"), this function will deploy to the default region (e.g., us-central1),
+// which must be the same region as the Firestore database for the trigger to work.
 export const onNewMessage = functions
-    .region("asia-east2")
     .firestore.document("conversations/{conversationId}/messages/{messageId}")
     .onCreate(async (snapshot, context) => {
         const messageData = snapshot.data();
@@ -105,7 +106,7 @@ export const onNewMessage = functions
         return Promise.all(tokensToRemove);
     });
 
-export const createNotificationOnUpdate = functions.region("asia-east2").firestore
+export const createNotificationOnUpdate = functions.firestore
     .document("{collectionId}/{docId}")
     .onUpdate(async (change, context) => {
         const {collectionId, docId} = context.params;
@@ -216,7 +217,6 @@ export const createNotificationOnUpdate = functions.region("asia-east2").firesto
     });
 
 export const onConversationUpdate = functions
-    .region("asia-east2")
     .firestore.document("conversations/{conversationId}")
     .onUpdate(async (change, context) => {
         const conversationId = context.params.conversationId;

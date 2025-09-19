@@ -1,8 +1,8 @@
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
-# Set the location for all backend resources.
-location: asia-east2
+# The location of all backend resources will now default to the project's default location (e.g., us-central1)
+# to match the Firestore database region.
 
 runConfig:
   # Increase this value if you'd like to automatically spin up
