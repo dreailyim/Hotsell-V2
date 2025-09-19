@@ -4,6 +4,7 @@
     "source": "functions",
     "runtime": "nodejs18",
     "predeploy": [
+      "npm --prefix functions install",
       "npm --prefix functions run build"
     ]
   },
