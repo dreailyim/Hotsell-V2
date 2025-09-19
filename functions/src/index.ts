@@ -32,7 +32,7 @@ export const onNewMessage = functions
         }
 
         const recipientId = convoData.participantIds.find(
-            (id: string) => id !== senderId,
+            (id) => id !== senderId,
         );
 
         if (!recipientId) {
@@ -227,7 +227,7 @@ export const onConversationUpdate = functions
         const participantIds = newValue.participantIds || [];
         const isHiddenForAll =
             participantIds.length > 0 &&
-            participantIds.every((id: string) => hiddenFor.includes(id));
+            participantIds.every((id) => hiddenFor.includes(id));
 
         if (isHiddenForAll) {
             console.log(`[${conversationId}] Deleting conversation and its messages.`);
