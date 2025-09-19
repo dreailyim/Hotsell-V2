@@ -55,31 +55,27 @@ export const onNewMessage = functions
             convoData.participantDetails[senderId]?.displayName || "Someone";
         const productName = convoData.product?.name || "an item";
 
-        const payload: admin.messaging.Message = {
+        const payload: admin.messaging.MessagingPayload = {
             notification: {
                 title: `來自 ${senderName} 的新訊息`,
                 body: messageData.text,
                 imageUrl: convoData.participantDetails[senderId]?.photoURL || undefined,
             },
-            webpush: {
-                fcmOptions: {
-                    link: `https://hotsell.dpdns.org/chat/${conversationId}`,
-                },
-                notification: {
-                    tag: conversationId, // Group notifications by conversation
-                    icon: convoData.participantDetails[senderId]?.photoURL || "/logo.png",
-                },
-            },
             data: {
                 conversationId: conversationId,
                 productName: productName,
             },
-            // The `token` property is not needed here as we are using sendToDevice
-        } as admin.messaging.Message; // Casting to be explicit
+        };
+
+        const options: admin.messaging.MessagingOptions = {
+            // Priority is not part of WebpushConfig, but a general option
+            priority: "high",
+            // Other options can go here, but webpush-specific things go inside payload.webpush
+        };
 
 
         // Send notifications to all tokens.
-        const response = await fcm.sendToDevice(tokens, payload);
+        const response = await fcm.sendToDevice(tokens, payload, options);
 
         // Cleanup invalid tokens
         const tokensToRemove: Promise<any>[] = [];
