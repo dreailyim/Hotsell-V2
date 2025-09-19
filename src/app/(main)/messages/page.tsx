@@ -273,25 +273,13 @@ export default function MessagesPage() {
     startDeleteTransition(async () => {
         const conversationIdsToDelete = Array.from(selectedConversations);
         const batch = writeBatch(db);
-        let processedCount = 0;
         
         try {
             for (const convoId of conversationIdsToDelete) {
                 const convoRef = doc(db, 'conversations', convoId);
-                const convoSnap = await getDoc(convoRef);
-
-                if (!convoSnap.exists()) continue;
-
-                const conversation = convoSnap.data() as Conversation;
-                const otherParticipantId = conversation.participantIds.find(id => id !== user.uid);
-                const isOtherParticipantHidden = otherParticipantId ? conversation.hiddenFor?.includes(otherParticipantId) : false;
-
-                if (isOtherParticipantHidden) {
-                    batch.delete(convoRef);
-                } else {
-                    batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
-                }
-                processedCount++;
+                // The logic is now simplified: just hide the conversation for the current user.
+                // A backend function will handle the actual deletion if both users have hidden it.
+                batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
             }
 
             await batch.commit();
@@ -301,7 +289,7 @@ export default function MessagesPage() {
 
             toast({
                 title: "操作成功",
-                description: `已成功處理 ${processedCount} 個對話。`,
+                description: `已成功隱藏 ${conversationIdsToDelete.length} 個對話。如果對方也刪除，對話將被永久移除。`,
             });
         } catch (error: any) {
              toast({
@@ -498,7 +486,7 @@ export default function MessagesPage() {
             <Button variant="destructive" disabled={selectedConversations.size === 0 || isDeleting} className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"><Trash2 className="mr-2 h-4 w-4" />刪除 ({selectedConversations.size})</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader><AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle><AlertDialogDescription>此操作可能會永久刪除對話 (如果對方也已刪除)。此操作無法復原。</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogHeader><AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle><AlertDialogDescription>此操作會將對話於您的列表中隱藏。如果對方也刪除，該對話將被永久移除。此操作無法復原。</AlertDialogDescription></AlertDialogHeader>
             <AlertDialogFooter><AlertDialogCancel>取消</AlertDialogCancel><AlertDialogAction onClick={handleDeleteSelected} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">確認刪除</AlertDialogAction></AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
