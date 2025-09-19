@@ -7,6 +7,12 @@ admin.initializeApp();
 const db = admin.firestore();
 const fcm = admin.messaging();
 
+// --- DEBUG: Hello World Test Function ---
+export const helloWorld = functions.region("asia-east2").https.onCall((data, context) => {
+    functions.logger.info("Hello logs!", {structuredData: true});
+    return { message: "Hello from asia-east2!" };
+});
+
 export const onNewMessage = functions
     .region("asia-east2")
     .firestore.document("conversations/{conversationId}/messages/{messageId}")
