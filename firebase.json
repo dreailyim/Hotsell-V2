@@ -2,36 +2,17 @@
 {
   "functions": [
     {
-      "source": ".",
+      "source": "functions",
       "codebase": "default",
+      "runtime": "nodejs18",
       "ignore": [
         "node_modules",
         ".git",
         "firebase-debug.log",
-        "firebase-debug.*.log",
-        ".firebase",
-        ".firebaserc",
-        "*.md",
-        "next.config.ts",
-        ".next",
-        "public",
-        "src/app",
-        "src/components",
-        "src/hooks",
-        "src/lib",
-        "src/ai",
-        "README.md",
-        "apphosting.yaml",
-        "components.json",
-        "cors.json",
-        "firestore.indexes.json",
-        "next-env.d.ts",
-        "postcss.config.mjs",
-        "tailwind.config.ts",
-        "tsconfig.json",
-        "webpack.config.js"
+        "firebase-debug.*.log"
       ],
       "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" install",
         "npm --prefix \"$RESOURCE_DIR\" run build"
       ]
     }
