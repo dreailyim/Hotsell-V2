@@ -92,11 +92,13 @@ export const onNewMessage = functions
           // Cleanup the tokens who are not registered anymore.
           if (
             error.code === "messaging/invalid-registration-token" ||
-          error.code === "messaging/registration-token-not-registered"
+            error.code === "messaging/registration-token-not-registered"
           ) {
             tokensToRemove.push(
                 db.collection("users").doc(recipientId).update({
-                  fcmTokens: admin.firestore.FieldValue.arrayRemove(tokens[index]),
+                  fcmTokens: admin.firestore.FieldValue.arrayRemove(
+                      tokens[index]
+                  ),
                 }),
             );
           }
