@@ -153,4 +153,3 @@ export const onConversationUpdate = functions
             return null;
         }
     });
-
