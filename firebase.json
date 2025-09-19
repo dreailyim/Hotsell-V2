@@ -1,11 +1,41 @@
 
 {
-  "functions": {
-    "source": "functions",
-    "predeploy": [
-      "npm --prefix functions install"
-    ]
-  },
+  "functions": [
+    {
+      "source": ".",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log",
+        ".firebase",
+        ".firebaserc",
+        "*.md",
+        "next.config.ts",
+        ".next",
+        "public",
+        "src/app",
+        "src/components",
+        "src/hooks",
+        "src/lib",
+        "src/ai",
+        "README.md",
+        "apphosting.yaml",
+        "components.json",
+        "cors.json",
+        "firestore.indexes.json",
+        "next-env.d.ts",
+        "postcss.config.mjs",
+        "tailwind.config.ts",
+        "tsconfig.json",
+        "webpack.config.js"
+      ],
+      "predeploy": [
+        "npm --prefix \"$RESOURCE_DIR\" run build"
+      ]
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"

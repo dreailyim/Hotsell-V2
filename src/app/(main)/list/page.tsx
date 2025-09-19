@@ -35,6 +35,7 @@ export default function ListPage() {
             setTestResult(null);
             setTestError(null);
             try {
+                // Ensure you are calling the correct callable function
                 const helloWorld = httpsCallable(functions, 'helloWorld');
                 const result = await helloWorld();
                 const data = result.data as { message: string };
@@ -68,7 +69,6 @@ export default function ListPage() {
             <Header title="刊登物品" showUserAvatar />
             <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-8">
                 
-                {/* --- DEBUGGING UI --- */}
                 <Card className="bg-yellow-50 border-yellow-300 dark:bg-yellow-950 dark:border-yellow-800">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2 text-yellow-800 dark:text-yellow-300">
@@ -106,7 +106,6 @@ export default function ListPage() {
                         )}
                     </CardContent>
                 </Card>
-                {/* --- END DEBUGGING UI --- */}
 
                 <ListingForm />
             </div>
