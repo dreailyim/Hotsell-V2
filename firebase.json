@@ -4,10 +4,11 @@
     "indexes": "firestore.indexes.json"
   },
   "functions": {
-    "source": "functions",
+    "source": ".",
     "runtime": "nodejs20",
     "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR\" install"
+      "npm install",
+      "npm run build:functions"
     ]
   },
   "storage": {
