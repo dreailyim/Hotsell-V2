@@ -3,6 +3,7 @@ import { Providers } from "./providers";
 import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import Script from "next/script";
+import { FcmRegistrar } from "@/components/fcm-registrar";
 
 export const metadata: Metadata = {
   title: "HotSell",
@@ -27,6 +28,7 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
         <Providers>
+          <FcmRegistrar />
           {children}
           <Toaster />
         </Providers>
