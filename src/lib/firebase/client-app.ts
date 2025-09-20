@@ -26,7 +26,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 // Explicitly connect to the correct function region.
-const functions = getFunctions(app, 'us-central1');
+const functions = getFunctions(app, 'asia-east2');
 
 // Initialize messaging only if the browser supports it
 const messaging = (async () => {
@@ -38,3 +38,5 @@ const messaging = (async () => {
 
 
 export { app, db, auth, storage, functions, messaging };
+
+    
