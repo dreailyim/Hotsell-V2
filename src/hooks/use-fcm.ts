@@ -27,10 +27,6 @@ export function useFcm() {
     
     const messaging = getMessaging(app);
 
-    // The VAPID key is required by getToken() to authorize the request.
-    // This key is public and safe to be in client-side code.
-    const VAPID_KEY = "BEhu10ANaPARApTUl9QFzo1t3JxBuqC-kwI6oPDO9ON1vWlEErqsBA2-McoUDdpHeKbPvgk_rhI6TTpiPYGpkFg";
-
     try {
       console.log('FCM: Requesting permission...');
       const permission = await Notification.requestPermission();
@@ -49,7 +45,9 @@ export function useFcm() {
       
       console.log('FCM: Notification permission granted. Requesting token...');
       
-      const currentToken = await getToken(messaging, { vapidKey: VAPID_KEY });
+      // The VAPID key is no longer needed here. Firebase SDK handles it automatically
+      // when configured correctly via firebase-messaging-sw.js and the standard setup.
+      const currentToken = await getToken(messaging);
 
       if (currentToken) {
           console.log('FCM: Token successfully retrieved:', currentToken);
