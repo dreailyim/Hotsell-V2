@@ -4,7 +4,7 @@ import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
-import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
+import { getFunctions } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
 // This configuration is safe to be exposed on the client-side.
@@ -38,5 +38,3 @@ const messaging = (async () => {
 
 
 export { app, db, auth, storage, functions, messaging };
-
-    

@@ -4,9 +4,7 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 
-admin.initializeApp({
-  credential: admin.credential.applicationDefault(),
-});
+admin.initializeApp();
 
 const db = admin.firestore();
 const fcm = admin.messaging();
@@ -20,16 +18,6 @@ export const getConversations = functions
     // This function needs its original implementation.
     // For now, it returns an empty array to avoid breaking client-side code.
     return { conversations: [] };
-  });
-
-// A simple callable function for testing backend connectivity.
-export const helloWorld = functions
-  .region('us-central1')
-  .https.onCall((data, context) => {
-    console.log('helloWorld function was called');
-    return {
-      message: 'Hello from us-central1!',
-    };
   });
 
 export const onNewMessage = functions
