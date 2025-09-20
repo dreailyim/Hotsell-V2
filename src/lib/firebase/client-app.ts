@@ -4,6 +4,7 @@ import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
+import { getFunctions, httpsCallable, connectFunctionsEmulator } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
 // This configuration is safe to be exposed on the client-side.
@@ -24,6 +25,8 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
+// Explicitly connect to the correct function region.
+const functions = getFunctions(app, 'us-central1');
 
 // Initialize messaging only if the browser supports it
 const messaging = (async () => {
@@ -34,6 +37,6 @@ const messaging = (async () => {
 })();
 
 
-export { app, db, auth, storage, messaging };
+export { app, db, auth, storage, functions, messaging };
 
     
