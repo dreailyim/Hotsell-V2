@@ -3,7 +3,7 @@
 
 # The location of all backend resources will now default to the project's default location (e.g., us-central1)
 # to match the Firestore database region.
-location: asia-east2
+location: us-central1
 
 runConfig:
   # Increase this value if you'd like to automatically spin up

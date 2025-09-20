@@ -14,7 +14,7 @@ const fcm = admin.messaging();
 // Placeholder for getConversations to prevent deletion.
 // Kept as V1 function to avoid upgrade conflicts.
 export const getConversations = functions
-  .region('asia-east2')
+  .region('us-central1')
   .https.onCall((data, context) => {
     console.log('getConversations was called, but is currently a placeholder.');
     // This function needs its original implementation.
@@ -24,16 +24,16 @@ export const getConversations = functions
 
 // A simple callable function for testing backend connectivity.
 export const helloWorld = functions
-  .region('asia-east2')
+  .region('us-central1')
   .https.onCall((data, context) => {
     console.log('helloWorld function was called');
     return {
-      message: 'Hello from asia-east2!',
+      message: 'Hello from us-central1!',
     };
   });
 
 export const onNewMessage = functions
-  .region('asia-east2')
+  .region('us-central1')
   .firestore.document('conversations/{conversationId}/messages/{messageId}')
   .onCreate(async (snapshot, context) => {
     const messageData = snapshot.data();
@@ -127,7 +127,7 @@ export const onNewMessage = functions
   });
 
 export const createNotificationOnUpdate = functions
-  .region('asia-east2')
+  .region('us-central1')
   .firestore.document('{collectionId}/{docId}')
   .onUpdate(async (change, context) => {
     const { collectionId, docId } = context.params;
@@ -223,7 +223,7 @@ export const createNotificationOnUpdate = functions
   });
 
 export const onNewReview = functions
-  .region('asia-east2')
+  .region('us-central1')
   .firestore.document('reviews/{reviewId}')
   .onCreate(async (snapshot, context) => {
     const review = snapshot.data();
@@ -255,7 +255,7 @@ export const onNewReview = functions
   });
 
 export const onConversationUpdate = functions
-  .region('asia-east2')
+  .region('us-central1')
   .firestore.document('conversations/{conversationId}')
   .onUpdate(async (change, context) => {
     const { conversationId } = context.params;
