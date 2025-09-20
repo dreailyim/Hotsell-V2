@@ -42,7 +42,7 @@ const fcm = admin.messaging();
 // Placeholder for getConversations to prevent deletion.
 // Kept as V1 function to avoid upgrade conflicts.
 exports.getConversations = functions
-    .region('us-central1')
+    .region('asia-east2')
     .https.onCall((data, context) => {
     console.log('getConversations was called, but is currently a placeholder.');
     // This function needs its original implementation.
@@ -51,15 +51,15 @@ exports.getConversations = functions
 });
 // A simple callable function for testing backend connectivity.
 exports.helloWorld = functions
-    .region('us-central1')
+    .region('asia-east2')
     .https.onCall((data, context) => {
     console.log('helloWorld function was called');
     return {
-        message: 'Hello from us-central1!',
+        message: 'Hello from asia-east2!',
     };
 });
 exports.onNewMessage = functions
-    .region('us-central1')
+    .region('asia-east2')
     .firestore.document('conversations/{conversationId}/messages/{messageId}')
     .onCreate(async (snapshot, context) => {
     var _a, _b, _c, _d, _e, _f, _g, _h;
@@ -137,7 +137,7 @@ exports.onNewMessage = functions
     return Promise.all(tokensToRemove);
 });
 exports.createNotificationOnUpdate = functions
-    .region('us-central1')
+    .region('asia-east2')
     .firestore.document('{collectionId}/{docId}')
     .onUpdate(async (change, context) => {
     var _a;
@@ -224,7 +224,7 @@ exports.createNotificationOnUpdate = functions
     return batch.commit();
 });
 exports.onNewReview = functions
-    .region('us-central1')
+    .region('asia-east2')
     .firestore.document('reviews/{reviewId}')
     .onCreate(async (snapshot, context) => {
     const review = snapshot.data();
@@ -252,7 +252,7 @@ exports.onNewReview = functions
     return batch.commit();
 });
 exports.onConversationUpdate = functions
-    .region('us-central1')
+    .region('asia-east2')
     .firestore.document('conversations/{conversationId}')
     .onUpdate(async (change, context) => {
     const { conversationId } = context.params;
