@@ -28,6 +28,14 @@ export function useFcm() {
     const messaging = getMessaging(app);
 
     try {
+      if ('serviceWorker' in navigator) {
+        await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        console.log('FCM Service Worker registration successful');
+      } else {
+        console.error('FCM: Service Worker not supported in this browser.');
+        return;
+      }
+      
       console.log('FCM: Requesting permission...');
       const permission = await Notification.requestPermission();
 
@@ -75,23 +83,9 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      // Ensure service worker is registered before requesting token
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/firebase-messaging-sw.js')
-          .then((registration) => {
-            console.log('FCM Service Worker registration successful, scope is:', registration.scope);
-            requestPermissionAndToken();
-          }).catch((err) => {
-            console.error('FCM Service Worker registration failed:', err);
-             toast({
-              title: "推播服務註冊失敗",
-              description: "無法註冊通知服務，您可能無法接收到背景通知。",
-              variant: "destructive"
-            });
-          });
-      }
+      requestPermissionAndToken();
     }
-  }, [user, requestPermissionAndToken, toast]);
+  }, [user, requestPermissionAndToken]);
 
   // Effect for handling foreground messages.
   useEffect(() => {
