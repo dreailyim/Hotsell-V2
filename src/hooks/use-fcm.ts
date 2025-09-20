@@ -45,8 +45,6 @@ export function useFcm() {
       
       console.log('FCM: Notification permission granted. Requesting token...');
       
-      // The VAPID key is no longer needed here. Firebase SDK handles it automatically
-      // when configured correctly via firebase-messaging-sw.js and the standard setup.
       const currentToken = await getToken(messaging);
 
       if (currentToken) {
@@ -77,9 +75,23 @@ export function useFcm() {
   // Effect to request permission and token when user is available.
   useEffect(() => {
     if (user) {
-      requestPermissionAndToken();
+      // Ensure service worker is registered before requesting token
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/firebase-messaging-sw.js')
+          .then((registration) => {
+            console.log('FCM Service Worker registration successful, scope is:', registration.scope);
+            requestPermissionAndToken();
+          }).catch((err) => {
+            console.error('FCM Service Worker registration failed:', err);
+             toast({
+              title: "推播服務註冊失敗",
+              description: "無法註冊通知服務，您可能無法接收到背景通知。",
+              variant: "destructive"
+            });
+          });
+      }
     }
-  }, [user, requestPermissionAndToken]);
+  }, [user, requestPermissionAndToken, toast]);
 
   // Effect for handling foreground messages.
   useEffect(() => {
