@@ -2,8 +2,8 @@
 'use strict';
 
 import * as admin from 'firebase-admin';
-import { https } from 'firebase-functions/v2/https';
-import { firestore } from 'firebase-functions/v2/firestore';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
+import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
 
 admin.initializeApp();
 
@@ -11,23 +11,22 @@ const db = admin.firestore();
 const fcm = admin.messaging();
 
 // Placeholder for getConversations to prevent deletion.
-// This is written in v2 syntax.
-export const getConversations = https.onCall({ region: 'us-central1' }, (request) => {
+export const getConversations = onCall({ region: 'us-central1' }, (request) => {
   console.log('getConversations was called, but is currently a placeholder.');
   // This function needs its original implementation.
   // For now, it returns an empty array to avoid breaking client-side code.
   return { conversations: [] };
 });
 
-// A simple callable function for testing backend connectivity, written in v2 syntax.
-export const helloWorld = https.onCall({ region: 'asia-east2' }, (request) => {
+// A simple callable function for testing backend connectivity.
+export const helloWorld = onCall({ region: 'asia-east2' }, (request) => {
   console.log('helloWorld function was called');
   return {
     message: 'Hello from asia-east2!',
   };
 });
 
-export const onNewMessage = firestore.onDocumentCreated(
+export const onNewMessage = onDocumentCreated(
   {
     document: 'conversations/{conversationId}/messages/{messageId}',
     region: 'asia-east2',
@@ -125,7 +124,7 @@ export const onNewMessage = firestore.onDocumentCreated(
   }
 );
 
-export const createNotificationOnUpdate = firestore.onDocumentUpdated(
+export const createNotificationOnUpdate = onDocumentUpdated(
   { document: '{collectionId}/{docId}', region: 'asia-east2' },
   async (event) => {
     const { collectionId, docId } = event.params;
@@ -220,7 +219,7 @@ export const createNotificationOnUpdate = firestore.onDocumentUpdated(
 );
 
 
-export const onNewReview = firestore.onDocumentCreated(
+export const onNewReview = onDocumentCreated(
   { document: 'reviews/{reviewId}', region: 'asia-east2' },
   async (event) => {
     const snapshot = event.data;
@@ -253,7 +252,7 @@ export const onNewReview = firestore.onDocumentCreated(
 );
 
 
-export const onConversationUpdate = firestore.onDocumentUpdated(
+export const onConversationUpdate = onDocumentUpdated(
   { document: 'conversations/{conversationId}', region: 'asia-east2' },
   async (event) => {
     const { conversationId } = event.params;
