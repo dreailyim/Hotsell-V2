@@ -10,6 +10,7 @@
     "source": "functions",
     "runtime": "nodejs20",
     "predeploy": [
+      "rm -rf functions/node_modules functions/package-lock.json",
       "npm --prefix \"$RESOURCE_DIR\" install",
       "npm --prefix \"$RESOURCE_DIR\" run build"
     ]
