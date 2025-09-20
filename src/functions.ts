@@ -1,9 +1,11 @@
 
 'use strict';
 
+import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { onCall } from 'firebase-functions/v2/https';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentCreated, onDocumentUpdated } from 'firebase-functions/v2/firestore';
+
 
 admin.initializeApp();
 
@@ -11,34 +13,36 @@ const db = admin.firestore();
 const fcm = admin.messaging();
 
 // Placeholder for getConversations to prevent deletion.
-export const getConversations = onCall({ region: 'us-central1' }, (request) => {
-  console.log('getConversations was called, but is currently a placeholder.');
-  // This function needs its original implementation.
-  // For now, it returns an empty array to avoid breaking client-side code.
-  return { conversations: [] };
-});
+// Kept as V1 function to avoid upgrade conflicts.
+export const getConversations = functions
+  .region('us-central1')
+  .https.onCall((data, context) => {
+    console.log('getConversations was called, but is currently a placeholder.');
+    // This function needs its original implementation.
+    // For now, it returns an empty array to avoid breaking client-side code.
+    return { conversations: [] };
+  });
 
 // A simple callable function for testing backend connectivity.
-export const helloWorld = onCall({ region: 'asia-east2' }, (request) => {
-  console.log('helloWorld function was called');
-  return {
-    message: 'Hello from asia-east2!',
-  };
-});
+export const helloWorld = functions
+  .region('asia-east2')
+  .https.onCall((data, context) => {
+    console.log('helloWorld function was called');
+    return {
+      message: 'Hello from asia-east2!',
+    };
+  });
 
-export const onNewMessage = onDocumentCreated(
-  {
-    document: 'conversations/{conversationId}/messages/{messageId}',
-    region: 'asia-east2',
-  },
-  async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) {
+export const onNewMessage = functions
+  .region('asia-east2')
+  .firestore.document('conversations/{conversationId}/messages/{messageId}')
+  .onCreate(async (snapshot, context) => {
+    const messageData = snapshot.data();
+    if (!messageData) {
       console.log('No data associated with the event');
       return;
     }
-    const messageData = snapshot.data();
-    const { conversationId } = event.params;
+    const { conversationId } = context.params;
 
     const senderId = messageData.senderId;
     const convoRef = db.collection('conversations').doc(conversationId);
@@ -121,19 +125,19 @@ export const onNewMessage = onDocumentCreated(
       }
     });
     return Promise.all(tokensToRemove);
-  }
-);
+  });
 
-export const createNotificationOnUpdate = onDocumentUpdated(
-  { document: '{collectionId}/{docId}', region: 'asia-east2' },
-  async (event) => {
-    const { collectionId, docId } = event.params;
-    const before = event.data?.before.data();
-    const after = event.data?.after.data();
+export const createNotificationOnUpdate = functions
+  .region('asia-east2')
+  .firestore.document('{collectionId}/{docId}')
+  .onUpdate(async (change, context) => {
+    const { collectionId, docId } = context.params;
+    const before = change.before.data();
+    const after = change.after.data();
 
     if (!before || !after) {
-        console.log("No data change found in event.");
-        return;
+      console.log('No data change found in event.');
+      return;
     }
 
     const batch = db.batch();
@@ -145,7 +149,9 @@ export const createNotificationOnUpdate = onDocumentUpdated(
 
       const oldFavoritedBy: string[] = before.favoritedBy || [];
       const newFavoritedBy: string[] = after.favoritedBy || [];
-      const newLikerId = newFavoritedBy.find((id) => !oldFavoritedBy.includes(id));
+      const newLikerId = newFavoritedBy.find(
+        (id) => !oldFavoritedBy.includes(id)
+      );
 
       if (newLikerId) {
         const likerSnap = await db.collection('users').doc(newLikerId).get();
@@ -213,54 +219,52 @@ export const createNotificationOnUpdate = onDocumentUpdated(
         });
       }
     }
-    
+
     return batch.commit();
-  }
-);
+  });
 
-
-export const onNewReview = onDocumentCreated(
-  { document: 'reviews/{reviewId}', region: 'asia-east2' },
-  async (event) => {
-    const snapshot = event.data;
-    if (!snapshot) {
+export const onNewReview = functions
+  .region('asia-east2')
+  .firestore.document('reviews/{reviewId}')
+  .onCreate(async (snapshot, context) => {
+    const review = snapshot.data();
+    if (!review) {
       console.log('No review data associated with the event');
       return;
     }
-    const review = snapshot.data();
     const batch = db.batch();
 
     const notificationId = `${review.ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
     batch.set(notificationRef, {
-        userId: review.ratedUserId,
-        type: 'new_review',
-        message: `${review.reviewerName} 給了您一個 ${review.rating} 星評價。`,
-        isRead: false,
-        createdAt: review.createdAt || admin.firestore.FieldValue.serverTimestamp(),
-        relatedData: {
-            productId: review.productId,
-            productName: review.productName,
-            productImage: review.productImage,
-            actorId: review.reviewerId,
-            actorName: review.reviewerName,
-        },
+      userId: review.ratedUserId,
+      type: 'new_review',
+      message: `${review.reviewerName} 給了您一個 ${review.rating} 星評價。`,
+      isRead: false,
+      createdAt:
+        review.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+      relatedData: {
+        productId: review.productId,
+        productName: review.productName,
+        productImage: review.productImage,
+        actorId: review.reviewerId,
+        actorName: review.reviewerName,
+      },
     });
 
     return batch.commit();
-  }
-);
+  });
 
-
-export const onConversationUpdate = onDocumentUpdated(
-  { document: 'conversations/{conversationId}', region: 'asia-east2' },
-  async (event) => {
-    const { conversationId } = event.params;
-    const newValue = event.data?.after.data();
+export const onConversationUpdate = functions
+  .region('asia-east2')
+  .firestore.document('conversations/{conversationId}')
+  .onUpdate(async (change, context) => {
+    const { conversationId } = context.params;
+    const newValue = change.after.data();
 
     if (!newValue) {
-        console.log("No new data for conversation update.");
-        return;
+      console.log('No new data for conversation update.');
+      return;
     }
 
     const hiddenFor: string[] = newValue.hiddenFor || [];
@@ -269,7 +273,9 @@ export const onConversationUpdate = onDocumentUpdated(
       participantIds.length > 0 &&
       participantIds.every((id: string) => hiddenFor.includes(id));
     if (isHiddenForAll) {
-      console.log(`[${conversationId}] Deleting conversation and its messages.`);
+      console.log(
+        `[${conversationId}] Deleting conversation and its messages.`
+      );
       const conversationRef = db.collection('conversations').doc(conversationId);
       const messagesRef = conversationRef.collection('messages');
       const messagesSnap = await messagesRef.get();
@@ -279,7 +285,4 @@ export const onConversationUpdate = onDocumentUpdated(
       return conversationRef.delete();
     }
     return null;
-  }
-);
-
-    
+  });
