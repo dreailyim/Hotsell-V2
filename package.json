@@ -7,14 +7,12 @@
     "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
     "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
     "build": "next build",
-    "build:functions": "tsc -p tsconfig.functions.json",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "deploy:firestore": "firebase deploy --only firestore",
-    "deploy:functions": "npm run build:functions && firebase deploy --only functions"
+    "deploy:functions": "firebase deploy --only functions"
   },
-  "main": "lib/functions.js",
   "dependencies": {
     "@genkit-ai/googleai": "^1.14.1",
     "@genkit-ai/next": "^1.14.1",

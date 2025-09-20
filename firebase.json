@@ -4,45 +4,8 @@
     "indexes": "firestore.indexes.json"
   },
   "functions": {
-    "source": ".",
-    "runtime": "nodejs20",
-    "predeploy": [
-      "npm install",
-      "npm run build:functions"
-    ],
-    "ignore": [
-      "node_modules",
-      ".next",
-      "src/app",
-      "src/components",
-      "src/hooks",
-      "src/lib",
-      "src/ai",
-      "public",
-      "*.json",
-      "*.ts",
-      "*.tsx",
-      "*.js",
-      "*.md",
-      "*.yaml",
-      "*.txt",
-      "next-env.d.ts",
-      "postcss.config.js",
-      "tailwind.config.ts",
-      "README.md",
-      ".env",
-      "cors.json",
-      "apphosting.yaml",
-      "ads.txt",
-      "src/lib/firebase/client-app.ts",
-      "src/lib/placeholder-data.ts",
-      "src/lib/types.ts",
-      "src/lib/utils.ts",
-      "src/next.config.ts",
-      "src/app/globals.css",
-      "src/app/layout.tsx",
-      "src/app/providers.tsx"
-    ]
+    "source": "functions",
+    "runtime": "nodejs20"
   },
   "storage": {
     "rules": "storage.rules"
