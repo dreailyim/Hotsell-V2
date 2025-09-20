@@ -14,7 +14,7 @@ const fcm = admin.messaging();
 // Placeholder for getConversations to prevent deletion.
 // Kept as V1 function to avoid upgrade conflicts.
 export const getConversations = functions
-  .region('us-central1')
+  .region('asia-east2')
   .https.onCall((data, context) => {
     console.log('getConversations was called, but is currently a placeholder.');
     // This function needs its original implementation.
@@ -285,5 +285,3 @@ export const onConversationUpdate = functions
     }
     return null;
   });
-
-    
