@@ -63,15 +63,9 @@
 
 @layer components {
   .glass-morphism {
-    @apply rounded-full p-2 transition-all;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
-    backdrop-filter: blur(2px);
-    box-shadow:
-      /* External shadow (for floating effect) */
-      0 8px 32px 0 rgba(0, 0, 0, 0.37),
-      /* Inner highlight (top-left) */
-      inset 4px 4px 10px 0 rgba(255, 255, 255, 0.2),
-      /* Inner shadow (bottom-right) */
-      inset -4px -4px 10px 0 rgba(0, 0, 0, 0.1);
+    @apply rounded-full bg-background/30 p-2 shadow-xl backdrop-blur-[2px];
+    /* Simulate top highlight and bottom shadow for a 3D "thick" glass effect */
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 }
