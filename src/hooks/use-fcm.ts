@@ -20,18 +20,15 @@ export function useFcm() {
     
     const supported = await isSupported();
     if (!supported) {
+      console.log('FCM is not supported in this browser.');
       return;
     }
     
     const messaging = getMessaging(app);
 
     try {
-      if ('serviceWorker' in navigator) {
-        // We need to wait for the service worker to be ready
-        await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      } else {
-        return;
-      }
+      // The service worker must be located at the root of the public directory.
+      const serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
       
       const permission = await Notification.requestPermission();
 
@@ -46,7 +43,7 @@ export function useFcm() {
         return;
       }
       
-      const currentToken = await getToken(messaging);
+      const currentToken = await getToken(messaging, { serviceWorkerRegistration });
 
       if (currentToken) {
           const userDocRef = doc(db, 'users', user.uid);
@@ -79,30 +76,33 @@ export function useFcm() {
 
   // Effect for handling foreground messages.
   useEffect(() => {
-    if (user) {
-      const setupListener = async () => {
+    if (typeof window === 'undefined' || !user) {
+        return;
+    }
+
+    const setupListener = async () => {
         const supported = await isSupported();
         if (supported) {
-          const messagingInstance = getMessaging(app);
-          const unsubscribe = onMessage(messagingInstance, (payload) => {
-            toast({
-              title: payload.notification?.title || '新通知',
-              description: payload.notification?.body,
+            const messagingInstance = getMessaging(app);
+            const unsubscribe = onMessage(messagingInstance, (payload) => {
+                console.log('Foreground message received.', payload);
+                toast({
+                  title: payload.notification?.title || '新通知',
+                  description: payload.notification?.body,
+                });
             });
-          });
-          return unsubscribe;
+            return unsubscribe;
         }
-      };
+    };
 
-      const unsubscribePromise = setupListener();
-      
-      return () => {
+    const unsubscribePromise = setupListener();
+    
+    return () => {
         unsubscribePromise.then(unsubscribe => {
-          if (unsubscribe) {
-            unsubscribe();
-          }
+            if (unsubscribe) {
+                unsubscribe();
+            }
         });
-      };
-    }
+    };
   }, [toast, user]);
 }
