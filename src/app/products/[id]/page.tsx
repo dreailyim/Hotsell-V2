@@ -472,7 +472,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
             'fixed inset-x-0 bottom-24 z-50 flex justify-center transition-transform duration-300 md:hidden',
             scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
           )}>
-          <div className="glass-morphism flex items-center gap-2">
+          <div className="flex items-center gap-2 glass-morphism">
              <AlertDialog>
               <AlertDialogTrigger asChild>
                  <Button
@@ -528,7 +528,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
           )}>
         <div className="flex items-center gap-2">
           {/* Action buttons group */}
-          <div className="glass-morphism flex items-center gap-2">
+          <div className="flex items-center gap-2 glass-morphism">
             {/* Edit Button */}
             <Link href={`/products/${product.id}/edit`}>
               <Button
@@ -619,7 +619,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         'fixed inset-x-0 bottom-24 z-50 flex justify-center transition-transform duration-300 md:hidden',
         scrollDirection === 'down' ? 'translate-y-full' : 'translate-y-0'
       )}>
-        <div className="glass-morphism flex items-center gap-2">
+        <div className="flex items-center gap-2 glass-morphism">
            <Button
               onClick={handleStartChat}
               disabled={isPending || authLoading}
