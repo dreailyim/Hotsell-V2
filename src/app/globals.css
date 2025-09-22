@@ -63,7 +63,7 @@
 
 @layer components {
   .glass-morphism {
-    @apply rounded-full bg-background/50 p-2 shadow-xl backdrop-blur-[2px] ring-1 ring-inset ring-white/20;
+    @apply rounded-full bg-background/40 p-2 shadow-xl backdrop-blur-[2px] ring-1 ring-inset ring-white/20;
     /* Simulate top highlight and bottom shadow for a 3D "thick" glass effect */
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
