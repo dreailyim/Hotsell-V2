@@ -578,35 +578,38 @@ const findOrCreateConversation = async (): Promise<string | null> => {
           </div>
 
           {/* Delete Button */}
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="icon"
-                className="h-14 w-14 flex-shrink-0 rounded-full bg-gradient-to-r from-red-500 to-pink-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity active:scale-95"
-                disabled={isPending || isSold}
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
-                <AlertDialogDescription>
-                  此操作無法復原。這將會永久刪除您的商品資料。
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>取消</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleDelete}
-                  className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+          <div className="glass-morphism">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-14 w-14 flex-shrink-0 rounded-full text-primary-foreground dark:text-black hover:opacity-90 transition-opacity active:scale-95"
+                  disabled={isPending || isSold}
                 >
-                  {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                  刪除
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  <Trash2 className="h-5 w-5 text-destructive" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    此操作無法復原。這將會永久刪除您的商品資料。
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>取消</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                  >
+                    {isPending ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    刪除
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </div>
     );
