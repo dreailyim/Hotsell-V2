@@ -50,7 +50,7 @@ export function useFcm() {
       // --- **正確的設定** ---
       // 取得此裝置的 FCM Token，並提供 VAPID key
       const currentToken = await getToken(messaging, { 
-          vapidKey: 'BEHuI8ANnaPARApTuL9QfZoit3JjxBUqC-kwI6oPD090W1WLEErqsBA2-McoUDdpHeKbPvgk_rhi6TTpiPYGPkFg',
+          vapidKey:'BBfufXrZC9QhcAwNKSGHsVMeuqQhnz76kJYVqrYczMV_1Engp54lGvnyAtX0zHTdoU9TuEITBI7ckloGlb5iTfA',
           serviceWorkerRegistration 
       });
 
