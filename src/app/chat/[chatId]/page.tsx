@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
@@ -61,7 +60,7 @@ function BidDialog({
     return (
         <AlertDialog open={open} onOpenChange={setOpen}>
             <AlertDialogTrigger asChild>
-                 <Button className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-blue-500 to-cyan-400 text-primary-foreground hover:opacity-90 transition-opacity">
+                 <Button className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
                     <HandCoins className="mr-1 h-4 w-4" />
                     {isReBid ? '重新出價' : '出價'}
                 </Button>
