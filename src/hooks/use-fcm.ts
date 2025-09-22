@@ -15,13 +15,11 @@ export function useFcm() {
 
   const requestPermissionAndToken = useCallback(async () => {
     if (!user) {
-      console.log("FCM: Aborted. User not logged in.");
       return;
     }
     
     const supported = await isSupported();
     if (!supported) {
-      console.log("FCM: Aborted. Messaging not supported in this browser.");
       return;
     }
     
@@ -29,18 +27,15 @@ export function useFcm() {
 
     try {
       if ('serviceWorker' in navigator) {
+        // We need to wait for the service worker to be ready
         await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('FCM Service Worker registration successful');
       } else {
-        console.error('FCM: Service Worker not supported in this browser.');
         return;
       }
       
-      console.log('FCM: Requesting permission...');
       const permission = await Notification.requestPermission();
 
       if (permission !== 'granted') {
-        console.log('FCM: Notification permission not granted. Status:', permission);
         if (permission === 'denied') {
           toast({
             title: "通知權限已被封鎖",
@@ -51,19 +46,14 @@ export function useFcm() {
         return;
       }
       
-      console.log('FCM: Notification permission granted. Requesting token...');
-      
       const currentToken = await getToken(messaging);
 
       if (currentToken) {
-          console.log('FCM: Token successfully retrieved:', currentToken);
           const userDocRef = doc(db, 'users', user.uid);
           await updateDoc(userDocRef, {
               fcmTokens: arrayUnion(currentToken),
           });
-          console.log('FCM: Token saved to Firestore.');
       } else {
-          console.error('FCM Error: No registration token available. This can happen if the service worker registration fails or if there is a misconfiguration.');
            toast({
             title: "獲取推播權杖失敗",
             description: "無法獲取權杖，請確認您的瀏覽器設定或稍後再試。",
@@ -95,7 +85,6 @@ export function useFcm() {
         if (supported) {
           const messagingInstance = getMessaging(app);
           const unsubscribe = onMessage(messagingInstance, (payload) => {
-            console.log('FCM: Foreground message received.', payload);
             toast({
               title: payload.notification?.title || '新通知',
               description: payload.notification?.body,
