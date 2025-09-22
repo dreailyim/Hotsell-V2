@@ -1,9 +1,8 @@
-// Import the Firebase app and messaging services
-import { initializeApp } from "firebase/app";
-import { getMessaging, onBackgroundMessage } from "firebase/messaging/sw";
+// 使用 'compat' 版本的 importScripts 來引入 Firebase SDK，這是 Service Worker 支援的方式
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// IMPORTANT: This configuration needs to be accessible to the service worker.
-// It's the same configuration from your `client-app.ts`.
+// 你的 Firebase 設定，保持不變
 const firebaseConfig = {
     "projectId": "hotsell-dolw2",
     "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -15,50 +14,52 @@ const firebaseConfig = {
     "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-// Initialize the Firebase app in the service worker
-const app = initializeApp(firebaseConfig);
-const messaging = getMessaging(app);
+// 使用 compat library 的方式初始化 Firebase
+firebase.initializeApp(firebaseConfig);
+
+// 取得 Firebase Messaging 的實例，以便處理背景訊息
+const messaging = firebase.messaging();
 
 /**
- * Handles incoming messages when the app is in the background or terminated.
- * This is the core logic for showing system-level notifications.
+ * 處理應用程式在背景或關閉時收到的訊息
  */
-onBackgroundMessage(messaging, (payload) => {
-  console.log('[firebase-messaging-sw.js] Received background message ', payload);
+messaging.onBackgroundMessage((payload) => {
+  console.log('[firebase-messaging-sw.js] 收到背景訊息：', payload);
 
-  // Customize the notification title and body from the incoming payload
+  // 從收到的 payload 自訂通知的標題和內容
   const notificationTitle = payload.notification?.title || '新訊息';
   const notificationOptions = {
     body: payload.notification?.body || '',
-    icon: payload.notification?.imageUrl || '/favicon.ico', // Optional: use an icon
-    data: payload.data, // Pass along data like URLs
+    icon: payload.notification?.imageUrl || '/favicon.ico', // 可選：使用圖示
+    data: payload.data, // 將 click_action 等資料傳遞下去
   };
 
-  // The service worker's registration is used to show the notification
+  // 使用 service worker 的 registration 來顯示通知
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
 /**
- * Handles clicks on the background notification.
- * This function is triggered when a user clicks the notification shown by the service worker.
+ * 處理背景通知的點擊事件
  */
 self.addEventListener('notificationclick', (event) => {
-    console.log('[firebase-messaging-sw.js] Notification click Received.', event.notification.data);
+    console.log('[firebase-messaging-sw.js] 用戶點擊了通知：', event.notification.data);
 
-    // Close the notification
+    // 關閉通知
     event.notification.close();
 
-    // This is the URL that will be opened when the notification is clicked
+    // 這是點擊通知後要開啟的 URL，來自 Cloud Function 的 data payload
     const targetUrl = event.notification.data?.click_action || '/';
 
-    // This looks for an existing window and focuses it, or opens a new one
+    // 這段程式碼會尋找一個已開啟的視窗並對焦，如果沒有就會開一個新的
     event.waitUntil(
         clients.matchAll({ type: "window" }).then((clientList) => {
             for (const client of clientList) {
-                if (client.url === targetUrl && 'focus' in client) {
+                // 如果找到符合的 URL，就直接 focus 該視窗
+                if (client.url.endsWith(targetUrl) && 'focus' in client) {
                     return client.focus();
                 }
             }
+            // 如果沒有符合的視窗，就開新視窗
             if (clients.openWindow) {
                 return clients.openWindow(targetUrl);
             }
