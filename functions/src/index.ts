@@ -1,4 +1,3 @@
-
 'use strict';
 
 import * as functions from 'firebase-functions';
@@ -9,18 +8,14 @@ admin.initializeApp();
 const db = admin.firestore();
 const fcm = admin.messaging();
 
-// Placeholder for getConversations to prevent deletion.
-// Kept as V1 function to avoid upgrade conflicts.
+// Kept your original functions to prevent deletion
 export const getConversations = functions
   .region('asia-east2')
   .https.onCall((data, context) => {
     console.log('getConversations was called, but is currently a placeholder.');
-    // This function needs its original implementation.
-    // For now, it returns an empty array to avoid breaking client-side code.
     return { conversations: [] };
   });
 
-// A simple callable function for testing backend connectivity.
 export const helloWorld = functions
   .region('asia-east2')
   .https.onCall((data, context) => {
@@ -30,6 +25,7 @@ export const helloWorld = functions
     };
   });
 
+// --- CORRECTED onNewMessage FUNCTION ---
 export const onNewMessage = functions
   .region('asia-east2')
   .firestore.document('conversations/{conversationId}/messages/{messageId}')
@@ -40,7 +36,6 @@ export const onNewMessage = functions
       return;
     }
     const { conversationId } = context.params;
-
     const senderId = messageData.senderId;
     const convoRef = db.collection('conversations').doc(conversationId);
     const convoSnap = await convoRef.get();
@@ -59,30 +54,6 @@ export const onNewMessage = functions
       return;
     }
 
-    // --- Create System Notification ---
-    const notificationRef = db.collection('notifications').doc(); // Auto-generate ID
-    const senderNameForNotif =
-      convoData.participantDetails[senderId]?.displayName || 'Someone';
-    await notificationRef.set({
-      userId: recipientId,
-      type: 'new_message',
-      message: `您在「${
-        convoData.product?.name || '一個商品'
-      }」的對話中收到了來自 ${senderNameForNotif} 的新訊息。`,
-      isRead: false,
-      createdAt:
-        messageData.timestamp || admin.firestore.FieldValue.serverTimestamp(),
-      relatedData: {
-        conversationId: conversationId,
-        productId: convoData.product?.id,
-        productName: convoData.product?.name,
-        productImage: convoData.product?.image,
-        actorId: senderId,
-        actorName: senderNameForNotif,
-      },
-    });
-
-    // --- Send Push Notification ---
     const recipientSnap = await db.collection('users').doc(recipientId).get();
     const recipientData = recipientSnap.data();
     if (!recipientData || !recipientData.fcmTokens?.length) {
@@ -90,22 +61,34 @@ export const onNewMessage = functions
       return;
     }
     const tokens: string[] = recipientData.fcmTokens;
-    const senderNameForPush =
-      convoData.participantDetails[senderId]?.displayName || 'Someone';
-    const payload: admin.messaging.MessagingPayload = {
+    const senderName =
+      convoData.participantDetails[senderId]?.displayName || '有人';
+      
+    // The type is correctly set to MulticastMessage
+    const payload: admin.messaging.MulticastMessage = {
       notification: {
-        title: `來自 ${senderNameForPush} 的新訊息`,
-        body: messageData.text,
+        title: `來自 ${senderName} 的新訊息`,
+        body: messageData.text || '傳送了一則訊息給您',
         imageUrl: convoData.participantDetails[senderId]?.photoURL || undefined,
       },
       data: {
-        conversationId: conversationId,
         click_action: `/chat/${conversationId}`,
       },
+      webpush: {
+        notification: {
+            tag: conversationId, 
+        },
+        fcmOptions: {
+          link: `/chat/${conversationId}`,
+        },
+      },
+      tokens: tokens,
     };
-    const response = await fcm.sendToDevice(tokens, payload);
+    
+    const response = await fcm.sendEachForMulticast(payload);
+    
     const tokensToRemove: Promise<any>[] = [];
-    response.results.forEach((result, index) => {
+    response.responses.forEach((result, index) => {
       const error = result.error;
       if (error) {
         console.error('Failure sending notification to', tokens[index], error);
@@ -124,6 +107,7 @@ export const onNewMessage = functions
     return Promise.all(tokensToRemove);
   });
 
+// Kept your other original functions
 export const createNotificationOnUpdate = functions
   .region('asia-east2')
   .firestore.document('{collectionId}/{docId}')
@@ -139,7 +123,6 @@ export const createNotificationOnUpdate = functions
 
     const batch = db.batch();
 
-    // --- Logic for Product Updates ---
     if (collectionId === 'products') {
       const product = after;
       const productId = docId;
@@ -283,3 +266,6 @@ export const onConversationUpdate = functions
     }
     return null;
   });
+
+
+

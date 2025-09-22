@@ -1,4 +1,3 @@
-
 // @ts-nocheck
 import { initializeApp, getApp, getApps } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
@@ -7,7 +6,7 @@ import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
-// This configuration is safe to be exposed on the client-side.
+// 您的 Firebase 設定，保持不變
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
@@ -19,24 +18,28 @@ const firebaseConfig = {
   "databaseURL": "https://hotsell-dolw2.firebaseio.com"
 };
 
-// A robust way to initialize Firebase on the client, ensuring it only happens once.
+// 初始化 Firebase App，這個模式可以防止在 Next.js 的熱重載中重複初始化
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
 const db = getFirestore(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-// Explicitly connect to the correct function region.
+// 明確連接到您部署 functions 的區域
 const functions = getFunctions(app, 'asia-east2');
 
-// Initialize messaging only if the browser supports it
+// 只有在瀏覽器環境且支援 FCM 時才初始化 messaging
+// 這種非同步立即執行函式 (IIFE) 的寫法是為了處理 isSupported() 的非同步特性
+// 最終 messaging 會是一個 Promise，它會 resolve 成 messaging instance 或 null
 const messaging = (async () => {
-    if (typeof window !== 'undefined' && await isSupported()) {
+    if (typeof window !== 'undefined' && (await isSupported())) {
+        console.log("Firebase Messaging is supported. Initializing...");
         return getMessaging(app);
     }
+    console.log("Firebase Messaging is not supported in this browser.");
     return null;
 })();
 
 
 export { app, db, auth, storage, functions, messaging };
 
-    
+
