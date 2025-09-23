@@ -221,27 +221,29 @@ export function ProductCard({ product }: ProductCardProps) {
         <CardContent className="p-3 flex flex-col justify-between flex-1">
             <div>
                 <h3 className="font-semibold truncate text-sm">{safeName}</h3>
-                <div className={cn(
-                    "mt-1 flex justify-between min-h-[36px]",
-                    isDiscounted ? "items-end" : "items-start"
-                )}>
+                <div className="mt-1">
                     {isDiscounted ? (
-                        <div>
+                        <>
                             <p className="text-base font-bold leading-tight text-[hsl(var(--sale-price))]">
                                 ${(price || 0).toLocaleString()}
                             </p>
-                            {originalPrice && (
-                                <p className="text-[10px] text-muted-foreground line-through">
-                                    ${originalPrice.toLocaleString()}
-                                </p>
-                            )}
-                        </div>
+                            <div className="flex justify-between items-center">
+                                {originalPrice && (
+                                    <p className="text-[10px] text-muted-foreground line-through">
+                                        ${originalPrice.toLocaleString()}
+                                    </p>
+                                )}
+                                {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
+                            </div>
+                        </>
                     ) : (
-                        <p className="text-base font-bold leading-tight text-primary">
-                            ${(price || 0).toLocaleString()}
-                        </p>
+                        <div className="flex justify-between items-center">
+                            <p className="text-base font-bold leading-tight text-primary">
+                                ${(price || 0).toLocaleString()}
+                            </p>
+                            {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
+                        </div>
                     )}
-                    {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0 self-end">{condition}</div>}
                 </div>
             </div>
 
