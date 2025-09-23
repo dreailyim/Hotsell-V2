@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -40,7 +40,18 @@ export default function HotPage() {
         const productsRef = collection(db, 'products');
         const q = query(productsRef, orderBy('favorites', 'desc'), limit(20));
         const querySnapshot = await getDocs(q);
-        const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const productsData = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const createdAt = data.createdAt instanceof Timestamp 
+                ? data.createdAt.toDate().toISOString() 
+                : new Date().toISOString();
+
+            return {
+                id: doc.id,
+                ...data,
+                createdAt,
+            } as Product;
+        });
         setProducts(productsData);
       } catch (err) {
         console.error("Error fetching hot products: ", err);
