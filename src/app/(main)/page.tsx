@@ -132,7 +132,18 @@ function HomePageContent() {
         }
 
         const querySnapshot = await getDocs(q);
-        const productsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+        const productsData = querySnapshot.docs.map(doc => {
+            const data = doc.data();
+            const createdAt = data.createdAt instanceof Timestamp 
+                ? data.createdAt.toDate().toISOString() 
+                : new Date().toISOString();
+            
+            return {
+                id: doc.id,
+                ...data,
+                createdAt,
+            } as Product;
+        });
         setProducts(productsData);
       } catch (error) {
         console.error("Error fetching products: ", error);
@@ -154,7 +165,7 @@ function HomePageContent() {
         {loadingProducts ? (
           <ProductGridSkeleton />
         ) : products.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
@@ -220,7 +231,7 @@ function HomePageContent() {
         {loadingProducts ? (
           <ProductGridSkeleton />
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}

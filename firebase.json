@@ -1,4 +1,7 @@
 {
+  "apphosting": {
+    "backend": "hotsell-backend"
+  },
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
