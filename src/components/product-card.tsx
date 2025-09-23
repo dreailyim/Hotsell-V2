@@ -221,35 +221,33 @@ export function ProductCard({ product }: ProductCardProps) {
             <div>
                 <h3 className="font-semibold truncate text-sm">{safeName}</h3>
                 <div className="mt-1">
-                    <div className="flex justify-between items-center">
-                        <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
-                            ${(price || 0).toLocaleString()}
-                        </p>
-                        {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
-                    </div>
-                    {isDiscounted && originalPrice && (
-                        <p className="text-[10px] text-muted-foreground line-through">
-                            ${originalPrice.toLocaleString()}
-                        </p>
-                    )}
+                  <div className="flex justify-between items-center">
+                      <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
+                          ${(price || 0).toLocaleString()}
+                      </p>
+                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
+                  </div>
+                  {isDiscounted && originalPrice && (
+                      <p className="text-[10px] text-muted-foreground line-through">
+                          ${originalPrice.toLocaleString()}
+                      </p>
+                  )}
                 </div>
             </div>
 
             <div className="flex justify-between items-center pt-2">
-                <div className='flex items-center gap-2 min-w-0'>
-                    <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-2 min-w-0">
-                        <Avatar className="h-6 w-6">
-                            <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
-                            <AvatarFallback className="text-xs">{safeSellerName?.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className="text-[11px] text-muted-foreground font-medium truncate">{safeSellerName}</span>
-                    </Link>
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                        <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                        <span className="font-bold text-[10px] text-foreground">
-                        {(seller?.averageRating || 0).toFixed(1)}
-                        </span>
-                    </div>
+                 <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-2 min-w-0">
+                    <Avatar className="h-6 w-6">
+                        <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
+                        <AvatarFallback className="text-xs">{safeSellerName?.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-[11px] text-muted-foreground font-medium truncate">{safeSellerName}</span>
+                </Link>
+                <div className="flex items-center gap-1 text-muted-foreground">
+                    <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                    <span className="font-bold text-[10px] text-foreground">
+                    {(seller?.averageRating || 0).toFixed(1)}
+                    </span>
                 </div>
             </div>
 
