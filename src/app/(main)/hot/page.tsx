@@ -80,7 +80,7 @@ export default function HotPage() {
              <p>快去發掘和收藏您喜歡的商品吧！</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 items-start">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
