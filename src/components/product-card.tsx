@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
@@ -159,7 +160,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg group flex flex-col border-none shadow-md bg-card">
+    <Card className="overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
         <div className="relative aspect-square w-full">
             <Link href={`/products/${id}`} aria-label={safeName}>
               <Image
@@ -217,7 +218,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </Button>
             </div>
         </div>
-        <CardContent className="p-3 flex flex-col justify-between">
+        <CardContent className="p-3">
             <div>
                 <h3 className="font-semibold truncate text-sm">{safeName}</h3>
                 <div className="mt-1">
