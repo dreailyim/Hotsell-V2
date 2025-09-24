@@ -78,7 +78,7 @@ function ProductGrid({
         )
     }
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 items-start">
             {products.map((product) => (
                 <div key={product.id} className="relative" onClick={() => isManaging && onToggleSelect?.(product.id)}>
                     <ProductCard product={product} />
