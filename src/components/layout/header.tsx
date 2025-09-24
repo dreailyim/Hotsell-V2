@@ -51,10 +51,10 @@ function Search() {
   }
 
   return (
-      <div className="relative w-full max-w-md">
+      <div className="relative w-full max-w-sm">
         <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="搜尋商品..."
+          placeholder="Hotsell搵下嘢..."
           className="w-full rounded-full pl-10 pr-10" // Add padding for clear button
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
