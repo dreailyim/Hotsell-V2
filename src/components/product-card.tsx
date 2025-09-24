@@ -217,7 +217,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </Button>
             </div>
         </div>
-        <CardContent className="p-3 flex flex-col justify-between flex-1">
+        <CardContent className="p-3 flex flex-col justify-between">
             <div>
                 <h3 className="font-semibold truncate text-sm">{safeName}</h3>
                 <div className="mt-1">
