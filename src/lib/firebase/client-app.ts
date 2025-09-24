@@ -41,5 +41,3 @@ const messaging = (async () => {
 
 
 export { app, db, auth, storage, functions, messaging };
-
-
