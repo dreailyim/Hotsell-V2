@@ -160,7 +160,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
 
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
+    <Card className="w-full overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
         <div className="relative aspect-square w-full">
             <Link href={`/products/${id}`} aria-label={safeName}>
               <Image
@@ -219,7 +219,7 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
         </div>
         <CardContent className="p-3">
-            <div>
+            <div className="w-full">
                 <h3 className="font-semibold truncate text-sm">{safeName}</h3>
                 <div className="mt-1">
                   <div className="flex justify-between items-center">
@@ -236,7 +236,7 @@ export function ProductCard({ product }: ProductCardProps) {
                 </div>
             </div>
 
-            <div className="flex justify-between items-center pt-2">
+            <div className="flex w-full justify-between items-center pt-2">
                  <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-2 min-w-0">
                     <Avatar className="h-6 w-6">
                         <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
