@@ -478,6 +478,17 @@ export default function ChatPage() {
     sendMessage(message);
   };
   
+  const getFormattedTime = (timestamp: Message['timestamp']) => {
+    if (!timestamp) return '';
+    try {
+      const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+      return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
+    } catch (e) {
+      console.error("Error formatting time:", e, "with value:", timestamp);
+      return '';
+    }
+  };
+
   const ChatProductHeader = () => {
     if (!conversation || !user) return null;
     
@@ -723,12 +734,18 @@ export default function ChatPage() {
                 </Avatar>
               )}
               <div className={cn(
-                "max-w-xs md:max-w-md lg:max-w-lg rounded-2xl px-4 py-2 text-sm",
+                "max-w-xs md:max-w-md lg:max-w-lg rounded-2xl px-3 py-2 text-sm flex flex-col",
                 isCurrentUser
                   ? "bg-primary text-primary-foreground rounded-br-none"
                   : "bg-muted text-secondary-foreground rounded-bl-none"
               )}>
                 <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                <span className={cn(
+                    "text-xs self-end mt-1",
+                    isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground"
+                )}>
+                  {getFormattedTime(msg.timestamp)}
+                </span>
               </div>
             </div>
           );
