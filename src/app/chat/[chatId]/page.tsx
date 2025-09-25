@@ -741,8 +741,8 @@ export default function ChatPage() {
               )}>
                 <p className="whitespace-pre-wrap break-words">{msg.text}</p>
                 <span className={cn(
-                    "text-xs self-end mt-1",
-                    isCurrentUser ? "text-primary-foreground/70" : "text-muted-foreground"
+                    "text-xs mt-1",
+                    isCurrentUser ? "self-end text-primary-foreground/70" : "self-start text-muted-foreground"
                 )}>
                   {getFormattedTime(msg.timestamp)}
                 </span>
