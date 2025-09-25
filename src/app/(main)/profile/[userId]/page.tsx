@@ -38,9 +38,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 function ProductGridSkeleton() {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 items-start">
+        <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3">
+                <div key={i} className="flex flex-col space-y-3 mb-4 break-inside-avoid">
                     <Skeleton className="h-[125px] w-full rounded-xl" />
                     <div className="space-y-2">
                         <Skeleton className="h-4 w-full" />
@@ -494,7 +494,7 @@ export default function UserProfilePage() {
         
         <div className="flex justify-center mb-4">
             <div className="flex items-center gap-4">
-                <Avatar className="h-12 w-12">
+                <Avatar className="h-14 w-14">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
