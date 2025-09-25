@@ -492,8 +492,8 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex items-center gap-4 mb-6">
-             <Avatar className="h-20 w-20">
+        <div className="flex items-center gap-3 mb-6">
+             <Avatar className="h-16 w-16">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                 <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
              </Avatar>
