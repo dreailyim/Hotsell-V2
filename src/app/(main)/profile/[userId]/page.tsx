@@ -40,11 +40,13 @@ function ProductGridSkeleton() {
     return (
         <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3 mb-4 break-inside-avoid">
-                    <Skeleton className="h-[125px] w-full rounded-xl" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
+                <div key={i} className="mb-4 break-inside-avoid">
+                    <div className="flex flex-col space-y-3">
+                        <Skeleton className="h-[125px] w-full rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
                     </div>
                 </div>
             ))}
@@ -505,7 +507,7 @@ export default function UserProfilePage() {
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
         <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
                 <Avatar className="h-14 w-14">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
@@ -558,7 +560,7 @@ export default function UserProfilePage() {
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
                             placeholder="搵下我有啲咩產品先" 
-                            className="pl-10 rounded-full" 
+                            className="pl-10 rounded-full h-9 text-sm" 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
