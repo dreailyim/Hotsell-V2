@@ -6,11 +6,11 @@ import { getStorage } from 'firebase/storage';
 import { getFunctions } from 'firebase/functions';
 import { getMessaging, isSupported } from 'firebase/messaging';
 
-// 您的 Firebase 設定，保持不變
+// 您的 Firebase 設定，storageBucket 已根據您的要求更新
 const firebaseConfig = {
   "projectId": "hotsell-dolw2",
   "appId": "1:25821240563:web:0c84f1a6f053f3e9e12b86",
-  "storageBucket": "hotsell-dolw2.appspot.com",
+  "storageBucket": "hotsell-dolw2.firebasestorage.app",
   "apiKey": "AIzaSyAZChqV6v73lcJBCMVXIdd4VlREq7tdDVo",
   "authDomain": "hotsell-dolw2.firebaseapp.com",
   "messagingSenderId": "25821240563",
@@ -28,8 +28,6 @@ const storage = getStorage(app);
 const functions = getFunctions(app, 'asia-east2');
 
 // 只有在瀏覽器環境且支援 FCM 時才初始化 messaging
-// 這種非同步立即執行函式 (IIFE) 的寫法是為了處理 isSupported() 的非同步特性
-// 最終 messaging 會是一個 Promise，它會 resolve 成 messaging instance 或 null
 const messaging = (async () => {
     if (typeof window !== 'undefined' && (await isSupported())) {
         console.log("Firebase Messaging is supported. Initializing...");
@@ -41,5 +39,3 @@ const messaging = (async () => {
 
 
 export { app, db, auth, storage, functions, messaging };
-
-

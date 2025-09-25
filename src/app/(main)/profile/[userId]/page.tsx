@@ -38,13 +38,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 function ProductGridSkeleton() {
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {Array.from({ length: 4 }).map((_, i) => (
-                <div key={i} className="flex flex-col space-y-3">
-                    <Skeleton className="h-[125px] w-full rounded-xl" />
-                    <div className="space-y-2">
-                        <Skeleton className="h-4 w-full" />
-                        <Skeleton className="h-4 w-3/4" />
+                <div key={i} className="mb-4 break-inside-avoid">
+                    <div className="flex flex-col space-y-3">
+                        <Skeleton className="h-[125px] w-full rounded-xl" />
+                        <div className="space-y-2">
+                            <Skeleton className="h-4 w-full" />
+                            <Skeleton className="h-4 w-3/4" />
+                        </div>
                     </div>
                 </div>
             ))}
@@ -78,9 +80,9 @@ function ProductGrid({
         )
     }
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2">
+        <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {products.map((product) => (
-                <div key={product.id} className="relative" onClick={() => isManaging && onToggleSelect?.(product.id)}>
+                <div key={product.id} className="relative mb-4 break-inside-avoid" onClick={() => isManaging && onToggleSelect?.(product.id)}>
                     <ProductCard product={product} />
                     {isManaging && (
                         <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer">
@@ -174,6 +176,8 @@ export default function UserProfilePage() {
   const [isManaging, setIsManaging] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [isProcessing, startTransition] = useTransition();
+
+  const [searchTerm, setSearchTerm] = useState('');
   
   const isOwnProfile = currentUser?.uid === userId;
   
@@ -320,6 +324,15 @@ export default function UserProfilePage() {
     }
   }, [activeTab, isOwnProfile, fetchReviews, fetchFavoriteProducts]);
 
+  const filteredUserProducts = useMemo(() => {
+    if (!searchTerm) {
+      return userProducts;
+    }
+    return userProducts.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [userProducts, searchTerm]);
+
   // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
     setSelectedProducts(prev => {
@@ -334,10 +347,11 @@ export default function UserProfilePage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedProducts.size === userProducts.length) {
+    const productsToSelect = filteredUserProducts;
+    if (selectedProducts.size === productsToSelect.length) {
         setSelectedProducts(new Set());
     } else {
-        setSelectedProducts(new Set(userProducts.map(p => p.id)));
+        setSelectedProducts(new Set(productsToSelect.map(p => p.id)));
     }
   };
   
@@ -441,7 +455,7 @@ export default function UserProfilePage() {
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/10 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">
-            {selectedProducts.size === userProducts.length ? '取消全選' : '全選'}
+            {selectedProducts.size === filteredUserProducts.length ? '取消全選' : '全選'}
         </Button>
         <div className="flex items-center gap-2">
             <Button
@@ -468,7 +482,7 @@ export default function UserProfilePage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作無法復原，將會永久刪除您選取的 {selectedProducts.size} 件產品。
+                            此操作無法復原，將會永久刪除您選取的 ${selectedProducts.size} 件產品。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -492,30 +506,32 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex items-center gap-4 mb-6">
-             <Avatar className="h-20 w-20">
-                <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
-                <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
-             </Avatar>
-             <div className="flex flex-col justify-center flex-1">
-                <h2 className="text-lg font-bold">{profileUser.displayName || '使用者'}</h2>
-                <p className="text-sm text-muted-foreground truncate">{profileUser.aboutMe || '未填寫個人簡介'}</p>
-                <div className="flex items-center gap-1 mt-1">
-                    <div className="flex items-center text-yellow-400">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                           <Star 
+        <div className="flex justify-center mb-4">
+            <div className="flex items-center gap-3">
+                <Avatar className="h-14 w-14">
+                    <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
+                    <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
+                    <p className="text-xs text-muted-foreground truncate max-w-xs">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center text-yellow-400">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                            <Star 
                                 key={i} 
                                 className={cn(
                                     "h-4 w-4", 
                                     (profileUser.averageRating || 0) > i ? 'fill-current' : 'text-gray-300 dark:text-gray-600'
                                 )} 
                             />
-                        ))}
+                            ))}
+                        </div>
+                        <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
+                        <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
-                    <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                 </div>
-             </div>
+            </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -542,7 +558,12 @@ export default function UserProfilePage() {
                 <div className="flex items-center gap-2 mb-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="搵下我有啲咩產品先" className="pl-10 rounded-full" />
+                        <Input 
+                            placeholder="搵下我有啲咩產品先" 
+                            className="pl-10 rounded-full h-9 text-sm" 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                     <Button variant="ghost" className="rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedProducts(new Set()); }}>
                         {isManaging ? '取消' : '管理'}
@@ -550,9 +571,9 @@ export default function UserProfilePage() {
                 </div>
             )}
              <ProductGrid 
-                products={userProducts} 
+                products={filteredUserProducts} 
                 loading={loadingUserProducts} 
-                emptyMessage={isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品"}
+                emptyMessage={searchTerm ? `找不到關於「${searchTerm}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
                 isManaging={isManaging}
                 selectedProducts={selectedProducts}
                 onToggleSelect={handleToggleSelection}
