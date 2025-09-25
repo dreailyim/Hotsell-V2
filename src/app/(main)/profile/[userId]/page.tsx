@@ -492,30 +492,32 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex flex-col items-center gap-2 mb-4">
-             <Avatar className="h-12 w-12">
-                <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
-                <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
-             </Avatar>
-             <div className="flex flex-col justify-center text-center">
-                <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
-                <p className="text-xs text-muted-foreground truncate">{profileUser.aboutMe || '未填寫個人簡介'}</p>
-                <div className="flex items-center gap-1 mt-1 justify-center">
-                    <div className="flex items-center text-yellow-400">
-                        {Array.from({ length: 5 }).map((_, i) => (
-                           <Star 
+        <div className="flex justify-center mb-4">
+            <div className="flex items-center gap-4">
+                <Avatar className="h-12 w-12">
+                    <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
+                    <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
+                    <p className="text-xs text-muted-foreground truncate max-w-xs">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                    <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center text-yellow-400">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                            <Star 
                                 key={i} 
                                 className={cn(
                                     "h-4 w-4", 
                                     (profileUser.averageRating || 0) > i ? 'fill-current' : 'text-gray-300 dark:text-gray-600'
                                 )} 
                             />
-                        ))}
+                            ))}
+                        </div>
+                        <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
+                        <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
-                    <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
-                    <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                 </div>
-             </div>
+            </div>
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
