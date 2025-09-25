@@ -30,6 +30,8 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { format, isToday, isYesterday, isSameDay } from 'date-fns';
+import { zhHK } from 'date-fns/locale';
 
 // Reusable BidDialog component for initial bids and re-bids
 function BidDialog({
@@ -489,6 +491,14 @@ export default function ChatPage() {
     }
   };
 
+  const getFormattedDate = (timestamp: Message['timestamp']) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp as string);
+    if (isToday(date)) return '今日';
+    if (isYesterday(date)) return '昨日';
+    return format(date, 'M月d日', { locale: zhHK });
+  };
+
   const ChatProductHeader = () => {
     if (!conversation || !user) return null;
     
@@ -725,29 +735,42 @@ export default function ChatPage() {
           const isCurrentUser = msg.senderId === user?.uid;
           const showAvatar = !isCurrentUser && otherUser && (index === 0 || messages[index - 1]?.senderId !== msg.senderId);
 
+          const currentMessageDate = new Date(msg.timestamp as string);
+          const prevMessageDate = index > 0 ? new Date(messages[index - 1].timestamp as string) : null;
+          const showDateSeparator = !prevMessageDate || !isSameDay(currentMessageDate, prevMessageDate);
+
           return (
-            <div key={msg.id} className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
-              {!isCurrentUser && (
-                <Avatar className={cn("h-8 w-8", showAvatar ? 'opacity-100' : 'opacity-0')}>
-                   {otherUser && <AvatarImage src={otherUser.photoURL || undefined} />}
-                   {otherUser && <AvatarFallback>{otherUser.displayName?.charAt(0) || 'U'}</AvatarFallback>}
-                </Avatar>
+            <React.Fragment key={msg.id}>
+              {showDateSeparator && (
+                <div className="flex justify-center my-4">
+                  <div className="text-xs text-muted-foreground bg-muted px-3 py-1 rounded-full">
+                    {getFormattedDate(msg.timestamp)}
+                  </div>
+                </div>
               )}
-              <div className={cn(
-                "max-w-xs md:max-w-md lg:max-w-lg rounded-2xl px-3 py-2 text-sm flex flex-col",
-                isCurrentUser
-                  ? "bg-primary text-primary-foreground rounded-br-none"
-                  : "bg-muted text-secondary-foreground rounded-bl-none"
-              )}>
-                <p className="whitespace-pre-wrap break-words">{msg.text}</p>
-                <span className={cn(
-                    "text-xs mt-1",
-                    isCurrentUser ? "self-end text-primary-foreground/70" : "self-start text-muted-foreground"
+              <div className={cn("flex items-end gap-2", isCurrentUser ? "justify-end" : "justify-start")}>
+                {!isCurrentUser && (
+                  <Avatar className={cn("h-8 w-8", showAvatar ? 'opacity-100' : 'opacity-0')}>
+                     {otherUser && <AvatarImage src={otherUser.photoURL || undefined} />}
+                     {otherUser && <AvatarFallback>{otherUser.displayName?.charAt(0) || 'U'}</AvatarFallback>}
+                  </Avatar>
+                )}
+                <div className={cn(
+                  "max-w-xs md:max-w-md lg:max-w-lg rounded-2xl px-3 py-2 text-sm flex flex-col",
+                  isCurrentUser
+                    ? "bg-primary text-primary-foreground rounded-br-none"
+                    : "bg-muted text-secondary-foreground rounded-bl-none"
                 )}>
-                  {getFormattedTime(msg.timestamp)}
-                </span>
+                  <p className="whitespace-pre-wrap break-words">{msg.text}</p>
+                  <span className={cn(
+                      "text-xs mt-1",
+                      isCurrentUser ? "self-end text-primary-foreground/70" : "self-start text-muted-foreground"
+                  )}>
+                    {getFormattedTime(msg.timestamp)}
+                  </span>
+                </div>
               </div>
-            </div>
+            </React.Fragment>
           );
         })}
         <div ref={messagesEndRef} />
