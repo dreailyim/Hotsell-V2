@@ -80,9 +80,9 @@ export default function HotPage() {
              <p>快去發掘和收藏您喜歡的商品吧！</p>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4 lg:gap-6 items-start">
+          <div className="columns-2 md:columns-3 lg:columns-4 gap-2 md:gap-4 lg:gap-6">
             {products.map(product => (
-              <div key={product.id}>
+              <div key={product.id} className="mb-4 break-inside-avoid">
                 <ProductCard product={product} />
               </div>
             ))}

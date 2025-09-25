@@ -78,9 +78,9 @@ function ProductGrid({
         )
     }
     return (
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4 lg:gap-6 items-start">
+        <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {products.map((product) => (
-                <div key={product.id} className="relative" onClick={() => isManaging && onToggleSelect?.(product.id)}>
+                <div key={product.id} className="relative mb-4 break-inside-avoid" onClick={() => isManaging && onToggleSelect?.(product.id)}>
                     <ProductCard product={product} />
                     {isManaging && (
                         <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer">
