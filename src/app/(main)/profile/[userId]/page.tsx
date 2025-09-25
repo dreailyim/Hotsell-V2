@@ -468,7 +468,7 @@ export default function UserProfilePage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作無法復原，將會永久刪除您選取的 {selectedProducts.size} 件產品。
+                            此操作無法復原，將會永久刪除您選取的 ${selectedProducts.size} 件產品。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -492,15 +492,15 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col items-center gap-2 mb-4">
              <Avatar className="h-12 w-12">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                 <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
              </Avatar>
-             <div className="flex flex-col justify-center flex-1">
+             <div className="flex flex-col justify-center text-center">
                 <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
                 <p className="text-xs text-muted-foreground truncate">{profileUser.aboutMe || '未填寫個人簡介'}</p>
-                <div className="flex items-center gap-1 mt-1">
+                <div className="flex items-center gap-1 mt-1 justify-center">
                     <div className="flex items-center text-yellow-400">
                         {Array.from({ length: 5 }).map((_, i) => (
                            <Star 
