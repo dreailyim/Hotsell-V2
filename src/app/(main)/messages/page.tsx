@@ -145,7 +145,7 @@ export default function MessagesPage() {
   const [errorNotifications, setErrorNotifications] = useState<string | null>(null);
 
   // --- States for Management & Search ---
-  const [isManaging, setIsManaging] = useState(isManaging);
+  const [isManaging, setIsManaging] = useState(false);
   const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
   const [isDeleting, startDeleteTransition] = useTransition();
   const [searchTerm, setSearchTerm] = useState('');
@@ -591,3 +591,5 @@ export default function MessagesPage() {
 }
 
   
+
+    
