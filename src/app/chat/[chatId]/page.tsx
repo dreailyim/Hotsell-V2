@@ -1,6 +1,7 @@
+
 'use client';
 
-import { useState, useEffect, useRef, useCallback, useTransition } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useTransition } from 'react';
 import { useSearchParams, useParams, useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Header } from '@/components/layout/header';
@@ -800,3 +801,5 @@ export default function ChatPage() {
     </div>
   );
 }
+
+    
