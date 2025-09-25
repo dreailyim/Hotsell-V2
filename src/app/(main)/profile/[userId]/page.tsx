@@ -174,6 +174,8 @@ export default function UserProfilePage() {
   const [isManaging, setIsManaging] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
   const [isProcessing, startTransition] = useTransition();
+
+  const [searchTerm, setSearchTerm] = useState('');
   
   const isOwnProfile = currentUser?.uid === userId;
   
@@ -320,6 +322,15 @@ export default function UserProfilePage() {
     }
   }, [activeTab, isOwnProfile, fetchReviews, fetchFavoriteProducts]);
 
+  const filteredUserProducts = useMemo(() => {
+    if (!searchTerm) {
+      return userProducts;
+    }
+    return userProducts.filter(product =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [userProducts, searchTerm]);
+
   // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
     setSelectedProducts(prev => {
@@ -334,10 +345,11 @@ export default function UserProfilePage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedProducts.size === userProducts.length) {
+    const productsToSelect = filteredUserProducts;
+    if (selectedProducts.size === productsToSelect.length) {
         setSelectedProducts(new Set());
     } else {
-        setSelectedProducts(new Set(userProducts.map(p => p.id)));
+        setSelectedProducts(new Set(productsToSelect.map(p => p.id)));
     }
   };
   
@@ -441,7 +453,7 @@ export default function UserProfilePage() {
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/10 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">
-            {selectedProducts.size === userProducts.length ? '取消全選' : '全選'}
+            {selectedProducts.size === filteredUserProducts.length ? '取消全選' : '全選'}
         </Button>
         <div className="flex items-center gap-2">
             <Button
@@ -544,7 +556,12 @@ export default function UserProfilePage() {
                 <div className="flex items-center gap-2 mb-4">
                     <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input placeholder="搵下我有啲咩產品先" className="pl-10 rounded-full" />
+                        <Input 
+                            placeholder="搵下我有啲咩產品先" 
+                            className="pl-10 rounded-full" 
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
                     </div>
                     <Button variant="ghost" className="rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedProducts(new Set()); }}>
                         {isManaging ? '取消' : '管理'}
@@ -552,9 +569,9 @@ export default function UserProfilePage() {
                 </div>
             )}
              <ProductGrid 
-                products={userProducts} 
+                products={filteredUserProducts} 
                 loading={loadingUserProducts} 
-                emptyMessage={isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品"}
+                emptyMessage={searchTerm ? `找不到關於「${searchTerm}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
                 isManaging={isManaging}
                 selectedProducts={selectedProducts}
                 onToggleSelect={handleToggleSelection}
