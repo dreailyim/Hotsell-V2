@@ -492,14 +492,14 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex items-center gap-3 mb-6">
-             <Avatar className="h-16 w-16">
+        <div className="flex items-center gap-4 mb-4">
+             <Avatar className="h-12 w-12">
                 <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                 <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
              </Avatar>
              <div className="flex flex-col justify-center flex-1">
-                <h2 className="text-lg font-bold">{profileUser.displayName || '使用者'}</h2>
-                <p className="text-sm text-muted-foreground truncate">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
+                <p className="text-xs text-muted-foreground truncate">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                 <div className="flex items-center gap-1 mt-1">
                     <div className="flex items-center text-yellow-400">
                         {Array.from({ length: 5 }).map((_, i) => (
