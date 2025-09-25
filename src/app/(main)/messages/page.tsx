@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState, useEffect, useTransition, useRef, useCallback } from 'react';
+import { useState, useEffect, useTransition, useRef, useCallback, useMemo } from 'react';
 import { Header } from '@/components/layout/header';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, MessageCircle, Search, Bell, Trash2, CheckCircle2, Circle, Star, Package, Tag, Heart, MessageSquareQuote, PackagePlus, PackageCheck } from 'lucide-react';
@@ -144,10 +144,11 @@ export default function MessagesPage() {
   const [loadingNotifications, setLoadingNotifications] = useState(true);
   const [errorNotifications, setErrorNotifications] = useState<string | null>(null);
 
-  // --- States for Management ---
-  const [isManaging, setIsManaging] = useState(false);
+  // --- States for Management & Search ---
+  const [isManaging, setIsManaging] = useState(isManaging);
   const [selectedConversations, setSelectedConversations] = useState<Set<string>>(new Set());
   const [isDeleting, startDeleteTransition] = useTransition();
+  const [searchTerm, setSearchTerm] = useState('');
 
   // --- State for Sliding Tabs ---
   const [activeTab, setActiveTab] = useState('private');
@@ -249,6 +250,22 @@ export default function MessagesPage() {
 
   const systemNotificationsUnreadCount = notifications.filter(n => !n.isRead).length;
 
+  // --- Filtering Logic ---
+  const filteredConversations = useMemo(() => {
+    if (!searchTerm) {
+        return conversations;
+    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return conversations.filter(convo => {
+        const otherUserName = convo.otherUserDetails?.displayName?.toLowerCase() || '';
+        const productName = convo.product.name.toLowerCase();
+        const lastMessage = convo.lastMessage?.text?.toLowerCase() || '';
+
+        return otherUserName.includes(lowerCaseSearchTerm) ||
+               productName.includes(lowerCaseSearchTerm) ||
+               lastMessage.includes(lowerCaseSearchTerm);
+    });
+  }, [conversations, searchTerm]);
 
   // --- Handlers for Private Messages ---
   const handleToggleSelection = (convoId: string) => {
@@ -260,10 +277,10 @@ export default function MessagesPage() {
   };
 
   const handleSelectAll = () => {
-    if (selectedConversations.size === conversations.length) {
+    if (selectedConversations.size === filteredConversations.length) {
       setSelectedConversations(new Set());
     } else {
-      setSelectedConversations(new Set(conversations.map(c => c.id)));
+      setSelectedConversations(new Set(filteredConversations.map(c => c.id)));
     }
   };
 
@@ -388,10 +405,19 @@ export default function MessagesPage() {
         </div>
       );
     }
+    if (filteredConversations.length === 0) {
+      return (
+        <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
+            <Search className="h-16 w-16 text-muted-foreground/50" />
+            <p className="font-semibold text-lg">找不到「{searchTerm}」的相關訊息</p>
+            <p>請嘗試其他關鍵字。</p>
+        </div>
+      )
+    }
 
     return (
       <div className="divide-y divide-border">
-        {conversations.map((convo) => {
+        {filteredConversations.map((convo) => {
           const otherUser = convo.otherUserDetails;
           if (!otherUser) {
             // Render a placeholder or skip if user details aren't loaded yet
@@ -492,7 +518,7 @@ export default function MessagesPage() {
   const ManagementFooter = () => (
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/20 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">{selectedConversations.size === conversations.length ? '取消全選' : '全選'}</Button>
+        <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">{selectedConversations.size === filteredConversations.length ? '取消全選' : '全選'}</Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" disabled={selectedConversations.size === 0 || isDeleting} className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"><Trash2 className="mr-2 h-4 w-4" />刪除 ({selectedConversations.size})</Button>
@@ -513,7 +539,12 @@ export default function MessagesPage() {
         <div className="flex items-center gap-2 mb-4 px-4 md:px-0">
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="搜尋訊息..." className="rounded-full pl-9 bg-muted border-none h-9" />
+                <Input
+                  placeholder="搜尋訊息..."
+                  className="rounded-full pl-9 bg-muted border-none h-9 text-sm"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
             </div>
             <Button variant="ghost" className="text-foreground text-sm rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedConversations(new Set()); }}>{isManaging ? '取消' : '管理'}</Button>
         </div>
@@ -558,3 +589,5 @@ export default function MessagesPage() {
     </>
   );
 }
+
+  
