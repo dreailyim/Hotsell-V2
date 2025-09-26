@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
@@ -606,7 +607,7 @@ export default function UserProfilePage() {
                 {reviews.map((review) => (
                     <Card 
                         key={review.id}
-                        className="p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl border-t border-t-white/20 border-b border-b-white/10"
+                        className="p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl border-t-2 border-t-white/20 border-b-2 border-b-white/10"
                     >
                         <div className="flex items-start gap-3">
                             <Avatar className="h-10 w-10 flex-shrink-0">
