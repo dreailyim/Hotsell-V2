@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
@@ -630,11 +629,10 @@ export default function UserProfilePage() {
                                     <Separator />
                                     <Link href={`/products/${review.productId}`} className="flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
                                         <div className="relative h-12 w-12 flex-shrink-0">
-                                            <Image 
+                                            <img 
                                                 src={review.productImage} 
                                                 alt={review.productName} 
-                                                fill 
-                                                className="object-cover rounded-md" 
+                                                className="absolute inset-0 h-full w-full object-cover rounded-md" 
                                                 data-ai-hint="product image"
                                             />
                                         </div>
