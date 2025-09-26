@@ -3,7 +3,6 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Product, Review } from './lib/types'; // CORRECTED IMPORT PATH
 
 admin.initializeApp();
 
@@ -126,7 +125,7 @@ export const createNotificationOnUpdate = functions
     const batch = db.batch();
 
     if (collectionId === 'products') {
-      const product = after as Product;
+      const product = after;
       const productId = docId;
 
       const oldFavoritedBy: string[] = before.favoritedBy || [];
@@ -209,7 +208,7 @@ export const onNewReview = functions
   .region('asia-east2')
   .firestore.document('reviews/{reviewId}')
   .onCreate(async (snapshot, context) => {
-    const review = snapshot.data() as Review;
+    const review = snapshot.data();
     if (!review) {
       console.log('No review data associated with the event');
       return;
@@ -241,12 +240,12 @@ export const onNewReview = functions
     }
     
     // Determine reviewer role
-    let reviewerRole: 'buyer' | 'seller' = 'buyer'; // Default to buyer
+    let reviewerRole = 'buyer'; // Default to buyer
     try {
         const productRef = db.collection('products').doc(review.productId);
         const productSnap = await productRef.get();
         if (productSnap.exists) {
-            const product = productSnap.data() as Product;
+            const product = productSnap.data();
             if (product.sellerId === review.reviewerId) {
                 reviewerRole = 'seller';
             }
