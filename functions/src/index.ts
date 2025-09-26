@@ -2,6 +2,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import type { Product } from '../../src/lib/types'; // Import type
 
 admin.initializeApp();
 
@@ -237,6 +238,24 @@ export const onNewReview = functions
         console.error(`Failed to update user rating for ${ratedUserId}:`, error);
         // Continue to create the notification even if rating update fails
     }
+    
+    // Determine reviewer role
+    let reviewerRole: 'buyer' | 'seller' = 'buyer'; // Default to buyer
+    try {
+        const productRef = db.collection('products').doc(review.productId);
+        const productSnap = await productRef.get();
+        if (productSnap.exists()) {
+            const product = productSnap.data() as Product;
+            if (product.sellerId === review.reviewerId) {
+                reviewerRole = 'seller';
+            }
+        }
+    } catch(e) {
+        console.error("Could not determine reviewer role:", e);
+    }
+    
+    // Update the review itself with the role
+    batch.update(snapshot.ref, { reviewerRole: reviewerRole });
 
     const notificationId = `${ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
@@ -290,6 +309,7 @@ export const onConversationUpdate = functions
     }
     return null;
   });
+
 
 
 

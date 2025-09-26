@@ -34,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 function ProductGridSkeleton() {
     return (
@@ -604,36 +605,40 @@ export default function UserProfilePage() {
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
                     <Card key={review.id}>
-                        <CardContent className="p-4 space-y-4">
-                            <div className="flex gap-4">
-                                <Avatar>
+                        <CardContent className="p-4 space-y-3">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-8 w-8">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
-                                    <AvatarFallback>{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
+                                    <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
                                 </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-center">
-                                    <p className="font-semibold">{review.reviewerName}</p>
-                                    <p className="text-xs text-muted-foreground">{getFormattedTime(review.createdAt)}</p>
+                                <div className="flex-1 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">{review.reviewerName}</span>
+                                         {review.reviewerRole && (
+                                            <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                                {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
+                                            </Badge>
+                                        )}
                                     </div>
-                                    <div className="flex items-center gap-1 mt-1 text-yellow-400">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-current' : ''}`} />
-                                    ))}
+                                    <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : ''}`} />
+                                        ))}
                                     </div>
-                                    <p className="text-sm mt-2">{review.comment}</p>
                                 </div>
+                                <p className="text-xs text-muted-foreground">{getFormattedTime(review.createdAt)}</p>
                             </div>
+                             <p className="text-sm pl-11">{review.comment}</p>
                             
                             {review.productName && review.productImage && (
                                 <>
-                                    <Separator />
+                                    <Separator className="my-2" />
                                     <Link href={`/products/${review.productId}`} className="flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
                                         <div className="relative h-12 w-12 flex-shrink-0">
                                             <img 
                                                 src={review.productImage} 
                                                 alt={review.productName} 
                                                 className="absolute inset-0 h-full w-full object-cover rounded-md" 
-                                                data-ai-hint="product image"
                                             />
                                         </div>
                                         <div className="flex-1">

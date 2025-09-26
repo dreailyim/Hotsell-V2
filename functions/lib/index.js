@@ -220,10 +220,31 @@ exports.onNewReview = functions
         return;
     }
     const batch = db.batch();
-    const notificationId = `${review.ratedUserId}_newreview_${snapshot.id}`;
+    const ratedUserId = review.ratedUserId;
+    const ratedUserRef = db.collection('users').doc(ratedUserId);
+    try {
+        const userDoc = await ratedUserRef.get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const currentReviewCount = (userData === null || userData === void 0 ? void 0 : userData.reviewCount) || 0;
+            const currentAverageRating = (userData === null || userData === void 0 ? void 0 : userData.averageRating) || 0;
+            const newReviewCount = currentReviewCount + 1;
+            const newAverageRating = (currentAverageRating * currentReviewCount + review.rating) /
+                newReviewCount;
+            batch.update(ratedUserRef, {
+                reviewCount: newReviewCount,
+                averageRating: newAverageRating,
+            });
+        }
+    }
+    catch (error) {
+        console.error(`Failed to update user rating for ${ratedUserId}:`, error);
+        // Continue to create the notification even if rating update fails
+    }
+    const notificationId = `${ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
     batch.set(notificationRef, {
-        userId: review.ratedUserId,
+        userId: ratedUserId,
         type: 'new_review',
         message: `${review.reviewerName} 給了您一個 ${review.rating} 星評價。`,
         isRead: false,
