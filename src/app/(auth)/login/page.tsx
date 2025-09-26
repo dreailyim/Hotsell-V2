@@ -27,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -137,6 +137,10 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md space-y-4">
+        <div className="flex flex-col items-center justify-center space-y-2">
+            <Flame className="h-12 w-12 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight text-primary">HotSell</h1>
+        </div>
         <Card>
           <CardHeader>
             <CardTitle>登入</CardTitle>
