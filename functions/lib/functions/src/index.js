@@ -246,7 +246,7 @@ exports.onNewReview = functions
     try {
         const productRef = db.collection('products').doc(review.productId);
         const productSnap = await productRef.get();
-        if (productSnap.exists()) {
+        if (productSnap.exists) {
             const product = productSnap.data();
             if (product.sellerId === review.reviewerId) {
                 reviewerRole = 'seller';

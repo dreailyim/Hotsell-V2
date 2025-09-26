@@ -606,33 +606,37 @@ export default function UserProfilePage() {
                 {reviews.map((review) => (
                     <Card key={review.id}>
                         <CardContent className="p-4 space-y-3">
-                            <div className="flex items-center gap-3">
-                                <Avatar className="h-8 w-8">
+                            <div className="flex items-start gap-3">
+                                <Avatar className="h-10 w-10">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
                                     <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 text-sm">
-                                    <div className="flex items-center gap-2">
-                                        <span className="font-semibold">{review.reviewerName}</span>
-                                         {review.reviewerRole && (
-                                            <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
-                                                {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
-                                            </Badge>
-                                        )}
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-semibold">{review.reviewerName}</span>
+                                                {review.reviewerRole && (
+                                                    <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                                        {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
+                                                    </Badge>
+                                                )}
+                                            </div>
+                                            <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
+                                                {Array.from({ length: 5 }).map((_, i) => (
+                                                    <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : ''}`} />
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
                                     </div>
-                                    <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
-                                        {Array.from({ length: 5 }).map((_, i) => (
-                                            <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : ''}`} />
-                                        ))}
-                                    </div>
+                                    <p className="text-sm mt-2">{review.comment}</p>
                                 </div>
-                                <p className="text-xs text-muted-foreground">{getFormattedTime(review.createdAt)}</p>
                             </div>
-                             <p className="text-sm pl-11">{review.comment}</p>
                             
                             {review.productName && review.productImage && (
                                 <>
-                                    <Separator className="my-2" />
+                                    <Separator className="my-3" />
                                     <Link href={`/products/${review.productId}`} className="flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
                                         <div className="relative h-12 w-12 flex-shrink-0">
                                             <img 
@@ -667,3 +671,5 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    
