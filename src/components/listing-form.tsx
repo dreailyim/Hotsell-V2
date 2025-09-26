@@ -260,17 +260,15 @@ export function ListingForm() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
           <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 ${MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {imagesData.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
                         <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center relative bg-muted/50">
-                            <Image
+                            <img
                                 src={image}
                                 alt={`Product preview ${index + 1}`}
-                                fill
-                                className="object-contain rounded-lg p-1"
-                                unoptimized
+                                className="object-contain rounded-lg p-1 h-full w-full"
                             />
                             <Button 
                                 type="button" 
@@ -478,5 +476,3 @@ export function ListingForm() {
     </Form>
   );
 }
-
-    
