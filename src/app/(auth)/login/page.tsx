@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
 import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
@@ -32,7 +31,7 @@ import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-  const { user, loading: authLoading, signUp, signIn, signInWithGoogle, sendPasswordReset } = useAuth();
+  const { user, loading: authLoading, signIn, sendPasswordReset } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
@@ -63,8 +62,7 @@ export default function LoginPage() {
   };
 
 
-  const handleAuthAction = async (
-    action: 'signUp' | 'signIn',
+  const handleSignIn = async (
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
@@ -74,19 +72,13 @@ export default function LoginPage() {
     const password = formData.get('password') as string;
 
     try {
-      if (action === 'signUp') {
-        const displayName = formData.get('displayName') as string;
-        await signUp(email, password, displayName);
-        toast({ title: '註冊成功！', description: '驗證郵件已寄出，請檢查您的收件箱。' });
-      } else {
-        await signIn(email, password);
-        toast({ title: '登入成功！', description: '很高興您回來！' });
-      }
+      await signIn(email, password);
+      toast({ title: '登入成功！', description: '很高興您回來！' });
       // The useEffect hook will handle the redirect
     } catch (error) {
       if (error instanceof FirebaseError) {
         toast({
-          title: action === 'signUp' ? '註冊失敗' : '登入失敗',
+          title: '登入失敗',
           description: getFriendlyErrorMessage(error),
           variant: 'destructive',
         });
@@ -101,31 +93,6 @@ export default function LoginPage() {
       setLoading(false);
     }
   };
-  
-  const handleGoogleSignIn = async () => {
-    setLoading(true);
-    try {
-        await signInWithGoogle();
-        toast({ title: 'Google 登入成功！', description: '很高興您回來！' });
-        // The useEffect hook will handle the redirect
-    } catch (error) {
-         if (error instanceof FirebaseError) {
-            toast({
-              title: 'Google 登入失敗',
-              description: getFriendlyErrorMessage(error),
-              variant: 'destructive',
-            });
-        } else {
-            toast({
-              title: '發生未知錯誤',
-              description: String(error),
-              variant: 'destructive',
-            });
-        }
-    } finally {
-        setLoading(false);
-    }
-  }
 
   const handlePasswordReset = async () => {
     if (!resetEmail) {
@@ -169,13 +136,13 @@ export default function LoginPage() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <div className="w-full max-w-md space-y-8">
+      <div className="w-full max-w-md space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>登入</CardTitle>
             <CardDescription>使用您的帳戶繼續。</CardDescription>
           </CardHeader>
-          <form onSubmit={(e) => handleAuthAction('signIn', e)}>
+          <form onSubmit={handleSignIn}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="login-email">電子郵件</Label>
@@ -228,52 +195,14 @@ export default function LoginPage() {
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 登入
               </Button>
-              <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleSignIn} type="button" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                使用 Google 登入
-              </Button>
             </CardFooter>
           </form>
         </Card>
 
-        <div className="flex items-center space-x-2">
-            <Separator className="flex-1" />
-            <span className="text-xs text-muted-foreground">或</span>
-            <Separator className="flex-1" />
+        <div className="text-center text-sm">
+            還沒有帳戶？ <Link href="/register" className="underline">立即註冊</Link>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>註冊</CardTitle>
-            <CardDescription>建立一個新帳戶。</CardDescription>
-          </CardHeader>
-            <form onSubmit={(e) => handleAuthAction('signUp', e)}>
-            <CardContent className="space-y-4">
-                <div className="space-y-2">
-                <Label htmlFor="signup-displayName">顯示名稱</Label>
-                <Input id="signup-displayName" name="displayName" type="text" placeholder="您的名稱" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-email">電子郵件</Label>
-                <Input id="signup-email" name="email" type="email" placeholder="m@example.com" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="signup-password">密碼</Label>
-                <Input id="signup-password" name="password" type="password" required />
-              </div>
-            </CardContent>
-            <CardFooter className="flex-col gap-4">
-              <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                註冊
-              </Button>
-                <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleSignIn} type="button" disabled={loading}>
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                使用 Google 註冊
-              </Button>
-            </CardFooter>
-          </form>
-        </Card>
       </div>
     </div>
   );
