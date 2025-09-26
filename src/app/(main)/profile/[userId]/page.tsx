@@ -606,7 +606,7 @@ export default function UserProfilePage() {
                 {reviews.map((review) => (
                     <Card 
                         key={review.id}
-                        className="p-4 rounded-xl border border-white/10 bg-background/30 backdrop-blur-sm shadow-xl"
+                        className="p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl border-t border-t-white/20 border-b border-b-white/10"
                     >
                         <div className="flex items-start gap-3">
                             <Avatar className="h-10 w-10 flex-shrink-0">
