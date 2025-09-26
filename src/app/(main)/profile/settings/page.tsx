@@ -286,32 +286,30 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
 
-        <Card>
-             <CardContent className="flex flex-col items-center gap-4 pt-6">
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                      <Button variant="destructive" className="w-full max-w-xs rounded-full">登出</Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                      <AlertDialogHeader>
-                        <AlertDialogTitle>確定要登出嗎？</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          您將會被登出此帳戶，需要重新登入才能繼續使用。
-                        </AlertDialogDescription>
-                      </AlertDialogHeader>
-                      <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
-                        <AlertDialogAction
-                          onClick={signOut}
-                          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
-                        >
-                         確認登出
-                        </AlertDialogAction>
-                      </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </CardContent>
-        </Card>
+        <div className="flex justify-center">
+            <AlertDialog>
+                <AlertDialogTrigger asChild>
+                    <Button className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>確定要登出嗎？</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        您將會被登出此帳戶，需要重新登入才能繼續使用。
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogAction
+                        onClick={signOut}
+                        className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                    >
+                        確認登出
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+        </div>
         
         <Card className="border-destructive">
             <CardHeader>
