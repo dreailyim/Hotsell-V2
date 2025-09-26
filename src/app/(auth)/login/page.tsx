@@ -138,7 +138,7 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         <div className="flex flex-col items-center justify-center space-y-2">
-            <Flame className="h-12 w-12 text-primary" />
+            <Flame className="h-12 w-12 text-primary animate-burn" />
             <h1 className="text-2xl font-bold tracking-tight text-primary">HotSell</h1>
         </div>
         <Card>
