@@ -2,7 +2,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import type { Product } from '../../src/lib/types'; // Import type
+import type { Product, Review } from '../../src/lib/types'; // Import types
 
 admin.initializeApp();
 
@@ -208,7 +208,7 @@ export const onNewReview = functions
   .region('asia-east2')
   .firestore.document('reviews/{reviewId}')
   .onCreate(async (snapshot, context) => {
-    const review = snapshot.data();
+    const review = snapshot.data() as Review;
     if (!review) {
       console.log('No review data associated with the event');
       return;
@@ -244,7 +244,7 @@ export const onNewReview = functions
     try {
         const productRef = db.collection('products').doc(review.productId);
         const productSnap = await productRef.get();
-        if (productSnap.exists()) {
+        if (productSnap.exists) {
             const product = productSnap.data() as Product;
             if (product.sellerId === review.reviewerId) {
                 reviewerRole = 'seller';
@@ -309,8 +309,3 @@ export const onConversationUpdate = functions
     }
     return null;
   });
-
-
-
-
-
