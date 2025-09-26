@@ -246,7 +246,7 @@ export const onNewReview = functions
         const productSnap = await productRef.get();
         if (productSnap.exists) {
             const product = productSnap.data();
-            if (product.sellerId === review.reviewerId) {
+            if (product && product.sellerId === review.reviewerId) {
                 reviewerRole = 'seller';
             }
         }
@@ -374,5 +374,7 @@ export const onUserDelete = functions
       console.error(`[${userId}] Error during data cleanup:`, error);
     }
   });
+
+    
 
     
