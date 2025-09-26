@@ -33,7 +33,7 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.onConversationUpdate = exports.onNewReview = exports.createNotificationOnUpdate = exports.onNewMessage = exports.helloWorld = exports.getConversations = void 0;
+exports.onUserDelete = exports.onConversationUpdate = exports.onNewReview = exports.createNotificationOnUpdate = exports.onNewMessage = exports.helloWorld = exports.getConversations = void 0;
 const functions = __importStar(require("firebase-functions"));
 const admin = __importStar(require("firebase-admin"));
 admin.initializeApp();
@@ -241,6 +241,23 @@ exports.onNewReview = functions
         console.error(`Failed to update user rating for ${ratedUserId}:`, error);
         // Continue to create the notification even if rating update fails
     }
+    // Determine reviewer role
+    let reviewerRole = 'buyer'; // Default to buyer
+    try {
+        const productRef = db.collection('products').doc(review.productId);
+        const productSnap = await productRef.get();
+        if (productSnap.exists) {
+            const product = productSnap.data();
+            if (product.sellerId === review.reviewerId) {
+                reviewerRole = 'seller';
+            }
+        }
+    }
+    catch (e) {
+        console.error("Could not determine reviewer role:", e);
+    }
+    // Update the review itself with the role
+    batch.update(snapshot.ref, { reviewerRole: reviewerRole });
     const notificationId = `${ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
     batch.set(notificationRef, {
@@ -277,12 +294,67 @@ exports.onConversationUpdate = functions
         console.log(`[${conversationId}] Deleting conversation and its messages.`);
         const conversationRef = db.collection('conversations').doc(conversationId);
         const messagesRef = conversationRef.collection('messages');
+        // Delete all sub-collection messages
         const messagesSnap = await messagesRef.get();
         const deleteBatch = db.batch();
         messagesSnap.docs.forEach((doc) => deleteBatch.delete(doc.ref));
         await deleteBatch.commit();
+        // Delete the conversation document itself
         return conversationRef.delete();
     }
     return null;
+});
+/**
+ * Triggered when a user is deleted from Firebase Authentication.
+ * Cleans up all associated user data from Firestore.
+ */
+exports.onUserDelete = functions
+    .region('asia-east2')
+    .auth.user()
+    .onDelete(async (user) => {
+    const userId = user.uid;
+    console.log(`[${userId}] User account deletion triggered. Cleaning up data...`);
+    const batch = db.batch();
+    // 1. Delete the user's profile document
+    const userDocRef = db.collection('users').doc(userId);
+    batch.delete(userDocRef);
+    // 2. Delete all products listed by the user
+    const productsQuery = db.collection('products').where('sellerId', '==', userId);
+    const productsSnap = await productsQuery.get();
+    productsSnap.forEach((doc) => {
+        console.log(`[${userId}] Deleting product: ${doc.id}`);
+        batch.delete(doc.ref);
+    });
+    // 3. Remove user from `favoritedBy` arrays of all products
+    const favoritedQuery = db.collection('products').where('favoritedBy', 'array-contains', userId);
+    const favoritedSnap = await favoritedQuery.get();
+    favoritedSnap.forEach((doc) => {
+        console.log(`[${userId}] Removing favorite from product: ${doc.id}`);
+        batch.update(doc.ref, {
+            favoritedBy: admin.firestore.FieldValue.arrayRemove(userId),
+            favorites: admin.firestore.FieldValue.increment(-1),
+        });
+    });
+    // 4. Delete all reviews written by the user
+    const reviewsQuery = db.collection('reviews').where('reviewerId', '==', userId);
+    const reviewsSnap = await reviewsQuery.get();
+    reviewsSnap.forEach((doc) => {
+        console.log(`[${userId}] Deleting review: ${doc.id}`);
+        batch.delete(doc.ref);
+    });
+    // 5. Delete all notifications for the user
+    const notificationsQuery = db.collection('notifications').where('userId', '==', userId);
+    const notificationsSnap = await notificationsQuery.get();
+    notificationsSnap.forEach((doc) => {
+        console.log(`[${userId}] Deleting notification: ${doc.id}`);
+        batch.delete(doc.ref);
+    });
+    try {
+        await batch.commit();
+        console.log(`[${userId}] Successfully cleaned up all data.`);
+    }
+    catch (error) {
+        console.error(`[${userId}] Error during data cleanup:`, error);
+    }
 });
 //# sourceMappingURL=index.js.map

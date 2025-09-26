@@ -3,7 +3,7 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import type { Product, Review } from '../../src/lib/types'; // Import types
+import { Product, Review } from './lib/types'; // CORRECTED IMPORT PATH
 
 admin.initializeApp();
 
@@ -126,7 +126,7 @@ export const createNotificationOnUpdate = functions
     const batch = db.batch();
 
     if (collectionId === 'products') {
-      const product = after;
+      const product = after as Product;
       const productId = docId;
 
       const oldFavoritedBy: string[] = before.favoritedBy || [];
@@ -296,16 +296,21 @@ export const onConversationUpdate = functions
     const isHiddenForAll =
       participantIds.length > 0 &&
       participantIds.every((id: string) => hiddenFor.includes(id));
+      
     if (isHiddenForAll) {
       console.log(
         `[${conversationId}] Deleting conversation and its messages.`
       );
       const conversationRef = db.collection('conversations').doc(conversationId);
       const messagesRef = conversationRef.collection('messages');
+      
+      // Delete all sub-collection messages
       const messagesSnap = await messagesRef.get();
       const deleteBatch = db.batch();
       messagesSnap.docs.forEach((doc) => deleteBatch.delete(doc.ref));
       await deleteBatch.commit();
+      
+      // Delete the conversation document itself
       return conversationRef.delete();
     }
     return null;
@@ -370,3 +375,5 @@ export const onUserDelete = functions
       console.error(`[${userId}] Error during data cleanup:`, error);
     }
   });
+
+    
