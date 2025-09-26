@@ -52,7 +52,18 @@ export default function RegisterPage() {
     const formData = new FormData(event.currentTarget);
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirm-password') as string;
     const displayName = formData.get('displayName') as string;
+
+    if (password !== confirmPassword) {
+        toast({
+            title: '註冊失敗',
+            description: '兩次輸入的密碼不一致。',
+            variant: 'destructive',
+        });
+        setLoading(false);
+        return;
+    }
 
     try {
       await signUp(email, password, displayName);
@@ -106,6 +117,10 @@ export default function RegisterPage() {
               <div className="space-y-2">
                 <Label htmlFor="signup-password">密碼</Label>
                 <Input id="signup-password" name="password" type="password" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-confirm-password">確認密碼</Label>
+                <Input id="signup-confirm-password" name="confirm-password" type="password" required />
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4">
