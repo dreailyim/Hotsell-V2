@@ -72,8 +72,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(newUser);
             // Create the document in Firestore
             setDoc(userDocRef, {
-                ...newUser,
+                displayName: newUser.displayName,
+                email: newUser.email,
+                photoURL: newUser.photoURL,
+                uid: newUser.uid,
                 createdAt: serverTimestamp(), // Use server timestamp for accuracy
+                aboutMe: '',
+                averageRating: 0,
+                reviewCount: 0,
             }).catch(e => console.error("Error creating user doc:", e));
           }
           setLoading(false);
