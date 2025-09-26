@@ -9,9 +9,7 @@ const nextConfig: NextConfig = {
   experimental: {
     // This allows the Next.js dev server to accept requests from the
     // Firebase Studio development preview URL.
-    allowedDevOrigins: [
-      '9003-firebase-studio-1756768466557.cluster-ubrd2huk7jh6otbgyei4h62ope.cloudworkstations.dev',
-    ],
+    // allowedDevOrigins was removed as it's deprecated in newer Next.js versions.
   },
   typescript: {
     ignoreBuildErrors: true,
