@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -30,13 +30,14 @@ import {
 } from "@/components/ui/alert-dialog"
 
 export default function SettingsPage() {
-  const { user, signOut, loading: authLoading, updateAuthProfile } = useAuth();
+  const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
   const [aboutMe, setAboutMe] = useState(user?.aboutMe || '');
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [password, setPassword] = useState('');
   const [isPending, startTransition] = useTransition();
 
   const [notificationPermission, setNotificationPermission] = useState('default');
@@ -134,6 +135,30 @@ export default function SettingsPage() {
         }
     });
   };
+
+  const handleDeleteAccount = async () => {
+      if (!password) {
+        toast({ title: '請輸入密碼', variant: 'destructive' });
+        return;
+      }
+      startTransition(async () => {
+          try {
+              await deleteAccount(password);
+              toast({ title: '帳戶已成功註銷' });
+              // The onAuthStateChanged listener in useAuth will handle the redirect.
+          } catch (error: any) {
+              let description = '發生未知錯誤，請稍後再試。';
+              if (error.code === 'auth/requires-recent-login' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') {
+                  description = '密碼錯誤或您的登入憑證已過期，請重新登入後再試。';
+              }
+              toast({
+                  title: '註銷失敗',
+                  description: description,
+                  variant: 'destructive',
+              });
+          }
+      });
+  }
 
   if (authLoading) {
     return (
@@ -261,33 +286,75 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
         
-        <div className="flex flex-col items-center gap-4 pt-4">
-             <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>確定要登出嗎？</AlertDialogTitle>
-                  <AlertDialogDescription>
-                    您將會被登出此帳戶，需要重新登入才能繼續使用。
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>取消</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={signOut}
-                    className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
-                  >
-                   確認登出
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-        </div>
+        <Card className="border-destructive">
+            <CardHeader>
+                <CardTitle className="text-destructive">危險區域</CardTitle>
+                <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="destructive" className="w-full max-w-xs rounded-full">登出</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>確定要登出嗎？</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          您將會被登出此帳戶，需要重新登入才能繼續使用。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={signOut}
+                          className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                        >
+                         確認登出
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                 <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                        <Button variant="outline" className="w-full max-w-xs rounded-full border-destructive text-destructive hover:bg-destructive/10">註銷帳戶</Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle className="flex items-center gap-2">
+                                <AlertTriangle className="text-destructive" /> 確定要註銷帳戶嗎？
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                這個操作**無法復原**。您的所有個人資料、刊登的商品、以及評價等都將被**永久刪除**。
+                                <br /><br />
+                                為確認此操作，請輸入您目前的登入密碼。
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <div className="py-2">
+                            <Label htmlFor="delete-password" className="sr-only">密碼</Label>
+                            <Input
+                                id="delete-password"
+                                type="password"
+                                placeholder="請在此輸入您的密碼"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <AlertDialogFooter>
+                            <AlertDialogCancel onClick={() => setPassword('')}>取消</AlertDialogCancel>
+                            <AlertDialogAction
+                                onClick={handleDeleteAccount}
+                                disabled={isPending || !password}
+                                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                            >
+                                {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                我確認，註銷我的帳戶
+                            </AlertDialogAction>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+            </CardContent>
+        </Card>
       </div>
     </>
   );
 }
-
-    
