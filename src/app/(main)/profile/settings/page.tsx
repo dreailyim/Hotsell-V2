@@ -285,14 +285,10 @@ export default function SettingsPage() {
                 <ThemeToggle />
             </CardContent>
         </Card>
-        
-        <Card className="border-destructive">
-            <CardHeader>
-                <CardTitle className="text-destructive">危險區域</CardTitle>
-                <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-                 <AlertDialog>
+
+        <Card>
+             <CardContent className="flex flex-col items-center gap-4 pt-6">
+                <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" className="w-full max-w-xs rounded-full">登出</Button>
                     </AlertDialogTrigger>
@@ -314,6 +310,15 @@ export default function SettingsPage() {
                       </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+            </CardContent>
+        </Card>
+        
+        <Card className="border-destructive">
+            <CardHeader>
+                <CardTitle className="text-destructive">危險區域</CardTitle>
+                <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col items-center gap-4">
                  <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="outline" className="w-full max-w-xs rounded-full border-destructive text-destructive hover:bg-destructive/10">註銷帳戶</Button>
