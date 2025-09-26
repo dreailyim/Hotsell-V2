@@ -459,7 +459,7 @@ export default function MessagesPage() {
                   </div>
               </div>
               <div className="relative h-12 w-12 flex-shrink-0">
-                    <Image src={convo.product.image} alt={convo.product.name} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                    <img src={convo.product.image} alt={convo.product.name} className="absolute inset-0 h-full w-full object-cover rounded-md" data-ai-hint="product image" />
               </div>
             </div>
           );
@@ -505,7 +505,7 @@ export default function MessagesPage() {
                     </div>
                     {notif.relatedData?.productImage && (
                          <div className="relative h-14 w-14 flex-shrink-0">
-                            <Image src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                            <img src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} className="absolute inset-0 h-full w-full object-cover rounded-md" data-ai-hint="product image" />
                         </div>
                     )}
                 </div>

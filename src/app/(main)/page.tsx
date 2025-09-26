@@ -201,11 +201,10 @@ function HomePageContent() {
                           <div className="p-1 cursor-pointer">
                           <Card className="overflow-hidden">
                               <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0">
-                                  <Image 
+                                  <img 
                                       src={banner.src}
                                       alt={banner.alt}
-                                      fill
-                                      className="object-cover"
+                                      className="absolute inset-0 h-full w-full object-cover"
                                       data-ai-hint={banner.dataAiHint}
                                   />
                                   <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white p-4 text-center">
