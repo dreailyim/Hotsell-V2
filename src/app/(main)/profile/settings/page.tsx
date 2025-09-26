@@ -316,8 +316,8 @@ export default function SettingsPage() {
                 <CardTitle className="text-destructive">危險區域</CardTitle>
                 <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-                 <AlertDialog>
+            <CardContent>
+                <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button variant="outline" className="w-full max-w-xs rounded-full border-destructive text-destructive hover:bg-destructive/10">註銷帳戶</Button>
                     </AlertDialogTrigger>
@@ -357,6 +357,10 @@ export default function SettingsPage() {
                 </AlertDialog>
             </CardContent>
         </Card>
+        
+        <div className="text-center text-xs text-muted-foreground mt-8">
+            App Version: {process.env.APP_VERSION || 'N/A'}
+        </div>
       </div>
     </>
   );

@@ -3,6 +3,9 @@ import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
   /* config options here */
+  env: {
+    APP_VERSION: process.env.npm_package_version,
+  },
   experimental: {
     // This allows the Next.js dev server to accept requests from the
     // Firebase Studio development preview URL.
