@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -150,12 +151,11 @@ export default function ProductPage() {
             ? data.createdAt.toDate().toISOString()
             : new Date().toISOString();
 
-        const fetchedProduct: Product = {
-            id: docSnap.id,
+        setProduct({ 
+            id: docSnap.id, 
             ...data,
             createdAt: createdAt,
-        };
-        setProduct(fetchedProduct);
+        } as Product);
       } else {
         setProduct(null);
       }
