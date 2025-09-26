@@ -605,54 +605,47 @@ export default function UserProfilePage() {
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
                     <Card key={review.id}>
-                        <CardContent className="p-4 space-y-3">
-                            <div className="flex items-start gap-3">
-                                <Avatar className="h-10 w-10">
+                        <CardContent className="p-4">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="h-10 w-10 flex-shrink-0">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
                                     <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1 text-sm">
-                                    <div className="flex justify-between items-start">
-                                        <div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="font-semibold">{review.reviewerName}</span>
-                                                {review.reviewerRole && (
-                                                    <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
-                                                        {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
-                                                    </Badge>
-                                                )}
-                                            </div>
-                                            <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
-                                                {Array.from({ length: 5 }).map((_, i) => (
-                                                    <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : ''}`} />
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">{review.reviewerName}</span>
+                                        {review.reviewerRole && (
+                                            <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                                {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
+                                            </Badge>
+                                        )}
                                     </div>
-                                    <p className="text-sm mt-2">{review.comment}</p>
+                                    <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <Star key={i} className={`h-3 w-3 ${i < review.rating ? 'fill-current' : ''}`} />
+                                        ))}
+                                    </div>
                                 </div>
+                                <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
                             </div>
+                            <p className="text-sm mt-3 ml-13">{review.comment}</p>
                             
                             {review.productName && review.productImage && (
-                                <>
-                                    <Separator className="my-3" />
-                                    <Link href={`/products/${review.productId}`} className="flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                        <div className="relative h-12 w-12 flex-shrink-0">
-                                            <img 
-                                                src={review.productImage} 
-                                                alt={review.productName} 
-                                                className="absolute inset-0 h-full w-full object-cover rounded-md" 
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium truncate">{review.productName}</p>
-                                            {typeof review.transactionPrice === 'number' && (
-                                                <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </>
+                                <Link href={`/products/${review.productId}`} className="mt-3 ml-13 flex items-center gap-3 p-2 -m-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                                    <div className="relative h-10 w-10 flex-shrink-0">
+                                        <img 
+                                            src={review.productImage} 
+                                            alt={review.productName} 
+                                            className="absolute inset-0 h-full w-full object-cover rounded-md" 
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium truncate">{review.productName}</p>
+                                        {typeof review.transactionPrice === 'number' && (
+                                            <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
+                                        )}
+                                    </div>
+                                </Link>
                             )}
                         </CardContent>
                     </Card>
@@ -671,5 +664,7 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    
 
     
