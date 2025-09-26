@@ -248,7 +248,7 @@ exports.onNewReview = functions
         const productSnap = await productRef.get();
         if (productSnap.exists) {
             const product = productSnap.data();
-            if (product.sellerId === review.reviewerId) {
+            if (product && product.sellerId === review.reviewerId) {
                 reviewerRole = 'seller';
             }
         }
