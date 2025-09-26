@@ -61,6 +61,12 @@
   }
 }
 
+@layer utilities {
+  .animate-zoom-in {
+    animation: zoom-in-fade-in 0.4s ease-out;
+  }
+}
+
 @layer components {
   .glass-morphism {
     @apply rounded-full bg-background/30 p-2 shadow-xl backdrop-blur-[2px];

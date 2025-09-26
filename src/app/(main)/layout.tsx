@@ -34,11 +34,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   // If user is authenticated, render the layout with the children pages.
   return (
-    <>
-      <div className="flex min-h-screen flex-col">
-        <main className="flex-1 pb-24 md:pb-0">{children}</main>
-      </div>
-      <BottomNav />
-    </>
+    <div className="flex min-h-screen flex-col">
+        <div className="flex-1 animate-zoom-in">
+            <main className="pb-24 md:pb-0">{children}</main>
+        </div>
+        <BottomNav />
+    </div>
   );
 }
