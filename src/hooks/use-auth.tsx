@@ -12,6 +12,7 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase/client-app';
 import { doc, setDoc, getDoc, Timestamp, serverTimestamp, onSnapshot } from 'firebase/firestore';
@@ -95,6 +96,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, displayName: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = userCredential.user;
+    
+    // Send email verification
+    await sendEmailVerification(firebaseUser);
+
     // Update the user's profile in Firebase Auth
     await updateProfile(firebaseUser, { displayName: displayName || '新用戶' });
     

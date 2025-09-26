@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -77,7 +78,7 @@ export default function LoginPage() {
       if (action === 'signUp') {
         const displayName = formData.get('displayName') as string;
         await signUp(email, password, displayName);
-        toast({ title: '註冊成功！', description: '歡迎加入 HotSell！' });
+        toast({ title: '註冊成功！', description: '驗證郵件已寄出，請檢查您的收件箱。' });
       } else {
         await signIn(email, password);
         toast({ title: '登入成功！', description: '很高興您回來！' });
