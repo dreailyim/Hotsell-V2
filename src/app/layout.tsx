@@ -8,7 +8,7 @@ import { FcmRegistrar } from "@/components/fcm-registrar";
 export const metadata: Metadata = {
   title: "HotSell",
   description: "A secondhand marketplace app.",
-  // manifest: "/manifest.json",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({
