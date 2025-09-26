@@ -1,5 +1,4 @@
-
-import type { Timestamp } from "firebase/firestore";
+import type { Timestamp, FieldValue } from "firebase/firestore";
 
 export type ShippingMethod = '面交' | '速遞包郵' | '速遞到付';
 
@@ -73,9 +72,9 @@ export type Conversation = {
   lastMessage: {
     text: string;
     senderId: string;
-    timestamp: Timestamp | string; // Correctly handle both Firestore Timestamp and client-side strings
+    timestamp: Timestamp | string | FieldValue;
   } | null;
-  lastActivity: Timestamp | string;
+  lastActivity: Timestamp | string | FieldValue;
   unreadCounts: {
     [key:string]: number;
   };
@@ -95,7 +94,7 @@ export type Message = {
     id: string;
     senderId: string;
     text: string;
-    timestamp: Timestamp | Date | string; // Stored as an ISO string
+    timestamp: Timestamp | Date | string | FieldValue;
 };
 
 // This type is deprecated and will be replaced by Conversation
@@ -107,7 +106,7 @@ export type Chat = {
     photoURL: string | null;
   };
   product: {
-    id: string;
+    id:string;
     name: string;
     image: string;
     price: number;
