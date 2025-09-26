@@ -50,6 +50,7 @@ export type Review = {
     rating: number;
     comment: string;
     createdAt: Timestamp | string;
+    reviewerRole?: 'buyer' | 'seller';
 }
 
 export type Conversation = {

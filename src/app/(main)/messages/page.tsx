@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useTransition, useRef, useCallback, useMemo } from 'react';
@@ -288,27 +287,14 @@ export default function MessagesPage() {
     if (!user || selectedConversations.size === 0) return;
     
     startDeleteTransition(async () => {
-        const conversationIdsToDelete = Array.from(selectedConversations);
+        const conversationIdsToHide = Array.from(selectedConversations);
         const batch = writeBatch(db);
-        let processedCount = 0;
         
         try {
-            for (const convoId of conversationIdsToDelete) {
+            for (const convoId of conversationIdsToHide) {
                 const convoRef = doc(db, 'conversations', convoId);
-                const convoSnap = await getDoc(convoRef);
-
-                if (!convoSnap.exists()) continue;
-
-                const conversation = convoSnap.data() as Conversation;
-                const otherParticipantId = conversation.participantIds.find(id => id !== user.uid);
-                const isOtherParticipantHidden = otherParticipantId ? conversation.hiddenFor?.includes(otherParticipantId) : false;
-
-                if (isOtherParticipantHidden) {
-                    batch.delete(convoRef);
-                } else {
-                    batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
-                }
-                processedCount++;
+                // The onConversationUpdate Cloud Function will handle the actual deletion.
+                batch.update(convoRef, { hiddenFor: arrayUnion(user.uid) });
             }
 
             await batch.commit();
@@ -318,12 +304,12 @@ export default function MessagesPage() {
 
             toast({
                 title: "操作成功",
-                description: `已成功處理 ${processedCount} 個對話。`,
+                description: `已成功隱藏 ${conversationIdsToHide.length} 個對話。`,
             });
         } catch (error: any) {
              toast({
-                title: "刪除失敗",
-                description: error.message || '刪除對話時發生未知錯誤。',
+                title: "操作失敗",
+                description: error.message || '隱藏對話時發生未知錯誤。',
                 variant: "destructive",
             });
         }
@@ -459,7 +445,7 @@ export default function MessagesPage() {
                   </div>
               </div>
               <div className="relative h-12 w-12 flex-shrink-0">
-                    <Image src={convo.product.image} alt={convo.product.name} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                    <img src={convo.product.image} alt={convo.product.name} className="absolute inset-0 h-full w-full object-cover rounded-md" data-ai-hint="product image" />
               </div>
             </div>
           );
@@ -505,7 +491,7 @@ export default function MessagesPage() {
                     </div>
                     {notif.relatedData?.productImage && (
                          <div className="relative h-14 w-14 flex-shrink-0">
-                            <Image src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                            <img src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} className="absolute inset-0 h-full w-full object-cover rounded-md" data-ai-hint="product image" />
                         </div>
                     )}
                 </div>
@@ -524,7 +510,7 @@ export default function MessagesPage() {
             <Button variant="destructive" disabled={selectedConversations.size === 0 || isDeleting} className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"><Trash2 className="mr-2 h-4 w-4" />刪除 ({selectedConversations.size})</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader><AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle><AlertDialogDescription>此操作可能會永久刪除對話 (如果對方也已刪除)。此操作無法復原。</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogHeader><AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle><AlertDialogDescription>您將不會再看到這個對話。如果對方也刪除，對話將會被永久移除。</AlertDialogDescription></AlertDialogHeader>
             <AlertDialogFooter><AlertDialogCancel>取消</AlertDialogCancel><AlertDialogAction onClick={handleDeleteSelected} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">確認刪除</AlertDialogAction></AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
@@ -589,7 +575,3 @@ export default function MessagesPage() {
     </>
   );
 }
-
-  
-
-    

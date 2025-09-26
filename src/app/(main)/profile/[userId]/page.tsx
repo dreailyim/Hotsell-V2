@@ -35,6 +35,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 
 function ProductGridSkeleton() {
     return (
@@ -594,7 +595,7 @@ export default function UserProfilePage() {
              {loadingReviews ? (
                 <div className="space-y-4 max-w-2xl mx-auto">
                     {[...Array(3)].map((_, i) => (
-                        <Card key={i}><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                        <Card key={i} className="bg-transparent border-none shadow-none"><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
                     ))}
                 </div>
              ) : reviews.length === 0 ? (
@@ -604,50 +605,51 @@ export default function UserProfilePage() {
              ) : (
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
-                    <Card key={review.id}>
-                        <CardContent className="p-4 space-y-4">
-                            <div className="flex gap-4">
-                                <Avatar>
-                                    <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
-                                    <AvatarFallback>{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex justify-between items-center">
-                                    <p className="font-semibold">{review.reviewerName}</p>
-                                    <p className="text-xs text-muted-foreground">{getFormattedTime(review.createdAt)}</p>
-                                    </div>
-                                    <div className="flex items-center gap-1 mt-1 text-yellow-400">
+                    <Card 
+                        key={review.id}
+                        className="p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl border-t-2 border-t-white/20 border-b-2 border-b-white/10"
+                    >
+                        <div className="flex items-start gap-3">
+                            <Avatar className="h-10 w-10 flex-shrink-0">
+                                <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
+                                <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 text-sm">
+                                <div className="flex items-center gap-2">
+                                    <span className="font-semibold">{review.reviewerName}</span>
+                                    {review.reviewerRole && (
+                                        <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                            {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
+                                        </Badge>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
                                     {Array.from({ length: 5 }).map((_, i) => (
-                                        <Star key={i} className={`h-4 w-4 ${i < review.rating ? 'fill-current' : ''}`} />
+                                        <Star key={i} className={cn("h-3 w-3", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
                                     ))}
-                                    </div>
-                                    <p className="text-sm mt-2">{review.comment}</p>
                                 </div>
                             </div>
-                            
-                            {review.productName && review.productImage && (
-                                <>
-                                    <Separator />
-                                    <Link href={`/products/${review.productId}`} className="flex items-center gap-3 p-2 -m-2 rounded-lg hover:bg-muted/50 transition-colors">
-                                        <div className="relative h-12 w-12 flex-shrink-0">
-                                            <Image 
-                                                src={review.productImage} 
-                                                alt={review.productName} 
-                                                fill 
-                                                className="object-cover rounded-md" 
-                                                data-ai-hint="product image"
-                                            />
-                                        </div>
-                                        <div className="flex-1">
-                                            <p className="text-sm font-medium truncate">{review.productName}</p>
-                                            {typeof review.transactionPrice === 'number' && (
-                                                <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
-                                            )}
-                                        </div>
-                                    </Link>
-                                </>
-                            )}
-                        </CardContent>
+                            <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
+                        </div>
+                        <p className="text-sm mt-3 ml-13">{review.comment}</p>
+                        
+                        {review.productName && review.productImage && (
+                            <Link href={`/products/${review.productId}`} className="mt-3 ml-13 flex items-center gap-3 p-2 -m-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                                <div className="relative h-10 w-10 flex-shrink-0">
+                                    <img 
+                                        src={review.productImage} 
+                                        alt={review.productName} 
+                                        className="absolute inset-0 h-full w-full object-cover rounded-md" 
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs font-medium truncate">{review.productName}</p>
+                                    {typeof review.transactionPrice === 'number' && (
+                                        <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
+                                    )}
+                                </div>
+                            </Link>
+                        )}
                     </Card>
                 ))}
                 </div>

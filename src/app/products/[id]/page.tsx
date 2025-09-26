@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -650,13 +649,10 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               {productImages.map((image, index) => (
                 <CarouselItem key={index}>
                   <div className="relative aspect-square w-full">
-                    <Image
+                    <img
                       src={image || 'https://picsum.photos/600/400'}
                       alt={`${product.name || '商品圖片'} ${index + 1}`}
-                      fill
-                      className="object-cover"
-                      priority={index === 0}
-                      data-ai-hint="product image"
+                      className="absolute inset-0 h-full w-full object-cover"
                     />
                   </div>
                 </CarouselItem>

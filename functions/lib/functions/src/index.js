@@ -241,6 +241,23 @@ exports.onNewReview = functions
         console.error(`Failed to update user rating for ${ratedUserId}:`, error);
         // Continue to create the notification even if rating update fails
     }
+    // Determine reviewer role
+    let reviewerRole = 'buyer'; // Default to buyer
+    try {
+        const productRef = db.collection('products').doc(review.productId);
+        const productSnap = await productRef.get();
+        if (productSnap.exists) {
+            const product = productSnap.data();
+            if (product.sellerId === review.reviewerId) {
+                reviewerRole = 'seller';
+            }
+        }
+    }
+    catch (e) {
+        console.error("Could not determine reviewer role:", e);
+    }
+    // Update the review itself with the role
+    batch.update(snapshot.ref, { reviewerRole: reviewerRole });
     const notificationId = `${ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
     batch.set(notificationRef, {

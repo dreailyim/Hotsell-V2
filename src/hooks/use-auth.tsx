@@ -12,6 +12,10 @@ import {
   GoogleAuthProvider,
   signInWithPopup,
   sendPasswordResetEmail,
+  sendEmailVerification,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+  deleteUser,
 } from 'firebase/auth';
 import { auth, db } from '@/lib/firebase/client-app';
 import { doc, setDoc, getDoc, Timestamp, serverTimestamp, onSnapshot } from 'firebase/firestore';
@@ -28,6 +32,7 @@ interface AuthContextType {
   signInWithGoogle: () => Promise<void>;
   updateAuthProfile: (profile: { displayName?: string; photoURL?: string | null }) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
+  deleteAccount: (password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -71,8 +76,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setUser(newUser);
             // Create the document in Firestore
             setDoc(userDocRef, {
-                ...newUser,
+                displayName: newUser.displayName,
+                email: newUser.email,
+                photoURL: newUser.photoURL,
+                uid: newUser.uid,
                 createdAt: serverTimestamp(), // Use server timestamp for accuracy
+                aboutMe: '',
+                averageRating: 0,
+                reviewCount: 0,
             }).catch(e => console.error("Error creating user doc:", e));
           }
           setLoading(false);
@@ -95,6 +106,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signUp = async (email: string, password: string, displayName: string) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const firebaseUser = userCredential.user;
+    
+    // Send email verification
+    await sendEmailVerification(firebaseUser);
+
     // Update the user's profile in Firebase Auth
     await updateProfile(firebaseUser, { displayName: displayName || '新用戶' });
     
@@ -137,7 +152,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   
   const sendPasswordReset = async (email: string) => {
     await sendPasswordResetEmail(auth, email);
-  }
+  };
+
+  const deleteAccount = async (password: string) => {
+    if (!auth.currentUser || !auth.currentUser.email) {
+      throw new Error('找不到有效的用戶或電郵地址。');
+    }
+
+    // 1. Re-authenticate the user
+    const credential = EmailAuthProvider.credential(auth.currentUser.email, password);
+    await reauthenticateWithCredential(auth.currentUser, credential);
+    
+    // 2. Delete the user from Firebase Authentication
+    // This will trigger the `onUserDelete` Cloud Function to clean up Firestore data.
+    await deleteUser(auth.currentUser);
+  };
 
   const value = {
       user,
@@ -148,6 +177,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       signInWithGoogle,
       updateAuthProfile,
       sendPasswordReset,
+      deleteAccount,
   };
 
   return (
