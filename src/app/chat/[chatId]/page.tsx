@@ -550,7 +550,7 @@ export default function ChatPage() {
           <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
-                  <img src={product.image} alt={product.name} className="absolute inset-0 h-full w-full object-cover rounded-md" />
+                  <Image src={product.image} alt={product.name} fill className="object-cover rounded-md" />
               </div>
               <div className="truncate">
                 <p className="font-semibold text-sm truncate">{product.name}</p>
@@ -650,7 +650,7 @@ export default function ChatPage() {
          <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
-                  <img src={product.image} alt={product.name} className="absolute inset-0 h-full w-full object-cover rounded-md" />
+                  <Image src={product.image} alt={product.name} fill className="object-cover rounded-md" />
               </div>
               <div className="truncate">
                 <p className="font-semibold text-sm truncate">{product.name}</p>

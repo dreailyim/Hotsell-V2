@@ -650,10 +650,11 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               {productImages.map((image, index) => (
                 <CarouselItem key={index}>
                   <div className="relative aspect-square w-full">
-                    <img
+                    <Image
                       src={image || 'https://picsum.photos/600/400'}
                       alt={`${product.name || '商品圖片'} ${index + 1}`}
-                      className="absolute inset-0 h-full w-full object-cover"
+                      fill
+                      className="object-cover"
                     />
                   </div>
                 </CarouselItem>
