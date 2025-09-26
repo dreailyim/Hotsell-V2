@@ -483,7 +483,7 @@ export default function ChatPage() {
   const getFormattedTime = (timestamp: Message['timestamp']) => {
     if (!timestamp) return '';
     try {
-      const date = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+      const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp as string);
       return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
     } catch (e) {
       console.error("Error formatting time:", e, "with value:", timestamp);
