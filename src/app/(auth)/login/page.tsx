@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -25,7 +24,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/use-auth';
 import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
@@ -169,114 +168,113 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background">
-      <Tabs defaultValue="login" className="w-[400px]">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="login">登入</TabsTrigger>
-          <TabsTrigger value="signup">註冊</TabsTrigger>
-        </TabsList>
-        <TabsContent value="login">
-          <Card>
-            <CardHeader>
-              <CardTitle>登入</CardTitle>
-              <CardDescription>使用您的帳戶繼續。</CardDescription>
-            </CardHeader>
-            <form onSubmit={(e) => handleAuthAction('signIn', e)}>
-              <CardContent className="space-y-4">
+    <div className="flex items-center justify-center min-h-screen bg-background p-4">
+      <div className="w-full max-w-md space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>登入</CardTitle>
+            <CardDescription>使用您的帳戶繼續。</CardDescription>
+          </CardHeader>
+          <form onSubmit={(e) => handleAuthAction('signIn', e)}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="login-email">電子郵件</Label>
+                <Input id="login-email" name="email" type="email" placeholder="m@example.com" required />
+              </div>
+              <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                      <Label htmlFor="login-password">密碼</Label>
+                      <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                              <Button variant="link" type="button" className="text-xs p-0 h-auto">忘記密碼？</Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                              <AlertDialogHeader>
+                              <AlertDialogTitle>重設您的密碼</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                  請輸入您的帳戶電郵地址，我們將會寄送密碼重設連結給您。
+                              </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <div className="grid gap-4 py-4">
+                                  <div className="grid grid-cols-4 items-center gap-4">
+                                      <Label htmlFor="reset-email" className="text-right">
+                                      電郵
+                                      </Label>
+                                      <Input
+                                          id="reset-email"
+                                          type="email"
+                                          value={resetEmail}
+                                          onChange={(e) => setResetEmail(e.target.value)}
+                                          className="col-span-3"
+                                          placeholder="m@example.com"
+                                      />
+                                  </div>
+                              </div>
+                              <AlertDialogFooter>
+                              <AlertDialogCancel>取消</AlertDialogCancel>
+                              <AlertDialogAction onClick={handlePasswordReset} disabled={loading}>
+                                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                  傳送重設郵件
+                              </AlertDialogAction>
+                              </AlertDialogFooter>
+                          </AlertDialogContent>
+                      </AlertDialog>
+                  </div>
+                <Input id="login-password" name="password" type="password" required />
+              </div>
+            </CardContent>
+            <CardFooter className="flex-col gap-4">
+              <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                登入
+              </Button>
+              <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleSignIn} type="button" disabled={loading}>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                使用 Google 登入
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+
+        <div className="flex items-center space-x-2">
+            <Separator className="flex-1" />
+            <span className="text-xs text-muted-foreground">或</span>
+            <Separator className="flex-1" />
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>註冊</CardTitle>
+            <CardDescription>建立一個新帳戶。</CardDescription>
+          </CardHeader>
+            <form onSubmit={(e) => handleAuthAction('signUp', e)}>
+            <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="login-email">電子郵件</Label>
-                  <Input id="login-email" name="email" type="email" placeholder="m@example.com" required />
-                </div>
-                <div className="space-y-2">
-                   <div className="flex items-center justify-between">
-                        <Label htmlFor="login-password">密碼</Label>
-                        <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                                <Button variant="link" type="button" className="text-xs p-0 h-auto">忘記密碼？</Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                                <AlertDialogHeader>
-                                <AlertDialogTitle>重設您的密碼</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                    請輸入您的帳戶電郵地址，我們將會寄送密碼重設連結給您。
-                                </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="grid grid-cols-4 items-center gap-4">
-                                        <Label htmlFor="reset-email" className="text-right">
-                                        電郵
-                                        </Label>
-                                        <Input
-                                            id="reset-email"
-                                            type="email"
-                                            value={resetEmail}
-                                            onChange={(e) => setResetEmail(e.target.value)}
-                                            className="col-span-3"
-                                            placeholder="m@example.com"
-                                        />
-                                    </div>
-                                </div>
-                                <AlertDialogFooter>
-                                <AlertDialogCancel>取消</AlertDialogCancel>
-                                <AlertDialogAction onClick={handlePasswordReset} disabled={loading}>
-                                     {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    傳送重設郵件
-                                </AlertDialogAction>
-                                </AlertDialogFooter>
-                            </AlertDialogContent>
-                        </AlertDialog>
-                    </div>
-                  <Input id="login-password" name="password" type="password" required />
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col gap-4">
-                <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
+                <Label htmlFor="signup-displayName">顯示名稱</Label>
+                <Input id="signup-displayName" name="displayName" type="text" placeholder="您的名稱" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-email">電子郵件</Label>
+                <Input id="signup-email" name="email" type="email" placeholder="m@example.com" required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="signup-password">密碼</Label>
+                <Input id="signup-password" name="password" type="password" required />
+              </div>
+            </CardContent>
+            <CardFooter className="flex-col gap-4">
+              <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  登入
-                </Button>
+                註冊
+              </Button>
                 <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleSignIn} type="button" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  使用 Google 登入
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-        <TabsContent value="signup">
-          <Card>
-            <CardHeader>
-              <CardTitle>註冊</CardTitle>
-              <CardDescription>建立一個新帳戶。</CardDescription>
-            </CardHeader>
-             <form onSubmit={(e) => handleAuthAction('signUp', e)}>
-              <CardContent className="space-y-4">
-                 <div className="space-y-2">
-                  <Label htmlFor="signup-displayName">顯示名稱</Label>
-                  <Input id="signup-displayName" name="displayName" type="text" placeholder="您的名稱" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-email">電子郵件</Label>
-                  <Input id="signup-email" name="email" type="email" placeholder="m@example.com" required />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="signup-password">密碼</Label>
-                  <Input id="signup-password" name="password" type="password" required />
-                </div>
-              </CardContent>
-              <CardFooter className="flex-col gap-4">
-                <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
-                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  註冊
-                </Button>
-                 <Button variant="outline" className="w-full rounded-full" onClick={handleGoogleSignIn} type="button" disabled={loading}>
-                  {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  使用 Google 註冊
-                </Button>
-              </CardFooter>
-            </form>
-          </Card>
-        </TabsContent>
-      </Tabs>
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                使用 Google 註冊
+              </Button>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }
