@@ -9,6 +9,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '1',
     name: '復古相機',
+    name_lowercase: '復古相機',
     price: 1500,
     image: 'https://picsum.photos/seed/product1/600/400',
     sellerName: '攝影愛好者',
@@ -23,6 +24,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '2',
     name: '設計師手提包',
+    name_lowercase: '設計師手提包',
     price: 4800,
     image: 'https://picsum.photos/seed/product2/600/400',
     sellerName: '時尚達人',
@@ -37,6 +39,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '3',
     name: '限量版運動鞋',
+    name_lowercase: '限量版運動鞋',
     price: 2200,
     image: 'https://picsum.photos/seed/product3/600/400',
     sellerName: '波鞋收藏家',
@@ -50,6 +53,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '4',
     name: '電競滑鼠',
+    name_lowercase: '電競滑鼠',
     price: 450,
     image: 'https://picsum.photos/seed/product4/600/400',
     sellerName: '遊戲玩家',
@@ -64,6 +68,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '5',
     name: '木製吉他',
+    name_lowercase: '木製吉他',
     price: 800,
     image: 'https://picsum.photos/seed/product5/600/400',
     sellerName: '音樂人',
@@ -78,6 +83,7 @@ export const placeholderProducts: Omit<Product, 'createdAt' | 'sellerId' | 'favo
   {
     id: '6',
     name: '古董掛鐘',
+    name_lowercase: '古董掛鐘',
     price: 1200,
     image: 'https://picsum.photos/seed/product6/600/400',
     sellerName: '古董收藏家',
