@@ -5,7 +5,7 @@ import { useState, useEffect, useTransition } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound, useParams, useRouter } from 'next/navigation';
-import { doc, onSnapshot, Timestamp, updateDoc, deleteDoc, getDoc, arrayUnion, arrayRemove, increment, collection, serverTimestamp, setDoc, addDoc, writeBatch, where, query, getDocs, deleteField } from 'firebase/firestore';
+import { doc, onSnapshot, Timestamp, updateDoc, deleteDoc, getDoc, arrayUnion, arrayRemove, increment, collection, serverTimestamp, setDoc, addDoc, writeBatch, where, query, getDocs, deleteField, FieldValue } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client-app';
 import type { Product, FullUser, Conversation } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
@@ -837,5 +837,3 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
-
-    
