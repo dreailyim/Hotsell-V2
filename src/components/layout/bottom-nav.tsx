@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -71,7 +70,7 @@ export function BottomNav() {
             <Link
               key={item.href}
               href={item.href}
-              ref={(el) => (itemsRef.current[index] = el)}
+              ref={(el) => { itemsRef.current[index] = el; }}
               className={cn(
                 'relative z-10 flex h-14 w-14 flex-col items-center justify-center rounded-full transition-colors gap-1',
                 isActive
