@@ -36,7 +36,7 @@ import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
 import { uploadString, getDownloadURL, getBlob } from 'firebase/storage';
-import { doc, updateDoc } from 'firebase/firestore';
+import { doc, updateDoc } from 'firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -243,7 +243,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
           category: values.productCategory,
           price: values.price,
           condition: values.condition,
-          shippingMethods: values.shippingMethods,
+          shippingMethods: values.shippingMethods as ShippingMethod[],
           pickupLocation: values.shippingMethods.includes('面交') ? values.pickupLocation : '',
           description: values.productDescription,
           images: imageUrls,
@@ -495,3 +495,5 @@ export function EditListingForm({ product }: EditListingFormProps) {
     </Form>
   );
 }
+
+    
