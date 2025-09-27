@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { Upload, Wand2, Loader2, RefreshCw, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
-import { getStorage, refFromURL } from 'firebase/storage';
+import { getStorage, ref } from 'firebase/storage';
 
 
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
-import { ref, uploadString, getDownloadURL, getBlob } from 'firebase/storage';
+import { uploadString, getDownloadURL, getBlob } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -302,7 +302,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
           <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormDescription>最多上傳 ${MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
