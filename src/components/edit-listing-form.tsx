@@ -243,7 +243,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
           category: values.productCategory,
           price: values.price,
           condition: values.condition,
-          shippingMethods: values.shippingMethods,
+          shippingMethods: values.shippingMethods as ShippingMethod[],
           pickupLocation: values.shippingMethods.includes('面交') ? values.pickupLocation : '',
           description: values.productDescription,
           images: imageUrls,
@@ -495,3 +495,5 @@ export function EditListingForm({ product }: EditListingFormProps) {
     </Form>
   );
 }
+
+    
