@@ -8,7 +8,7 @@ import { z } from 'zod';
 import { Upload, Wand2, Loader2, RefreshCw, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
-import { getStorage, refFromURL } from 'firebase/storage';
+import { getStorage, ref } from 'firebase/storage';
 
 
 import { Button } from '@/components/ui/button';
@@ -35,7 +35,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
-import { ref, uploadString, getDownloadURL, getBlob } from 'firebase/storage';
+import { uploadString, getDownloadURL, getBlob } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
