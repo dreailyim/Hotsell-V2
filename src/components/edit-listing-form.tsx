@@ -36,7 +36,7 @@ import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
 import { uploadString, getDownloadURL, getBlob } from 'firebase/storage';
-import { doc, updateDoc } from 'firestore';
+import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
