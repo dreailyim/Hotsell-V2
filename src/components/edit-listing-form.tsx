@@ -185,28 +185,6 @@ export function EditListingForm({ product }: EditListingFormProps) {
     startAiTransition(async () => {
       let imageAsDataUri = firstImage;
       
-      if (imageAsDataUri.startsWith('https://firebasestorage.googleapis.com')) {
-        try {
-            const imageRef = ref(storage, imageAsDataUri);
-            const blob = await getBlob(imageRef);
-            
-            imageAsDataUri = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result as string);
-                reader.onerror = reject;
-                reader.readAsDataURL(blob);
-            });
-        } catch (error) {
-             console.error("Error converting storage URL to data URI:", error);
-             toast({
-                title: '圖片讀取失敗',
-                description: '無法讀取現有圖片以生成描述，請稍後再試。',
-                variant: 'destructive',
-            });
-            return;
-        }
-      }
-
       const result = await generateDescriptionAction({
         productName: values.productName,
         productCategory: values.productCategory,
