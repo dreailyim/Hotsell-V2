@@ -302,7 +302,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
           <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormDescription>最多上傳 ${MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
