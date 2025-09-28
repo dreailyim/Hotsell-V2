@@ -8,8 +8,7 @@ import { z } from 'zod';
 import { Upload, Wand2, Loader2, RefreshCw, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { useRouter } from 'next/navigation';
-import { getStorage, ref } from 'firebase/storage';
-
+import Image from 'next/image';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -35,7 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { generateDescriptionAction } from '@/app/(main)/list/actions';
 import { useAuth } from '@/hooks/use-auth';
 import { db, storage } from '@/lib/firebase/client-app';
-import { uploadString, getDownloadURL } from 'firebase/storage';
+import { uploadString, getDownloadURL, ref } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -285,10 +284,11 @@ export function EditListingForm({ product }: EditListingFormProps) {
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
                         <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center relative bg-muted/50">
-                                <img
+                                <Image
                                     src={image}
                                     alt={`Product preview ${index + 1}`}
-                                    className="object-contain rounded-lg p-1 h-full w-full"
+                                    fill
+                                    className="object-contain rounded-lg p-1"
                                 />
                                 <Button 
                                     type="button" 
@@ -495,5 +495,3 @@ export function EditListingForm({ product }: EditListingFormProps) {
     </Form>
   );
 }
-
-    

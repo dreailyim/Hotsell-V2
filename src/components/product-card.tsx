@@ -162,10 +162,11 @@ export function ProductCard({ product }: ProductCardProps) {
     <Card className="w-full h-full flex flex-col overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
         <div className="relative aspect-square w-full">
             <Link href={`/products/${id}`} aria-label={safeName}>
-              <img
+              <Image
                 src={safeImage}
                 alt={safeName}
-                className="absolute inset-0 h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                fill
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
                 data-ai-hint="product image"
                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/600/400'; }}
               />

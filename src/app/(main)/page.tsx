@@ -75,7 +75,7 @@ function HomePageContent() {
           console.log("Banners collection is empty. Seeding initial data...");
           const batch = writeBatch(db);
           const defaultBanners = [
-              { src: "https://picsum.photos/seed/ad1/1200/400", alt: "Special promotion on electronics", title: "電子產品特賣", description: "相機、手機、筆電，應有盡有！", dataAiHint: "electronics sale", href: "/hot" },
+              { src: "https://picsum.photos/seed/ad1/1200/400", alt: "Special promotion on electronics", title: "電子產品特賣", description: "相機、手機、筆電，應有尽有！", dataAiHint: "electronics sale", href: "/hot" },
               { src: "https://picsum.photos/seed/ad2/1200/400", alt: "New fashion arrivals", title: "時尚新品到著", description: "換季大減價，立即選購！", dataAiHint: "fashion clothes", href: "/" },
               { src: "https://picsum.photos/seed/ad3/1200/400", alt: "Home goods clearance", title: "家居好物清貨", description: "為您的家增添一份溫馨。", dataAiHint: "home decor", href: "/" },
           ];
@@ -201,10 +201,11 @@ function HomePageContent() {
                           <div className="p-1 cursor-pointer">
                           <Card className="overflow-hidden">
                               <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0">
-                                  <img 
+                                  <Image 
                                       src={banner.src}
                                       alt={banner.alt}
-                                      className="absolute inset-0 h-full w-full object-cover"
+                                      fill
+                                      className="object-cover"
                                       data-ai-hint={banner.dataAiHint}
                                   />
                                   <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white p-4 text-center">
