@@ -322,13 +322,13 @@ export default function SettingsPage() {
                         <Button variant="outline" className="w-full max-w-xs rounded-full border-destructive text-destructive hover:bg-destructive/10">註銷帳戶</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <AlertDialogHeader>
+                        <AlertDialogHeader className="text-left">
                             <AlertDialogTitle className="flex items-center gap-2">
                                 <AlertTriangle className="text-destructive" /> 確定要註銷帳戶嗎？
                             </AlertDialogTitle>
                             <AlertDialogDescription>
                                 這個操作**無法復原**。您的所有個人資料、刊登的商品、以及評價等都將被**永久刪除**。
-                                <br /><br />
+                                <br />
                                 為確認此操作，請輸入您目前的登入密碼。
                             </AlertDialogDescription>
                         </AlertDialogHeader>
