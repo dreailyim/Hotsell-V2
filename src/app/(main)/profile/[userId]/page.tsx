@@ -238,9 +238,9 @@ export default function UserProfilePage() {
   };
 
   const getFormattedDate = (timestamp: FullUser['createdAt'] | undefined) => {
-    if (!timestamp || typeof timestamp !== 'string') return '未知';
+    if (!timestamp) return '未知';
     try {
-        const date = new Date(timestamp);
+        const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
         if (isNaN(date.getTime())) {
             return '未知';
         }
@@ -564,54 +564,52 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="mb-4">
-            <div className="flex justify-between items-start">
-                <div className="flex items-start gap-3">
-                    <Avatar className="h-14 w-14 flex-shrink-0">
-                        <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
-                        <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
-                        <div className="flex items-center gap-1 mt-1">
-                            <div className="flex items-center text-yellow-400">
-                                {Array.from({ length: 5 }).map((_, i) => (
-                                <Star 
-                                    key={i} 
-                                    className={cn(
-                                        "h-4 w-4", 
-                                        (profileUser.averageRating || 0) > i ? 'fill-current' : 'text-gray-300 dark:text-gray-600'
-                                    )} 
-                                />
-                                ))}
-                            </div>
-                            <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
-                            <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
+        <div className="flex justify-between items-start mb-4">
+            <div className="flex items-start gap-4">
+                <Avatar className="h-16 w-16 flex-shrink-0 self-center">
+                    <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
+                    <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col justify-center">
+                    <h2 className="text-lg font-bold">{profileUser.displayName || '使用者'}</h2>
+                    <div className="flex items-center gap-1 mt-1">
+                        <div className="flex items-center text-yellow-400">
+                            {Array.from({ length: 5 }).map((_, i) => (
+                            <Star 
+                                key={i} 
+                                className={cn(
+                                    "h-4 w-4", 
+                                    (profileUser.averageRating || 0) > i ? 'fill-current' : 'text-gray-300 dark:text-gray-600'
+                                )} 
+                            />
+                            ))}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                        <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
+                        <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2 max-w-xs">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                 </div>
-                 {!isOwnProfile && (
-                    <div className="flex flex-col items-center gap-2">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 rounded-full bg-muted/50"
-                            onClick={() => toast({ title: '已複製用戶檔案連結！' })}
-                        >
-                            <Share2 className="h-4 w-4 text-muted-foreground" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-9 w-9 rounded-full bg-muted/50"
-                            onClick={() => toast({ title: '感謝您的舉報，我們會盡快處理。' })}
-                        >
-                            <ShieldAlert className="h-4 w-4 text-destructive" />
-                        </Button>
-                    </div>
-                )}
             </div>
+            {!isOwnProfile && (
+                <div className="flex flex-col items-center gap-2">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full bg-black/30 text-white hover:bg-black/40"
+                        onClick={() => toast({ title: '已複製用戶檔案連結！' })}
+                    >
+                        <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 rounded-full bg-black/30 text-destructive hover:bg-black/40"
+                        onClick={() => toast({ title: '感謝您的舉報，我們會盡快處理。' })}
+                    >
+                        <ShieldAlert className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
