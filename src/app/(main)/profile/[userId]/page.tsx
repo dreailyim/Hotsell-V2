@@ -565,8 +565,8 @@ export default function UserProfilePage() {
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
         <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-3">
-                <Avatar className="h-14 w-14">
+            <div className="flex items-start gap-3">
+                <Avatar className="h-14 w-14 flex-shrink-0">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
@@ -587,7 +587,7 @@ export default function UserProfilePage() {
                         <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
                         <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs mt-1">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                    <p className="text-xs text-muted-foreground max-w-xs mt-1">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                 </div>
             </div>
         </div>
@@ -744,7 +744,7 @@ export default function UserProfilePage() {
                        <Separator />
                        <div className="space-y-2 p-2">
                          <p className="text-xs text-muted-foreground">個人簡介</p>
-                         <p className="text-sm text-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                         <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
                        </div>
                     </CardContent>
                 </Card>
