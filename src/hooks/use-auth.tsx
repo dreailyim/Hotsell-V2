@@ -64,6 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               displayName: firestoreData.displayName || firebaseUser.displayName,
               photoURL: firestoreData.photoURL || firebaseUser.photoURL,
               aboutMe: firestoreData.aboutMe || '',
+              city: firestoreData.city || '',
               createdAt: createdAt,
               averageRating: firestoreData.averageRating || 0,
               reviewCount: firestoreData.reviewCount || 0,
@@ -77,6 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               displayName: firebaseUser.displayName,
               photoURL: firebaseUser.photoURL,
               aboutMe: '',
+              city: '',
               createdAt: new Date().toISOString(), // Use current date as a fallback for initial state
               averageRating: 0,
               reviewCount: 0,
@@ -90,6 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 uid: newUser.uid,
                 createdAt: serverTimestamp(), // Use server timestamp for accuracy
                 aboutMe: '',
+                city: '',
                 averageRating: 0,
                 reviewCount: 0,
             }).catch(e => console.error("Error creating user doc:", e));
@@ -130,6 +133,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL: firebaseUser.photoURL,
         createdAt: serverTimestamp(),
         aboutMe: '',
+        city: '',
         averageRating: 0,
         reviewCount: 0,
     });
@@ -202,3 +206,5 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    

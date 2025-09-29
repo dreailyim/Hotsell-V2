@@ -1,3 +1,4 @@
+
 import type { Timestamp, FieldValue } from "firebase/firestore";
 
 export type ShippingMethod = '面交' | '速遞包郵' | '速遞到付';
@@ -31,6 +32,7 @@ export interface FullUser {
     photoURL: string | null;
     createdAt: Timestamp | string; // Stored as ISO string in state, Timestamp from Firestore
     aboutMe?: string;
+    city?: string;
     // New fields for reviews
     averageRating?: number;
     reviewCount?: number;
@@ -133,3 +135,5 @@ export type SystemNotification = {
         price?: number;
     };
 };
+
+    

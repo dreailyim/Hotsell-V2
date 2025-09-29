@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle, MapPin } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -29,12 +29,14 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import packageInfo from '@/../package.json';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [city, setCity] = useState(user?.city || '');
   const [aboutMe, setAboutMe] = useState(user?.aboutMe || '');
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -100,6 +102,39 @@ export default function SettingsPage() {
       reader.readAsDataURL(file);
     }
   };
+  
+  const handleCityGeolocate = () => {
+    if (!navigator.geolocation) {
+      toast({
+        title: '瀏覽器不支援定位',
+        description: '您的瀏覽器不支援或已封鎖地理位置服務。',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    startTransition(() => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          console.log(`GPS Location: Lat ${latitude}, Lon ${longitude}`);
+          // TODO: Implement reverse geocoding to get city name from coordinates
+          toast({
+            title: '已成功獲取位置',
+            description: '城市反查功能開發中，暫時請手動選擇。',
+          });
+        },
+        (error) => {
+          console.error('Geolocation error:', error);
+          toast({
+            title: '無法獲取位置',
+            description: '請確認您已授權瀏覽器讀取您的位置。',
+            variant: 'destructive',
+          });
+        }
+      );
+    });
+  };
 
   const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -121,6 +156,7 @@ export default function SettingsPage() {
                 displayName,
                 aboutMe,
                 photoURL,
+                city,
             });
 
             await updateAuthProfile({ displayName, photoURL });
@@ -237,6 +273,25 @@ export default function SettingsPage() {
                               disabled
                             />
                         </div>
+                    </div>
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="city">我的城市</Label>
+                    <div className="flex items-center gap-2">
+                        <Select onValueChange={setCity} value={city} disabled={isSaveDisabled}>
+                            <SelectTrigger id="city">
+                                <SelectValue placeholder="選擇您所在的城市" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="香港島">香港島</SelectItem>
+                                <SelectItem value="九龍">九龍</SelectItem>
+                                <SelectItem value="新界">新界</SelectItem>
+                            </SelectContent>
+                        </Select>
+                        <Button type="button" variant="outline" size="icon" onClick={handleCityGeolocate} disabled={isSaveDisabled}>
+                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
+                        </Button>
                     </div>
                 </div>
 
@@ -375,3 +430,5 @@ export default function SettingsPage() {
     </>
   );
 }
+
+    
