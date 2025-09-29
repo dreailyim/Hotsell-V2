@@ -595,10 +595,10 @@ export default function UserProfilePage() {
                   <Button
                       variant="ghost"
                       size="icon"
-                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 text-white hover:bg-transparent hover:text-white/80"
+                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 hover:bg-transparent hover:text-foreground/80"
                       onClick={() => toast({ title: '已複製用戶檔案連結！' })}
                   >
-                      <Share2 className="h-4 w-4" />
+                      <Share2 className="h-4 w-4 text-foreground" />
                   </Button>
                   <Button
                       variant="ghost"
