@@ -483,7 +483,7 @@ export default function UserProfilePage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作無法復原，將會永久刪除您選取的 ${selectedProducts.size} 件產品。
+                            此操作無法復原，將會永久刪除您選取的 ${'${selectedProducts.size}'} 件產品。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -574,7 +574,7 @@ export default function UserProfilePage() {
              <ProductGrid 
                 products={filteredUserProducts} 
                 loading={loadingUserProducts} 
-                emptyMessage={searchTerm ? `找不到關於「${searchTerm}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
+                emptyMessage={searchTerm ? `找不到關於「${'${searchTerm}'}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
                 isManaging={isManaging}
                 selectedProducts={selectedProducts}
                 onToggleSelect={handleToggleSelection}
@@ -606,7 +606,7 @@ export default function UserProfilePage() {
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
                     <Card key={review.id} className="overflow-hidden bg-transparent border-none shadow-none p-0">
-                        <div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4 fancy-glass-border">
+                        <div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4 border border-t-white/20 border-l-white/20 border-b-black/20 border-r-black/20">
                             <div className="flex items-start gap-3">
                                 <Avatar className="h-10 w-10 flex-shrink-0">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
