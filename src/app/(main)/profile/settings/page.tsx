@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle, MapPin } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -36,6 +36,7 @@ export default function SettingsPage() {
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
   const [city, setCity] = useState(user?.city || '');
   const [aboutMe, setAboutMe] = useState(user?.aboutMe || '');
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
@@ -103,39 +104,6 @@ export default function SettingsPage() {
     }
   };
   
-  const handleCityGeolocate = () => {
-    if (!navigator.geolocation) {
-      toast({
-        title: '瀏覽器不支援定位',
-        description: '您的瀏覽器不支援或已封鎖地理位置服務。',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    startTransition(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log(`GPS Location: Lat ${latitude}, Lon ${longitude}`);
-          // TODO: Implement reverse geocoding to get city name from coordinates
-          toast({
-            title: '已成功獲取位置',
-            description: '城市反查功能開發中，暫時請手動選擇。',
-          });
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          toast({
-            title: '無法獲取位置',
-            description: '請確認您已授權瀏覽器讀取您的位置。',
-            variant: 'destructive',
-          });
-        }
-      );
-    });
-  };
-
   const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
@@ -154,6 +122,7 @@ export default function SettingsPage() {
             const userRef = doc(db, 'users', user.uid);
             await updateDoc(userRef, {
                 displayName,
+                phoneNumber,
                 aboutMe,
                 photoURL,
                 city,
@@ -269,8 +238,10 @@ export default function SettingsPage() {
                             <Label htmlFor="phone">電話號碼</Label>
                             <Input
                               id="phone"
+                              value={phoneNumber || ''}
+                              onChange={(e) => setPhoneNumber(e.target.value)}
                               placeholder="尚未提供"
-                              disabled
+                              disabled={isSaveDisabled}
                             />
                         </div>
                     </div>
@@ -289,9 +260,6 @@ export default function SettingsPage() {
                                 <SelectItem value="新界">新界</SelectItem>
                             </SelectContent>
                         </Select>
-                        <Button type="button" variant="outline" size="icon" onClick={handleCityGeolocate} disabled={isSaveDisabled}>
-                            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-                        </Button>
                     </div>
                 </div>
 
@@ -430,5 +398,7 @@ export default function SettingsPage() {
     </>
   );
 }
+
+    
 
     

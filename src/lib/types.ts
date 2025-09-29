@@ -30,6 +30,7 @@ export interface FullUser {
     email: string | null;
     displayName: string | null;
     photoURL: string | null;
+    phoneNumber?: string | null;
     createdAt: Timestamp | string; // Stored as ISO string in state, Timestamp from Firestore
     aboutMe?: string;
     city?: string;
@@ -43,6 +44,7 @@ export type Review = {
     ratedUserId: string;
     reviewerId: string;
     reviewerName: string;
+
     reviewerAvatar: string;
     productId: string;
     productName: string; // Added field
@@ -135,5 +137,7 @@ export type SystemNotification = {
         price?: number;
     };
 };
+
+    
 
     
