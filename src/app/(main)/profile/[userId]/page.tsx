@@ -737,8 +737,9 @@ export default function UserProfilePage() {
                           </div>
                        </div>
                        <Separator />
-                       <div className="p-2">
-                        <p className="text-sm text-muted-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                       <div className="space-y-2 p-2">
+                         <p className="text-xs text-muted-foreground">個人簡介</p>
+                         <p className="text-sm text-center text-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
                        </div>
                     </CardContent>
                 </Card>
@@ -750,5 +751,3 @@ export default function UserProfilePage() {
     </>
   );
 }
-
-    
