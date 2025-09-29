@@ -328,9 +328,7 @@ export default function SettingsPage() {
                                      <AlertTriangle className="text-destructive" /> 確定要註銷帳戶嗎？
                                 </div>
                             </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                這個操作&lt;strong&gt;無法復原&lt;/strong&gt;。您的所有個人資料、刊登的商品、以及評價等都將被&lt;strong&gt;永久刪除&lt;/strong&gt;。為確認此操作，請輸入您目前的登入密碼。
-                            </AlertDialogDescription>
+                            <AlertDialogDescription dangerouslySetInnerHTML={{ __html: '這個操作<strong>無法復原</strong>。您的所有個人資料、刊登的商品、以及評價等都將被<strong>永久刪除</strong>。為確認此操作，請輸入您目前的登入密碼。' }} />
                         </AlertDialogHeader>
                         <div className="py-2">
                             <Label htmlFor="delete-password" className="sr-only">密碼</Label>
