@@ -74,18 +74,7 @@
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
- .fancy-border {
-    --border-width: 2px;
-    --border-color-1: rgba(255, 255, 255, 0.2);
-    --border-color-2: rgba(255, 255, 255, 0.1);
-    --bg-color: transparent;
-    background-image:
-      conic-gradient(from 90deg at var(--border-width) var(--border-width), var(--bg-color) 90deg, var(--border-color-1) 0),
-      conic-gradient(from -90deg at calc(100% - var(--border-width)) calc(100% - var(--border-width)), var(--bg-color) 90deg, var(--border-color-2) 0);
-    background-position:
-      top left,
-      bottom right;
-    background-size: 50px 50px;
-    background-repeat: no-repeat;
+  .fancy-border {
+    @apply shadow-[inset_0_1px_0_0_theme(colors.white/0.1),0_1px_2px_0_theme(colors.black/0.1)] dark:shadow-[inset_0_1px_0_0_theme(colors.white/0.05),0_1px_2px_0_theme(colors.black/0.1)];
   }
 }
