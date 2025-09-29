@@ -49,6 +49,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
             const firestoreData = docSnap.data();
+            
+            let createdAt = '';
+            if (firestoreData.createdAt instanceof Timestamp) {
+                createdAt = firestoreData.createdAt.toDate().toISOString();
+            } else if (typeof firestoreData.createdAt === 'string') {
+                createdAt = firestoreData.createdAt;
+            }
+
             // Combine auth data with Firestore data
             const fullUser: FullUser = {
               uid: firebaseUser.uid,
@@ -56,7 +64,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               displayName: firestoreData.displayName || firebaseUser.displayName,
               photoURL: firestoreData.photoURL || firebaseUser.photoURL,
               aboutMe: firestoreData.aboutMe || '',
-              createdAt: (firestoreData.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString(),
+              createdAt: createdAt,
               averageRating: firestoreData.averageRating || 0,
               reviewCount: firestoreData.reviewCount || 0,
             };
@@ -69,7 +77,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               displayName: firebaseUser.displayName,
               photoURL: firebaseUser.photoURL,
               aboutMe: '',
-              createdAt: new Date().toISOString(), // Use current date as a fallback
+              createdAt: new Date().toISOString(), // Use current date as a fallback for initial state
               averageRating: 0,
               reviewCount: 0,
             };

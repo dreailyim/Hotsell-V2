@@ -238,16 +238,19 @@ export default function UserProfilePage() {
   };
 
   const getFormattedDate = (timestamp: FullUser['createdAt'] | undefined) => {
-    if (!timestamp) return '未知';
+    if (!timestamp || typeof timestamp !== 'string') return '未知';
     try {
-      // Robustly handle both Timestamp and string formats.
-      const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
-      return format(date, 'yyyy年M月d日');
+        const date = new Date(timestamp);
+        // Check if the date is valid
+        if (isNaN(date.getTime())) {
+            return '未知';
+        }
+        return format(date, 'yyyy年M月d日');
     } catch (error) {
-      console.error("Error formatting date:", error);
-      return '日期無效';
+        console.error("Error formatting date:", error);
+        return '日期無效';
     }
-  }
+}
 
   const fetchFavoriteProducts = useCallback(async () => {
     if (!userId) return;
