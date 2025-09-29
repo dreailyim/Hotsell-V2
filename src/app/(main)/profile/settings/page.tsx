@@ -28,6 +28,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import packageInfo from '@/../package.json';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -360,7 +361,7 @@ export default function SettingsPage() {
         </Card>
         
         <div className="text-center text-xs text-muted-foreground mt-8">
-            App Version: {process.env.APP_VERSION || 'N/A'}
+            App Version: {packageInfo.version || 'N/A'}
         </div>
       </div>
     </>
