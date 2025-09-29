@@ -237,14 +237,15 @@ export default function UserProfilePage() {
     }
   };
 
-  const getFormattedDate = (timestamp: FullUser['createdAt']) => {
+  const getFormattedDate = (timestamp: FullUser['createdAt'] | undefined) => {
     if (!timestamp) return '未知';
     try {
+      // Robustly handle both Timestamp and string formats.
       const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
       return format(date, 'yyyy年M月d日');
     } catch (error) {
       console.error("Error formatting date:", error);
-      return '未知';
+      return '日期無效';
     }
   }
 
@@ -377,14 +378,16 @@ export default function UserProfilePage() {
       return reviewsAsBuyer.length;
   }, [reviewsAsBuyer]);
 
-  const getCreditRating = (rating: number, reviewCount: number): { label: string; icon: React.ElementType; color: string } => {
-    if (reviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
-    if (rating >= 4.8 && reviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
-    if (rating >= 4.5 && reviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
-    if (rating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
+  const getCreditRating = (rating?: number, reviewCount?: number): { label: string; icon: React.ElementType; color: string } => {
+    const safeRating = rating || 0;
+    const safeReviewCount = reviewCount || 0;
+    if (safeReviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
+    if (safeRating >= 4.8 && safeReviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
+    if (safeRating >= 4.5 && safeReviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
+    if (safeRating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
     return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
   };
-  const creditRating = getCreditRating(profileUser?.averageRating || 0, profileUser?.reviewCount || 0);
+  const creditRating = getCreditRating(profileUser?.averageRating, profileUser?.reviewCount);
 
   // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
