@@ -229,6 +229,14 @@ export default function SettingsPage() {
                               disabled
                             />
                         </div>
+                         <div className='space-y-1.5'>
+                            <Label htmlFor="phone">電話號碼</Label>
+                            <Input
+                              id="phone"
+                              placeholder="尚未提供"
+                              disabled
+                            />
+                        </div>
                     </div>
                 </div>
 
