@@ -721,12 +721,12 @@ export default function UserProfilePage() {
                           <div className="space-y-1">
                              <creditRating.icon className={cn("mx-auto h-7 w-7", creditRating.color)} />
                              <p className="text-xs text-muted-foreground">信用評級</p>
-                             <p className="font-semibold">{creditRating.label}</p>
+                             <p className="font-semibold text-sm">{creditRating.label}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">加入日期</p>
-                             <p className="font-semibold">{getFormattedDate(profileUser.createdAt)}</p>
+                             <p className="font-semibold text-sm">{getFormattedDate(profileUser.createdAt)}</p>
                           </div>
                        </div>
                        <Separator />
@@ -734,12 +734,12 @@ export default function UserProfilePage() {
                            <div className="space-y-1">
                              <PackageCheck className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">成功售出</p>
-                             <p className="font-semibold">{loadingUserProducts ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${soldCount} 件`}</p>
+                             <p className="font-semibold text-sm">{loadingUserProducts ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${soldCount} 件`}</p>
                           </div>
                            <div className="space-y-1">
                              <ShoppingBag className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">給出好評</p>
-                             <p className="font-semibold">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
+                             <p className="font-semibold text-sm">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
                           </div>
                        </div>
                        <Separator />
