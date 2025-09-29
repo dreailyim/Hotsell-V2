@@ -606,7 +606,7 @@ export default function UserProfilePage() {
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
                     <Card key={review.id} className="overflow-hidden bg-transparent border-none shadow-none p-0">
-                        <div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4 border border-border">
+                        <div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4 border-t border-b border-white/20">
                             <div className="flex items-start gap-3">
                                 <Avatar className="h-10 w-10 flex-shrink-0">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
