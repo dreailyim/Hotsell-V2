@@ -606,12 +606,7 @@ export default function UserProfilePage() {
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
                     <Card key={review.id} className="overflow-hidden">
-                        <div className="relative p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl">
-                             {/* Top-left border */}
-                            <div className="absolute top-0 left-0 h-[2px] w-1/2 bg-gradient-to-r from-white/20 via-white/5 to-transparent"></div>
-                            {/* Bottom-right border */}
-                            <div className="absolute bottom-0 right-0 h-[2px] w-1/2 bg-gradient-to-l from-white/10 via-white/5 to-transparent"></div>
-                            
+                         <div className="relative p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl fancy-border">
                             <div className="flex items-start gap-3">
                                 <Avatar className="h-10 w-10 flex-shrink-0">
                                     <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
