@@ -636,10 +636,11 @@ export default function UserProfilePage() {
                         {review.productName && review.productImage && (
                             <Link href={`/products/${review.productId}`} className="mt-3 ml-13 flex items-center gap-3 p-2 -m-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
                                 <div className="relative h-10 w-10 flex-shrink-0">
-                                    <img 
+                                    <Image 
                                         src={review.productImage} 
-                                        alt={review.productName} 
-                                        className="absolute inset-0 h-full w-full object-cover rounded-md" 
+                                        alt={review.productName}
+                                        fill 
+                                        className="object-cover rounded-md" 
                                     />
                                 </div>
                                 <div className="flex-1">
