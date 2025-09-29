@@ -516,31 +516,47 @@ export default function ChatPage() {
       const hasOtherUserReviewed = otherUserId ? reviewStatus?.[otherUserId] === true : false;
       
       const renderReviewAction = () => {
-        return (
-          hasCurrentUserReviewed ? (
+        // If current user has NOT reviewed, show "Leave Review" dialog.
+        if (!hasCurrentUserReviewed) {
+          return <ReviewDialog conversationData={conversation} />;
+        }
+        
+        // If current user HAS reviewed, and other user HAS reviewed, show "View Review".
+        if (hasCurrentUserReviewed && hasOtherUserReviewed) {
+          return (
             <Button asChild className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-purple-500 to-indigo-600 text-primary-foreground hover:opacity-90 transition-opacity">
               <Link href={`/profile/${otherUserId}?tab=reviews`}>
                 <MessageSquareQuote className="mr-1 h-4 w-4" />
                 查看評價
               </Link>
             </Button>
-          ) : (
-            <ReviewDialog conversationData={conversation} />
+          );
+        }
+
+        // If current user HAS reviewed, but other user has NOT, show disabled "Waiting" button.
+        if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
+          return (
+            <Button className="h-8 rounded-full px-3 text-xs bg-muted text-muted-foreground hover:bg-muted cursor-not-allowed" disabled>
+                <Loader2 className="mr-1 h-4 w-4 animate-spin" />
+                等待對方
+            </Button>
           )
-        );
+        }
+        
+        return null;
       }
       
        const renderReviewStatusText = () => {
         if (hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-muted-foreground mt-1">對方已對你評價</p>;
+          return <p className="text-xs text-green-600 mt-1">雙方已互相評價！</p>;
         }
         if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
           return <p className="text-xs text-muted-foreground mt-1 animate-pulse">等待對方評價...</p>;
         }
         if (!hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-blue-500 mt-1 animate-pulse">對方俾咗評價你喇，爭你咋！</p>;
+          return <p className="text-xs text-blue-500 mt-1 animate-pulse">對方已對您留下評價！</p>;
         }
-        return <p className="text-xs text-muted-foreground mt-1">交易已完成，快啲評價對方啦！</p>;
+        return <p className="text-xs text-muted-foreground mt-1">交易已完成，快來評價對方吧！</p>;
       };
 
 
