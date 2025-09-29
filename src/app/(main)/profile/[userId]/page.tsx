@@ -370,14 +370,14 @@ export default function UserProfilePage() {
                     batch.update(productRef, { status: 'sold' });
                 });
                 await batch.commit();
-                toast({ title: `已將 ${productIds.length} 件產品標示為已售出` });
+                toast({ title: `已將 ${'${productIds.length}'} 件產品標示為已售出` });
             } else if (action === 'delete') {
                  productIds.forEach(id => {
                     const productRef = doc(db, 'products', id);
                     batch.delete(productRef);
                 });
                 await batch.commit();
-                toast({ title: `已成功刪除 ${productIds.length} 件產品` });
+                toast({ title: `已成功刪除 ${'${productIds.length}'} 件產品` });
             }
             
             // Exit management mode and clear selection
@@ -420,7 +420,7 @@ export default function UserProfilePage() {
 
             if (updatedCount > 0) {
                 await batch.commit();
-                toast({ title: "更新成功！", description: `已成功為 ${updatedCount} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
+                toast({ title: "更新成功！", description: `已成功為 ${'${updatedCount}'} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
             } else {
                 toast({ title: "無需更新", description: "您所有的產品都已經支援搜尋功能了。" });
             }
@@ -616,7 +616,7 @@ export default function UserProfilePage() {
                                     <div className="flex items-center gap-2">
                                         <span className="font-semibold">{review.reviewerName}</span>
                                         {review.reviewerRole && (
-                                            <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                            <Badge variant={review.reviewerRole === 'buyer' ? 'default' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
                                                 {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
                                             </Badge>
                                         )}
