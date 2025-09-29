@@ -566,7 +566,7 @@ export default function UserProfilePage() {
         
         <div className="flex justify-between items-start mb-4">
             <div className="flex items-center gap-4">
-                <Avatar className="h-16 w-16 flex-shrink-0 self-center">
+                <Avatar className="h-16 w-16 self-center">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
@@ -591,20 +591,19 @@ export default function UserProfilePage() {
                 </div>
             </div>
             {!isOwnProfile && (
-              <div className="flex flex-col items-center gap-2 glass-morphism !p-1.5">
+              <div className="flex flex-col gap-2">
                   <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-full text-white hover:bg-transparent hover:text-white/80"
+                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 text-white hover:bg-transparent hover:text-white/80"
                       onClick={() => toast({ title: '已複製用戶檔案連結！' })}
                   >
                       <Share2 className="h-4 w-4" />
                   </Button>
-                  <Separator className="bg-white/20 h-px w-4/5" />
                   <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 rounded-full text-destructive hover:bg-transparent hover:text-destructive/80"
+                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 text-destructive hover:bg-transparent hover:text-destructive/80"
                       onClick={() => toast({ title: '感謝您的舉報，我們會盡快處理。' })}
                   >
                       <ShieldAlert className="h-4 w-4" />
@@ -763,7 +762,7 @@ export default function UserProfilePage() {
                           </div>
                        </div>
                         <Separator />
-                        <div className="space-y-2 p-2 text-center">
+                        <div className="space-y-2 text-center">
                             <p className="text-xs text-muted-foreground">個人簡介</p>
                             <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
                         </div>
