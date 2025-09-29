@@ -322,15 +322,13 @@ export default function SettingsPage() {
                         <Button variant="outline" className="w-full max-w-xs rounded-full border-destructive text-destructive hover:bg-destructive/10">註銷帳戶</Button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle className="flex items-center gap-2">
-                                <AlertTriangle className="text-destructive" /> 確定要註銷帳戶嗎？
+                        <AlertDialogHeader className="text-left">
+                            <AlertDialogTitle>
+                                <div className="flex items-center gap-2">
+                                     <AlertTriangle className="text-destructive" /> 確定要註銷帳戶嗎？
+                                </div>
                             </AlertDialogTitle>
-                            <AlertDialogDescription>
-                                這個操作**無法復原**。您的所有個人資料、刊登的商品、以及評價等都將被**永久刪除**。
-                                <br /><br />
-                                為確認此操作，請輸入您目前的登入密碼。
-                            </AlertDialogDescription>
+                            <AlertDialogDescription dangerouslySetInnerHTML={{ __html: '這個操作<strong>無法復原</strong>。您的所有個人資料、刊登的商品、以及評價等都將被<strong>永久刪除</strong>。為確認此操作，請輸入您目前的登入密碼。' }} />
                         </AlertDialogHeader>
                         <div className="py-2">
                             <Label htmlFor="delete-password" className="sr-only">密碼</Label>
@@ -342,17 +340,20 @@ export default function SettingsPage() {
                                 onChange={(e) => setPassword(e.target.value)}
                             />
                         </div>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel onClick={() => setPassword('')}>取消</AlertDialogCancel>
-                            <AlertDialogAction
+                        <div className="flex flex-col gap-2 mt-4">
+                            <Button
                                 onClick={handleDeleteAccount}
                                 disabled={isPending || !password}
-                                className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
+                                variant="destructive"
+                                className="w-full rounded-full"
                             >
                                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 我確認，註銷我的帳戶
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
+                            </Button>
+                            <AlertDialogCancel asChild>
+                                <Button variant="outline" className="w-full rounded-full" onClick={() => setPassword('')}>取消</Button>
+                            </AlertDialogCancel>
+                        </div>
                     </AlertDialogContent>
                 </AlertDialog>
             </CardContent>

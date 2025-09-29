@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,7 +17,7 @@ import { db } from '@/lib/firebase/client-app';
 import type { Product, Review, FullUser } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -169,10 +169,12 @@ export default function UserProfilePage() {
   const [userProducts, setUserProducts] = useState<Product[]>([]);
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsAsBuyer, setReviewsAsBuyer] = useState<Review[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingUserProducts, setLoadingUserProducts] = useState(true);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [loadingReviewsAsBuyer, setLoadingReviewsAsBuyer] = useState(true);
 
   const [isManaging, setIsManaging] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
@@ -235,6 +237,20 @@ export default function UserProfilePage() {
     }
   };
 
+  const getFormattedDate = (timestamp: FullUser['createdAt'] | undefined) => {
+    if (!timestamp) return '未知';
+    try {
+        const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
+        if (isNaN(date.getTime())) {
+            return '未知';
+        }
+        return format(date, 'yyyy年M月d日');
+    } catch (error) {
+        console.error("Error formatting date:", error);
+        return '日期無效';
+    }
+}
+
   const fetchFavoriteProducts = useCallback(async () => {
     if (!userId) return;
      setLoadingFavorites(true);
@@ -262,12 +278,11 @@ export default function UserProfilePage() {
     }
   }, [userId]);
 
-  const fetchReviews = useCallback(async () => {
-      if (!userId) return;
+  const fetchReviews = useCallback(async (ratedUserId: string) => {
       setLoadingReviews(true);
       try {
           const reviewsRef = collection(db, 'reviews');
-          const q = query(reviewsRef, where('ratedUserId', '==', userId), orderBy('createdAt', 'desc'));
+          const q = query(reviewsRef, where('ratedUserId', '==', ratedUserId), orderBy('createdAt', 'desc'));
           const unsubscribe = onSnapshot(q, (snapshot) => {
               const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
               setReviews(reviewsData);
@@ -278,7 +293,22 @@ export default function UserProfilePage() {
           console.error("Error fetching reviews:", error);
           setLoadingReviews(false);
       }
-  }, [userId]);
+  }, []);
+
+  const fetchReviewsAsBuyer = useCallback(async (reviewerId: string) => {
+    setLoadingReviewsAsBuyer(true);
+    try {
+        const reviewsRef = collection(db, 'reviews');
+        const q = query(reviewsRef, where('reviewerId', '==', reviewerId), where('reviewerRole', '==', 'buyer'));
+        const querySnapshot = await getDocs(q);
+        const reviewsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+        setReviewsAsBuyer(reviewsData);
+    } catch (error) {
+        console.error("Error fetching reviews as buyer:", error);
+    } finally {
+        setLoadingReviewsAsBuyer(false);
+    }
+  }, []);
 
 
   // Fetch user's own products
@@ -312,18 +342,25 @@ export default function UserProfilePage() {
     return () => unsubscribeProducts();
   }, [userId]);
   
-  // Fetch favorites or reviews only when the respective tab is active
+  // Fetch data based on active tab
   useEffect(() => {
+    if (!userId) return;
+    let unsubscribe: (() => void) | undefined;
+  
     if (activeTab === 'reviews') {
-        const unsubscribePromise = fetchReviews();
-        return () => {
-            unsubscribePromise?.then(unsub => unsub && unsub());
-        }
+      fetchReviews(userId).then(unsub => unsubscribe = unsub);
     }
     if (activeTab === 'favorites' && isOwnProfile) {
-        fetchFavoriteProducts();
+      fetchFavoriteProducts();
     }
-  }, [activeTab, isOwnProfile, fetchReviews, fetchFavoriteProducts]);
+    if (activeTab === 'about') {
+      fetchReviewsAsBuyer(userId);
+    }
+  
+    return () => {
+      unsubscribe && unsubscribe();
+    };
+  }, [activeTab, isOwnProfile, userId, fetchReviews, fetchFavoriteProducts, fetchReviewsAsBuyer]);
 
   const filteredUserProducts = useMemo(() => {
     if (!searchTerm) {
@@ -333,6 +370,26 @@ export default function UserProfilePage() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [userProducts, searchTerm]);
+
+  // --- Derived data for 'About' tab ---
+  const soldCount = useMemo(() => {
+    return userProducts.filter(p => p.status === 'sold').length;
+  }, [userProducts]);
+
+  const reviewsGivenCount = useMemo(() => {
+      return reviewsAsBuyer.length;
+  }, [reviewsAsBuyer]);
+
+  const getCreditRating = (rating?: number, reviewCount?: number): { label: string; icon: React.ElementType; color: string } => {
+    const safeRating = rating || 0;
+    const safeReviewCount = reviewCount || 0;
+    if (safeReviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
+    if (safeRating >= 4.8 && safeReviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
+    if (safeRating >= 4.5 && safeReviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
+    if (safeRating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
+    return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
+  };
+  const creditRating = getCreditRating(profileUser?.averageRating, profileUser?.reviewCount);
 
   // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
@@ -507,15 +564,14 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex justify-center mb-4">
-            <div className="flex items-center gap-3">
-                <Avatar className="h-14 w-14">
+        <div className="flex justify-between items-start mb-4">
+            <div className="flex items-center gap-4">
+                <Avatar className="h-16 w-16 self-center">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
-                <div>
-                    <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">{profileUser.aboutMe || '未填寫個人簡介'}</p>
+                <div className="flex flex-col justify-center">
+                    <h2 className="text-lg font-bold">{profileUser.displayName || '使用者'}</h2>
                     <div className="flex items-center gap-1 mt-1">
                         <div className="flex items-center text-yellow-400">
                             {Array.from({ length: 5 }).map((_, i) => (
@@ -531,8 +587,29 @@ export default function UserProfilePage() {
                         <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
                         <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                 </div>
             </div>
+            {!isOwnProfile && (
+              <div className="flex flex-col gap-2">
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 hover:bg-transparent hover:text-foreground/80"
+                      onClick={() => toast({ title: '已複製用戶檔案連結！' })}
+                  >
+                      <Share2 className="h-4 w-4 text-foreground" />
+                  </Button>
+                  <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 text-destructive hover:bg-transparent hover:text-destructive/80"
+                      onClick={() => toast({ title: '感謝您的舉報，我們會盡快處理。' })}
+                  >
+                      <ShieldAlert className="h-4 w-4" />
+                  </Button>
+              </div>
+            )}
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -595,7 +672,7 @@ export default function UserProfilePage() {
              {loadingReviews ? (
                 <div className="space-y-4 max-w-2xl mx-auto">
                     {[...Array(3)].map((_, i) => (
-                        <Card key={i} className="bg-transparent border-none shadow-none"><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                        <div key={i} className="p-px rounded-xl border-gradient-effect"><div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4"><Skeleton className="h-24 w-full" /></div></div>
                     ))}
                 </div>
              ) : reviews.length === 0 ? (
@@ -605,60 +682,92 @@ export default function UserProfilePage() {
              ) : (
                 <div className="space-y-4 max-w-2xl mx-auto">
                 {reviews.map((review) => (
-                    <Card 
-                        key={review.id}
-                        className="p-4 rounded-xl bg-background/30 backdrop-blur-sm shadow-xl border-t-2 border-t-white/20 border-b-2 border-b-white/10"
-                    >
-                        <div className="flex items-start gap-3">
-                            <Avatar className="h-10 w-10 flex-shrink-0">
-                                <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
-                                <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 text-sm">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-semibold">{review.reviewerName}</span>
-                                    {review.reviewerRole && (
-                                        <Badge variant={review.reviewerRole === 'buyer' ? 'secondary' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
-                                            {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
-                                        </Badge>
-                                    )}
+                    <div key={review.id} className="p-px rounded-xl border-gradient-effect">
+                        <div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4">
+                            <div className="flex items-start gap-3">
+                                <Avatar className="h-10 w-10 flex-shrink-0">
+                                    <AvatarImage src={review.reviewerAvatar || undefined} alt={review.reviewerName || ''} />
+                                    <AvatarFallback className="text-xs">{review.reviewerName?.charAt(0) || 'R'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 text-sm">
+                                    <div className="flex items-center gap-2">
+                                        <span className="font-semibold">{review.reviewerName}</span>
+                                        {review.reviewerRole && (
+                                            <Badge variant={review.reviewerRole === 'buyer' ? 'default' : 'outline'} className="px-1.5 py-0 text-[10px] h-4">
+                                                {review.reviewerRole === 'buyer' ? '買家' : '賣家'}
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
+                                        {Array.from({ length: 5 }).map((_, i) => (
+                                            <Star key={i} className={cn("h-3 w-3", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
+                                        ))}
+                                    </div>
                                 </div>
-                                <div className="flex items-center gap-1 mt-0.5 text-yellow-400">
-                                    {Array.from({ length: 5 }).map((_, i) => (
-                                        <Star key={i} className={cn("h-3 w-3", i < review.rating ? 'fill-current' : 'text-muted-foreground/30')} />
-                                    ))}
-                                </div>
+                                <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
                             </div>
-                            <p className="text-xs text-muted-foreground flex-shrink-0">{getFormattedTime(review.createdAt)}</p>
+                            <p className="text-sm mt-3 ml-13">{review.comment}</p>
+                            
+                            {review.productName && review.productImage && (
+                                <Link href={`/products/${review.productId}`} className="mt-3 ml-13 flex items-center gap-3 p-2 -m-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                                    <div className="relative h-10 w-10 flex-shrink-0">
+                                        <Image 
+                                            src={review.productImage} 
+                                            alt={review.productName}
+                                            fill 
+                                            className="object-cover rounded-md" 
+                                        />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-medium truncate">{review.productName}</p>
+                                        {typeof review.transactionPrice === 'number' && (
+                                            <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
+                                        )}
+                                    </div>
+                                </Link>
+                            )}
                         </div>
-                        <p className="text-sm mt-3 ml-13">{review.comment}</p>
-                        
-                        {review.productName && review.productImage && (
-                            <Link href={`/products/${review.productId}`} className="mt-3 ml-13 flex items-center gap-3 p-2 -m-2 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
-                                <div className="relative h-10 w-10 flex-shrink-0">
-                                    <Image 
-                                        src={review.productImage} 
-                                        alt={review.productName}
-                                        fill 
-                                        className="object-cover rounded-md" 
-                                    />
-                                </div>
-                                <div className="flex-1">
-                                    <p className="text-xs font-medium truncate">{review.productName}</p>
-                                    {typeof review.transactionPrice === 'number' && (
-                                        <p className="text-xs text-muted-foreground">成交價: <span className="font-semibold text-primary">${review.transactionPrice.toLocaleString()}</span></p>
-                                    )}
-                                </div>
-                            </Link>
-                        )}
-                    </Card>
+                    </div>
                 ))}
                 </div>
              )}
           </TabsContent>
           <TabsContent value="about">
-             <div className="max-w-2xl mx-auto text-center py-8">
-              <p className="text-muted-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+             <div className="max-w-2xl mx-auto space-y-6 text-center py-8">
+                <Card>
+                    <CardContent className="p-4 space-y-4">
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                          <div className="space-y-1">
+                             <creditRating.icon className={cn("mx-auto h-7 w-7", creditRating.color)} />
+                             <p className="text-xs text-muted-foreground">信用評級</p>
+                             <p className="font-semibold text-sm">{creditRating.label}</p>
+                          </div>
+                           <div className="space-y-1">
+                             <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">加入日期</p>
+                             <p className="font-semibold text-sm">{getFormattedDate(profileUser.createdAt)}</p>
+                          </div>
+                       </div>
+                       <Separator />
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                           <div className="space-y-1">
+                             <PackageCheck className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">成功售出</p>
+                             <p className="font-semibold text-sm">{loadingUserProducts ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${soldCount} 件`}</p>
+                          </div>
+                           <div className="space-y-1">
+                             <ShoppingBag className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">給出好評</p>
+                             <p className="font-semibold text-sm">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
+                          </div>
+                       </div>
+                        <Separator />
+                        <div className="space-y-2 text-center">
+                            <p className="text-xs text-muted-foreground">個人簡介</p>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
           </TabsContent>
         </Tabs>
@@ -667,3 +776,7 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    
+
+    

@@ -42,7 +42,7 @@
     --muted-foreground: 0 0% 63.9%;
     --accent: 16 100% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 72.2% 50.6%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 22%;
     --input: 0 0% 22%;
@@ -73,5 +73,10 @@
     /* Simulate top highlight and bottom shadow for a 3D "thick" glass effect */
     border-top: 1px solid rgba(255, 255, 255, 0.3);
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .border-gradient-effect {
+    background: linear-gradient(to bottom right, rgba(255, 255, 255, 0.3), rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2));
+    background-origin: border-box;
   }
 }
