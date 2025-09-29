@@ -77,4 +77,21 @@
   .fancy-border {
      @apply shadow-[inset_0_1px_0_0_theme(colors.white/0.1),0_1px_2px_0_theme(colors.black/0.1)] dark:shadow-[inset_0_1px_0_0_theme(colors.white/0.05),0_1px_2px_0_theme(colors.black/0.1)];
   }
+
+  .fancy-glass-border {
+    @apply relative;
+  }
+  .fancy-glass-border::before {
+    content: "";
+    @apply absolute inset-0 rounded-xl p-px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05), rgba(0,0,0,0.1));
+    -webkit-mask: 
+        linear-gradient(#fff 0 0) content-box, 
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+  .dark .fancy-glass-border::before {
+    background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05), rgba(0,0,0,0.5));
+  }
 }
