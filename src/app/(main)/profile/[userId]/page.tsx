@@ -566,7 +566,7 @@ export default function UserProfilePage() {
         
         <div className="flex justify-center mb-4">
             <div className="flex items-center gap-3">
-                <Avatar className="h-14 w-14 flex-shrink-0">
+                <Avatar className="h-14 w-14 flex-shrink-0 self-center">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
@@ -741,11 +741,11 @@ export default function UserProfilePage() {
                              <p className="font-semibold text-sm">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
                           </div>
                        </div>
-                       <Separator />
-                       <div className="space-y-2 p-2">
-                         <p className="text-xs text-muted-foreground">個人簡介</p>
-                         <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
-                       </div>
+                        <Separator />
+                        <div className="space-y-2 p-2">
+                          <p className="text-xs text-muted-foreground">個人簡介</p>
+                          <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                        </div>
                     </CardContent>
                 </Card>
             </div>
@@ -756,4 +756,3 @@ export default function UserProfilePage() {
     </>
   );
 }
-
