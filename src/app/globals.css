@@ -79,19 +79,18 @@
   }
 
   .fancy-glass-border {
-    @apply relative;
+    position: relative;
   }
   .fancy-glass-border::before {
     content: "";
-    @apply absolute inset-0 rounded-xl p-px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05), rgba(0,0,0,0.1));
-    -webkit-mask: 
-        linear-gradient(#fff 0 0) content-box, 
-        linear-gradient(#fff 0 0);
-    -webkit-mask-composite: xor;
-            mask-composite: exclude;
-  }
-  .dark .fancy-glass-border::before {
+    position: absolute;
+    inset: -1px; /* The width of the border */
+    border-radius: inherit; /* Inherit the border-radius from the parent */
     background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05), rgba(0,0,0,0.5));
+    z-index: -1;
+  }
+
+  .dark .fancy-glass-border::before {
+     background: linear-gradient(135deg, rgba(255,255,255,0.3), rgba(255,255,255,0.05), rgba(0,0,0,0.5));
   }
 }
