@@ -241,7 +241,6 @@ export default function UserProfilePage() {
     if (!timestamp || typeof timestamp !== 'string') return '未知';
     try {
         const date = new Date(timestamp);
-        // Check if the date is valid
         if (isNaN(date.getTime())) {
             return '未知';
         }
@@ -573,7 +572,6 @@ export default function UserProfilePage() {
                 </Avatar>
                 <div>
                     <h2 className="text-base font-bold">{profileUser.displayName || '使用者'}</h2>
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                     <div className="flex items-center gap-1 mt-1">
                         <div className="flex items-center text-yellow-400">
                             {Array.from({ length: 5 }).map((_, i) => (
@@ -589,6 +587,7 @@ export default function UserProfilePage() {
                         <span className="text-xs font-bold">{(profileUser.averageRating || 0).toFixed(1)}</span>
                         <span className="text-xs text-muted-foreground">({profileUser.reviewCount || 0})</span>
                     </div>
+                    <p className="text-xs text-muted-foreground truncate max-w-xs mt-1">{profileUser.aboutMe || '未填寫個人簡介'}</p>
                 </div>
             </div>
         </div>
@@ -745,7 +744,7 @@ export default function UserProfilePage() {
                        <Separator />
                        <div className="space-y-2 p-2">
                          <p className="text-xs text-muted-foreground">個人簡介</p>
-                         <p className="text-sm text-center text-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                         <p className="text-sm text-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
                        </div>
                     </CardContent>
                 </Card>
