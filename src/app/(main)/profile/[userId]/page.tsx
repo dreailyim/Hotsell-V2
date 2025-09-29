@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, CheckBadge, ShoppingBag, Trophy } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -17,7 +17,7 @@ import { db } from '@/lib/firebase/client-app';
 import type { Product, Review, FullUser } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -169,10 +169,12 @@ export default function UserProfilePage() {
   const [userProducts, setUserProducts] = useState<Product[]>([]);
   const [favoriteProducts, setFavoriteProducts] = useState<Product[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsAsBuyer, setReviewsAsBuyer] = useState<Review[]>([]);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [loadingUserProducts, setLoadingUserProducts] = useState(true);
   const [loadingFavorites, setLoadingFavorites] = useState(true);
   const [loadingReviews, setLoadingReviews] = useState(true);
+  const [loadingReviewsAsBuyer, setLoadingReviewsAsBuyer] = useState(true);
 
   const [isManaging, setIsManaging] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set());
@@ -235,6 +237,17 @@ export default function UserProfilePage() {
     }
   };
 
+  const getFormattedDate = (timestamp: FullUser['createdAt']) => {
+    if (!timestamp) return '未知';
+    try {
+      const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
+      return format(date, 'yyyy年M月d日');
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return '未知';
+    }
+  }
+
   const fetchFavoriteProducts = useCallback(async () => {
     if (!userId) return;
      setLoadingFavorites(true);
@@ -262,12 +275,11 @@ export default function UserProfilePage() {
     }
   }, [userId]);
 
-  const fetchReviews = useCallback(async () => {
-      if (!userId) return;
+  const fetchReviews = useCallback(async (ratedUserId: string) => {
       setLoadingReviews(true);
       try {
           const reviewsRef = collection(db, 'reviews');
-          const q = query(reviewsRef, where('ratedUserId', '==', userId), orderBy('createdAt', 'desc'));
+          const q = query(reviewsRef, where('ratedUserId', '==', ratedUserId), orderBy('createdAt', 'desc'));
           const unsubscribe = onSnapshot(q, (snapshot) => {
               const reviewsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
               setReviews(reviewsData);
@@ -278,7 +290,22 @@ export default function UserProfilePage() {
           console.error("Error fetching reviews:", error);
           setLoadingReviews(false);
       }
-  }, [userId]);
+  }, []);
+
+  const fetchReviewsAsBuyer = useCallback(async (reviewerId: string) => {
+    setLoadingReviewsAsBuyer(true);
+    try {
+        const reviewsRef = collection(db, 'reviews');
+        const q = query(reviewsRef, where('reviewerId', '==', reviewerId), where('reviewerRole', '==', 'buyer'));
+        const querySnapshot = await getDocs(q);
+        const reviewsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Review));
+        setReviewsAsBuyer(reviewsData);
+    } catch (error) {
+        console.error("Error fetching reviews as buyer:", error);
+    } finally {
+        setLoadingReviewsAsBuyer(false);
+    }
+  }, []);
 
 
   // Fetch user's own products
@@ -312,18 +339,25 @@ export default function UserProfilePage() {
     return () => unsubscribeProducts();
   }, [userId]);
   
-  // Fetch favorites or reviews only when the respective tab is active
+  // Fetch data based on active tab
   useEffect(() => {
+    if (!userId) return;
+    let unsubscribe: (() => void) | undefined;
+  
     if (activeTab === 'reviews') {
-        const unsubscribePromise = fetchReviews();
-        return () => {
-            unsubscribePromise?.then(unsub => unsub && unsub());
-        }
+      fetchReviews(userId).then(unsub => unsubscribe = unsub);
     }
     if (activeTab === 'favorites' && isOwnProfile) {
-        fetchFavoriteProducts();
+      fetchFavoriteProducts();
     }
-  }, [activeTab, isOwnProfile, fetchReviews, fetchFavoriteProducts]);
+    if (activeTab === 'about') {
+      fetchReviewsAsBuyer(userId);
+    }
+  
+    return () => {
+      unsubscribe && unsubscribe();
+    };
+  }, [activeTab, isOwnProfile, userId, fetchReviews, fetchFavoriteProducts, fetchReviewsAsBuyer]);
 
   const filteredUserProducts = useMemo(() => {
     if (!searchTerm) {
@@ -333,6 +367,24 @@ export default function UserProfilePage() {
       product.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [userProducts, searchTerm]);
+
+  // --- Derived data for 'About' tab ---
+  const soldCount = useMemo(() => {
+    return userProducts.filter(p => p.status === 'sold').length;
+  }, [userProducts]);
+
+  const reviewsGivenCount = useMemo(() => {
+      return reviewsAsBuyer.length;
+  }, [reviewsAsBuyer]);
+
+  const getCreditRating = (rating: number, reviewCount: number): { label: string; icon: React.ElementType; color: string } => {
+    if (reviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
+    if (rating >= 4.8 && reviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
+    if (rating >= 4.5 && reviewCount >= 5) return { label: '優秀', icon: CheckBadge, color: 'text-blue-500' };
+    if (rating >= 4.0) return { label: '良好', icon: CheckBadge, color: 'text-green-500' };
+    return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
+  };
+  const creditRating = getCreditRating(profileUser?.averageRating || 0, profileUser?.reviewCount || 0);
 
   // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
@@ -370,14 +422,14 @@ export default function UserProfilePage() {
                     batch.update(productRef, { status: 'sold' });
                 });
                 await batch.commit();
-                toast({ title: `已將 ${'${productIds.length}'} 件產品標示為已售出` });
+                toast({ title: `已將 ${productIds.length} 件產品標示為已售出` });
             } else if (action === 'delete') {
                  productIds.forEach(id => {
                     const productRef = doc(db, 'products', id);
                     batch.delete(productRef);
                 });
                 await batch.commit();
-                toast({ title: `已成功刪除 ${'${productIds.length}'} 件產品` });
+                toast({ title: `已成功刪除 ${productIds.length} 件產品` });
             }
             
             // Exit management mode and clear selection
@@ -420,7 +472,7 @@ export default function UserProfilePage() {
 
             if (updatedCount > 0) {
                 await batch.commit();
-                toast({ title: "更新成功！", description: `已成功為 ${'${updatedCount}'} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
+                toast({ title: "更新成功！", description: `已成功為 ${updatedCount} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
             } else {
                 toast({ title: "無需更新", description: "您所有的產品都已經支援搜尋功能了。" });
             }
@@ -483,7 +535,7 @@ export default function UserProfilePage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作無法復原，將會永久刪除您選取的 ${'${selectedProducts.size}'} 件產品。
+                            此操作無法復原，將會永久刪除您選取的 ${selectedProducts.size} 件產品。
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -574,7 +626,7 @@ export default function UserProfilePage() {
              <ProductGrid 
                 products={filteredUserProducts} 
                 loading={loadingUserProducts} 
-                emptyMessage={searchTerm ? `找不到關於「${'${searchTerm}'}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
+                emptyMessage={searchTerm ? `找不到關於「${searchTerm}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
                 isManaging={isManaging}
                 selectedProducts={selectedProducts}
                 onToggleSelect={handleToggleSelection}
@@ -595,7 +647,7 @@ export default function UserProfilePage() {
              {loadingReviews ? (
                 <div className="space-y-4 max-w-2xl mx-auto">
                     {[...Array(3)].map((_, i) => (
-                        <Card key={i} className="bg-transparent border-none shadow-none"><CardContent className="p-4"><Skeleton className="h-24 w-full" /></CardContent></Card>
+                        <div key={i} className="p-px rounded-xl border-gradient-effect"><div className="relative rounded-xl bg-background/30 backdrop-blur-sm shadow-xl p-4"><Skeleton className="h-24 w-full" /></div></div>
                     ))}
                 </div>
              ) : reviews.length === 0 ? (
@@ -656,8 +708,37 @@ export default function UserProfilePage() {
              )}
           </TabsContent>
           <TabsContent value="about">
-             <div className="max-w-2xl mx-auto text-center py-8">
-              <p className="text-muted-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+             <div className="max-w-2xl mx-auto space-y-6 text-center py-8">
+                <Card>
+                    <CardContent className="p-4 space-y-4">
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                          <div className="space-y-1">
+                             <creditRating.icon className={cn("mx-auto h-7 w-7", creditRating.color)} />
+                             <p className="text-xs text-muted-foreground">信用評級</p>
+                             <p className="font-semibold">{creditRating.label}</p>
+                          </div>
+                           <div className="space-y-1">
+                             <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">加入日期</p>
+                             <p className="font-semibold">{getFormattedDate(profileUser.createdAt)}</p>
+                          </div>
+                       </div>
+                       <Separator />
+                       <div className="grid grid-cols-2 gap-4 text-center">
+                           <div className="space-y-1">
+                             <PackageCheck className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">成功售出</p>
+                             <p className="font-semibold">{loadingUserProducts ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${soldCount} 件`}</p>
+                          </div>
+                           <div className="space-y-1">
+                             <ShoppingBag className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">給出好評</p>
+                             <p className="font-semibold">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
+                          </div>
+                       </div>
+                    </CardContent>
+                </Card>
+                <p className="text-muted-foreground whitespace-pre-wrap">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
             </div>
           </TabsContent>
         </Tabs>
