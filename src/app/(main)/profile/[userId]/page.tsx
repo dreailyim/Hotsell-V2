@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, CheckBadge, ShoppingBag, Trophy } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -380,8 +380,8 @@ export default function UserProfilePage() {
   const getCreditRating = (rating: number, reviewCount: number): { label: string; icon: React.ElementType; color: string } => {
     if (reviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
     if (rating >= 4.8 && reviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
-    if (rating >= 4.5 && reviewCount >= 5) return { label: '優秀', icon: CheckBadge, color: 'text-blue-500' };
-    if (rating >= 4.0) return { label: '良好', icon: CheckBadge, color: 'text-green-500' };
+    if (rating >= 4.5 && reviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
+    if (rating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
     return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
   };
   const creditRating = getCreditRating(profileUser?.averageRating || 0, profileUser?.reviewCount || 0);
@@ -747,3 +747,5 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    
