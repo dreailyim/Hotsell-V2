@@ -265,10 +265,11 @@ export function ListingForm() {
                 {imagesData.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
                         <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center relative bg-muted/50">
-                            <img
+                            <Image
                                 src={image}
                                 alt={`Product preview ${index + 1}`}
-                                className="object-contain rounded-lg p-1 h-full w-full"
+                                fill
+                                className="object-contain rounded-lg p-1"
                             />
                             <Button 
                                 type="button" 
