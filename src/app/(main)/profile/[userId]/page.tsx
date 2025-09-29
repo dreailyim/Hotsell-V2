@@ -564,9 +564,9 @@ export default function UserProfilePage() {
       <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
-        <div className="flex justify-center mb-4">
+        <div className="mb-4">
             <div className="flex items-center gap-3">
-                <Avatar className="h-14 w-14 flex-shrink-0 self-center">
+                <Avatar className="h-14 w-14 flex-shrink-0">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
@@ -743,7 +743,7 @@ export default function UserProfilePage() {
                        </div>
                         <Separator />
                         <div className="space-y-2 p-2">
-                          <p className="text-xs text-muted-foreground">個人簡介</p>
+                           <p className="text-xs text-muted-foreground">個人簡介</p>
                           <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
                         </div>
                     </CardContent>
