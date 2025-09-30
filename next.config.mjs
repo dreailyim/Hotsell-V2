@@ -1,38 +1,30 @@
 
 /** @type {import('next').NextConfig} */
+import createNextPwa from '@ducanh2912/next-pwa';
+
+const withPWA = createNextPwa({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
+
 const nextConfig = {
-  env: {
-    APP_VERSION: process.env.npm_package_version,
-  },
-  experimental: {},
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
-        port: '',
-        pathname: '/**',
-      },
-    ],
+  // Your Next.js config options here
+  webpack: (config, { isServer, dev }) => {
+    // Exclude the custom server sw from the main app builds
+    if (!isServer && !dev) {
+        config.externals = {
+            ...config.externals,
+            './firebase/messaging-sw': 'self.firebase-messaging-sw.js',
+        };
+    }
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      fs: false, // This is to fix 'fs' module not found error in browser
+    };
+    return config;
   },
 };
 
-export default nextConfig;
+export default withPWA(nextConfig);
