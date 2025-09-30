@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -169,7 +169,10 @@ export default function SettingsPage() {
   if (authLoading) {
     return (
        <div className="flex min-h-screen items-center justify-center">
-         <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex flex-col items-center justify-center gap-4">
+                <Flame className="h-16 w-16 text-primary animate-burn" />
+                <p className="text-muted-foreground animate-pulse">載入中...</p>
+            </div>
        </div>
     )
   }

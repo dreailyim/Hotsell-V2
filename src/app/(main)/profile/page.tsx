@@ -4,7 +4,7 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Loader2 } from 'lucide-react';
+import { Flame } from 'lucide-react';
 
 /**
  * This page acts as a redirector.
@@ -32,7 +32,10 @@ export default function ProfileRedirectPage() {
   // Display a loading indicator while the redirect is in progress
   return (
     <div className="flex h-screen items-center justify-center">
-      <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="flex flex-col items-center justify-center gap-4">
+            <Flame className="h-16 w-16 text-primary animate-burn" />
+            <p className="text-muted-foreground animate-pulse">載入中...</p>
+        </div>
     </div>
   );
 }
