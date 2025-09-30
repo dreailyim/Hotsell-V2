@@ -46,6 +46,7 @@ import {
   RefreshCw,
   Clock,
   Star,
+  MapPin,
 } from 'lucide-react';
 import {
   Carousel,
@@ -759,7 +760,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                   </div>
                   {(product.shippingMethods || []).includes('面交') && product.pickupLocation && (
                       <div className="flex items-center gap-2">
-                          <div className="w-4 h-4"></div>
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
                           <div>
                               <p className="text-muted-foreground text-xs">地點</p>
                               <p className="font-medium">{product.pickupLocation}</p>
