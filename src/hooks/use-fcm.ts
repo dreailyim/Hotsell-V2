@@ -14,7 +14,7 @@ export function useFcm() {
   /**
    * 請求權限、取得 Token 並儲存到 Firestore
    */
-  const requestPermissionAndToken = useCallback(async () => {
+  const requestPermissionAndToken = useCallback(async (retryCount = 0) => {
     if (!user) {
       console.log('FCM: User not logged in. Aborting.');
       return;
@@ -66,6 +66,14 @@ export function useFcm() {
       }
     } catch (error: any) {
       console.error('FCM Error: An error occurred while retrieving token.', error);
+      
+      // Handle the specific IndexedDB error with a retry
+      if (error.code === 'messaging/failed-to-get-token' && error.message.includes('database connection is closing') && retryCount < 1) {
+          console.log('FCM: Database connection closing. Retrying in 1 second...');
+          setTimeout(() => requestPermissionAndToken(retryCount + 1), 1000);
+          return; // Exit without showing toast on first failed attempt
+      }
+      
       toast({
         title: "獲取推播權杖失敗",
         description: `${error.message} (${error.code || '未知錯誤碼'})`,
