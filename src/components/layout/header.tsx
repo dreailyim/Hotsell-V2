@@ -87,10 +87,10 @@ export function Header({
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/30 backdrop-blur-sm">
-      <div className="container mx-auto flex h-12 items-center px-4 md:px-6">
+      <div className="container mx-auto flex h-12 items-center justify-between px-4 md:px-6">
         {/* Left Section */}
-        <div className="flex flex-1 items-center justify-start gap-2">
-          {showBackButton && (
+        <div className="flex items-center" style={{ width: '60px' }}>
+          {showBackButton ? (
             <Button
               variant="ghost"
               size="icon"
@@ -99,21 +99,20 @@ export function Header({
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-          )}
-           {!showBackButton && (
-            <div className="flex items-center gap-2">
+          ) : (
+             <div className="flex items-center gap-2">
                 <Flame className="h-7 w-7 text-primary animate-burn" />
             </div>
           )}
         </div>
 
         {/* Center Section */}
-        <div className="flex flex-none items-center justify-center">
+        <div className="flex-1 flex items-center justify-center">
           {showSearch ? <Search /> : (title && <h1 className="whitespace-nowrap text-lg font-bold">{title}</h1>)}
         </div>
 
         {/* Right Section */}
-        <div className="flex flex-1 items-center justify-end">
+        <div className="flex items-center justify-end" style={{ width: '60px' }}>
           {showSettingsButton && (
             <Link href="/profile/settings">
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">

@@ -47,6 +47,9 @@ import {
   Clock,
   Star,
   MapPin,
+  Trophy,
+  BadgeCheck,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   Carousel,
@@ -455,12 +458,23 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     notFound();
   }
 
+  const getCreditRating = (rating?: number, reviewCount?: number): { label: string; icon: React.ElementType; color: string } => {
+    const safeRating = rating || 0;
+    const safeReviewCount = reviewCount || 0;
+    if (safeReviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
+    if (safeRating >= 4.8 && safeReviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
+    if (safeRating >= 4.5 && safeReviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
+    if (safeRating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
+    return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
+  };
+
   const isSeller = user?.uid === product.sellerId;
   const displayPrice = product.price ?? 0;
   const sellerDisplayName = seller?.displayName || product.sellerName;
   const sellerDisplayAvatar = seller?.photoURL || product.sellerAvatar;
   const isDiscounted = typeof product.originalPrice === 'number' && typeof displayPrice === 'number' && displayPrice < product.originalPrice;
   const productImages = product.images?.length ? product.images : [product.image];
+  const creditRating = getCreditRating(seller?.averageRating, seller?.reviewCount);
 
 
   const SellerActionBar = () => {
@@ -773,15 +787,15 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
           <Separator className="my-4" />
 
-          <div className="flex justify-between items-center">
-            <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-3">
+          <Link href={`/profile/${product.sellerId}`} className="flex justify-between items-start">
+            <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={sellerDisplayAvatar || undefined} alt={sellerDisplayName || '賣家頭像'} />
                 <AvatarFallback>{sellerDisplayName?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
                 <p className="font-semibold text-sm">{sellerDisplayName}</p>
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <div className="flex items-center gap-1 text-muted-foreground mt-1">
                     <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                     <span className="font-bold text-xs text-foreground">
                         {(seller?.averageRating || 0).toFixed(1)}
@@ -789,13 +803,14 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                     <span className="text-xs">({seller?.reviewCount || 0})</span>
                 </div>
               </div>
-            </Link>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/profile/${product.sellerId}`}>
-                查看賣場
-              </Link>
-            </Button>
-          </div>
+            </div>
+            <div className="text-right">
+                <Badge variant="outline" className={cn("text-xs font-semibold border-none text-white", creditRating.color === 'text-amber-400' && 'bg-amber-400/20 text-amber-400', creditRating.color === 'text-blue-500' && 'bg-blue-500/20 text-blue-500', creditRating.color === 'text-green-500' && 'bg-green-500/20 text-green-500', creditRating.color === 'text-gray-500' && 'bg-gray-500/20 text-gray-500' )}>
+                    <creditRating.icon className="h-3 w-3 mr-1" />
+                    {creditRating.label}
+                </Badge>
+            </div>
+          </Link>
 
           <Separator className="my-4" />
 
@@ -839,3 +854,7 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
+    
+
+    
