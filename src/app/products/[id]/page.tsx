@@ -794,21 +794,21 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                 <AvatarFallback>{sellerDisplayName?.charAt(0)}</AvatarFallback>
               </Avatar>
               <div>
-                <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{sellerDisplayName}</p>
-                    <Badge variant="outline" className={cn("text-xs font-semibold border-none text-white", creditRating.color === 'text-amber-400' && 'bg-amber-400/20 text-amber-400', creditRating.color === 'text-blue-500' && 'bg-blue-500/20 text-blue-500', creditRating.color === 'text-green-500' && 'bg-green-500/20 text-green-500', creditRating.color === 'text-gray-500' && 'bg-gray-500/20 text-gray-500' )}>
-                        <creditRating.icon className="h-3 w-3 mr-1" />
-                        {creditRating.label}
-                    </Badge>
-                </div>
-                <div className="flex items-center gap-1 text-muted-foreground">
+                <p className="font-semibold text-sm">{sellerDisplayName}</p>
+              </div>
+            </div>
+            <div className="text-right">
+                <Badge variant="outline" className={cn("text-xs font-semibold border-none text-white", creditRating.color === 'text-amber-400' && 'bg-amber-400/20 text-amber-400', creditRating.color === 'text-blue-500' && 'bg-blue-500/20 text-blue-500', creditRating.color === 'text-green-500' && 'bg-green-500/20 text-green-500', creditRating.color === 'text-gray-500' && 'bg-gray-500/20 text-gray-500' )}>
+                    <creditRating.icon className="h-3 w-3 mr-1" />
+                    {creditRating.label}
+                </Badge>
+                <div className="flex items-center gap-1 text-muted-foreground justify-end mt-1">
                     <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
                     <span className="font-bold text-xs text-foreground">
                         {(seller?.averageRating || 0).toFixed(1)}
                     </span>
                     <span className="text-xs">({seller?.reviewCount || 0})</span>
                 </div>
-              </div>
             </div>
           </Link>
 
