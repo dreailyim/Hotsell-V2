@@ -7,7 +7,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAZChqV6v73lcJBCMVXIdd4VlREq7tdDVo",
   authDomain: "hotsell-dolw2.firebaseapp.com",
   projectId: "hotsell-dolw2",
-  storageBucket: "hotsell-dolw2.appspot.com",
+  storageBucket: "hotsell-dolw2.firebasestorage.app",
   messagingSenderId: "25821240563",
   appId: "1:25821240563:web:0c84f1a6f053f3e9e12b86",
   measurementId: "G-5G6503TB6P",
