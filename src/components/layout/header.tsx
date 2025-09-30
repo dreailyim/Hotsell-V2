@@ -100,7 +100,7 @@ export function Header({
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          {showSearch && (
+           {!showBackButton && (
             <div className="flex items-center gap-2">
                 <Flame className="h-7 w-7 text-primary animate-burn" />
             </div>
@@ -109,10 +109,7 @@ export function Header({
 
         {/* Center Section */}
         <div className="flex flex-none items-center justify-center">
-          {showSearch && <Search />}
-          {!showSearch && title && (
-            <h1 className="whitespace-nowrap text-lg font-bold">{title}</h1>
-          )}
+          {showSearch ? <Search /> : (title && <h1 className="whitespace-nowrap text-lg font-bold">{title}</h1>)}
         </div>
 
         {/* Right Section */}
