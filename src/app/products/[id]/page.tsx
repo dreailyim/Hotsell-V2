@@ -787,8 +787,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
           <Separator className="my-4" />
 
-          <Link href={`/profile/${product.sellerId}`} className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
+          <Link href={`/profile/${product.sellerId}`} className="flex justify-between items-start">
+            <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={sellerDisplayAvatar || undefined} alt={sellerDisplayName || '賣家頭像'} />
                 <AvatarFallback>{sellerDisplayName?.charAt(0)}</AvatarFallback>
@@ -854,5 +854,7 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
+    
 
     
