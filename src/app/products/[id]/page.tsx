@@ -795,6 +795,13 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               </Avatar>
               <div>
                 <p className="font-semibold text-sm">{sellerDisplayName}</p>
+                <div className="flex items-center gap-1 text-muted-foreground mt-1">
+                    <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
+                    <span className="font-bold text-xs text-foreground">
+                        {(seller?.averageRating || 0).toFixed(1)}
+                    </span>
+                    <span className="text-xs">({seller?.reviewCount || 0})</span>
+                </div>
               </div>
             </div>
             <div className="text-right">
@@ -802,13 +809,6 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                     <creditRating.icon className="h-3 w-3 mr-1" />
                     {creditRating.label}
                 </Badge>
-                <div className="flex items-center gap-1 text-muted-foreground justify-end mt-1">
-                    <Star className="h-3 w-3 text-yellow-400 fill-yellow-400" />
-                    <span className="font-bold text-xs text-foreground">
-                        {(seller?.averageRating || 0).toFixed(1)}
-                    </span>
-                    <span className="text-xs">({seller?.reviewCount || 0})</span>
-                </div>
             </div>
           </Link>
 
@@ -854,3 +854,5 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
+
+    
