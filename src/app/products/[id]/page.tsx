@@ -787,8 +787,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
           <Separator className="my-4" />
 
-          <div className="flex justify-between items-center">
-            <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-3">
+          <Link href={`/profile/${product.sellerId}`} className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={sellerDisplayAvatar || undefined} alt={sellerDisplayName || '賣家頭像'} />
                 <AvatarFallback>{sellerDisplayName?.charAt(0)}</AvatarFallback>
@@ -809,13 +809,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                     <span className="text-xs">({seller?.reviewCount || 0})</span>
                 </div>
               </div>
-            </Link>
-            <Button asChild variant="outline" size="sm">
-              <Link href={`/profile/${product.sellerId}`}>
-                查看賣場
-              </Link>
-            </Button>
-          </div>
+            </div>
+          </Link>
 
           <Separator className="my-4" />
 
