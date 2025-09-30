@@ -91,7 +91,10 @@ export default function RegisterPage() {
   if (authLoading || user) {
      return (
         <div className="flex min-h-screen items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex flex-col items-center justify-center gap-4">
+                <Flame className="h-16 w-16 text-primary animate-burn" />
+                <p className="text-muted-foreground animate-pulse">載入中...</p>
+            </div>
         </div>
     )
   }

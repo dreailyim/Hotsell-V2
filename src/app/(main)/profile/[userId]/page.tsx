@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -736,11 +736,16 @@ export default function UserProfilePage() {
              <div className="max-w-2xl mx-auto space-y-6 text-center py-8">
                 <Card>
                     <CardContent className="p-4 space-y-4">
-                       <div className="grid grid-cols-2 gap-4 text-center">
+                       <div className="grid grid-cols-3 gap-4 text-center">
                           <div className="space-y-1">
                              <creditRating.icon className={cn("mx-auto h-7 w-7", creditRating.color)} />
                              <p className="text-xs text-muted-foreground">信用評級</p>
                              <p className="font-semibold text-sm">{creditRating.label}</p>
+                          </div>
+                          <div className="space-y-1">
+                             <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
+                             <p className="text-xs text-muted-foreground">所在城市</p>
+                             <p className="font-semibold text-sm">{profileUser.city || '未設定'}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
@@ -776,7 +781,3 @@ export default function UserProfilePage() {
     </>
   );
 }
-
-    
-
-    

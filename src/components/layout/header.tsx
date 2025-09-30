@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Settings, Search as SearchIcon, X } from 'lucide-react';
+import { ArrowLeft, Settings, Search as SearchIcon, X, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
@@ -55,7 +55,7 @@ function Search() {
       <div className="relative w-full max-w-xs">
         <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="Hotsell搵下嘢..."
+          placeholder="搵下有咩啱..."
           className="w-full rounded-full pl-10 pr-10 h-8 text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -89,7 +89,7 @@ export function Header({
     <header className="sticky top-0 z-40 w-full bg-background/30 backdrop-blur-sm">
       <div className="container mx-auto flex h-12 items-center px-4 md:px-6">
         {/* Left Section */}
-        <div className="flex w-1/5 justify-start">
+        <div className="flex flex-1 items-center justify-start gap-2">
           {showBackButton && (
             <Button
               variant="ghost"
@@ -100,18 +100,20 @@ export function Header({
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-        </div>
-
-        {/* Center Section */}
-        <div className="flex w-3/5 items-center justify-center">
-          {showSearch && <Search />}
-          {!showSearch && title && (
-            <h1 className="whitespace-nowrap text-lg font-bold">{title}</h1>
+           {!showBackButton && (
+            <div className="flex items-center gap-2">
+                <Flame className="h-7 w-7 text-primary animate-burn" />
+            </div>
           )}
         </div>
 
+        {/* Center Section */}
+        <div className="flex flex-none items-center justify-center">
+          {showSearch ? <Search /> : (title && <h1 className="whitespace-nowrap text-lg font-bold">{title}</h1>)}
+        </div>
+
         {/* Right Section */}
-        <div className="flex w-1/5 items-center justify-end">
+        <div className="flex flex-1 items-center justify-end">
           {showSettingsButton && (
             <Link href="/profile/settings">
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">

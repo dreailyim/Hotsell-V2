@@ -1,21 +1,19 @@
+import withPWA from '@ducanh2912/next-pwa';
+
+const pwa = withPWA({
+  dest: 'public',
+  register: true,
+  skipWaiting: true,
+  disable: process.env.NODE_ENV === 'development',
+});
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    APP_VERSION: process.env.npm_package_version,
-  },
-  experimental: {},
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'placehold.co',
+        hostname: 'firebasestorage.googleapis.com',
         port: '',
         pathname: '/**',
       },
@@ -25,9 +23,9 @@ const nextConfig = {
         port: '',
         pathname: '/**',
       },
-      {
+       {
         protocol: 'https',
-        hostname: 'firebasestorage.googleapis.com',
+        hostname: 'i.pravatar.cc',
         port: '',
         pathname: '/**',
       },
@@ -35,4 +33,4 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+export default pwa(nextConfig);

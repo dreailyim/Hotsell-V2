@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -28,12 +28,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
+import packageInfo from '@/../package.json';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
   const { toast } = useToast();
 
   const [displayName, setDisplayName] = useState(user?.displayName || '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
+  const [city, setCity] = useState(user?.city || '');
   const [aboutMe, setAboutMe] = useState(user?.aboutMe || '');
   const [newAvatar, setNewAvatar] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -99,7 +103,7 @@ export default function SettingsPage() {
       reader.readAsDataURL(file);
     }
   };
-
+  
   const handleProfileUpdate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!user) return;
@@ -118,8 +122,10 @@ export default function SettingsPage() {
             const userRef = doc(db, 'users', user.uid);
             await updateDoc(userRef, {
                 displayName,
+                phoneNumber,
                 aboutMe,
                 photoURL,
+                city,
             });
 
             await updateAuthProfile({ displayName, photoURL });
@@ -163,7 +169,10 @@ export default function SettingsPage() {
   if (authLoading) {
     return (
        <div className="flex min-h-screen items-center justify-center">
-         <Loader2 className="h-8 w-8 animate-spin" />
+            <div className="flex flex-col items-center justify-center gap-4">
+                <Flame className="h-16 w-16 text-primary animate-burn" />
+                <p className="text-muted-foreground animate-pulse">載入中...</p>
+            </div>
        </div>
     )
   }
@@ -228,6 +237,32 @@ export default function SettingsPage() {
                               disabled
                             />
                         </div>
+                         <div className='space-y-1.5'>
+                            <Label htmlFor="phone">電話號碼</Label>
+                            <Input
+                              id="phone"
+                              value={phoneNumber || ''}
+                              onChange={(e) => setPhoneNumber(e.target.value)}
+                              placeholder="尚未提供"
+                              disabled={isSaveDisabled}
+                            />
+                        </div>
+                    </div>
+                </div>
+                
+                <div className="space-y-2">
+                    <Label htmlFor="city">我的城市</Label>
+                    <div className="flex items-center gap-2">
+                        <Select onValueChange={setCity} value={city} disabled={isSaveDisabled}>
+                            <SelectTrigger id="city">
+                                <SelectValue placeholder="選擇您所在的城市" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="香港島">香港島</SelectItem>
+                                <SelectItem value="九龍">九龍</SelectItem>
+                                <SelectItem value="新界">新界</SelectItem>
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -360,9 +395,13 @@ export default function SettingsPage() {
         </Card>
         
         <div className="text-center text-xs text-muted-foreground mt-8">
-            App Version: {process.env.APP_VERSION || 'N/A'}
+            App Version: {packageInfo.version || 'N/A'}
         </div>
       </div>
     </>
   );
 }
+
+    
+
+    

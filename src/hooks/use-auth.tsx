@@ -30,7 +30,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
-  updateAuthProfile: (profile: { displayName?: string; photoURL?: string | null }) => Promise<void>;
+  updateAuthProfile: (profile: { displayName?: string; photoURL?: string | null; phoneNumber?: string | null }) => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
   deleteAccount: (password: string) => Promise<void>;
 }
@@ -63,7 +63,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               email: firebaseUser.email,
               displayName: firestoreData.displayName || firebaseUser.displayName,
               photoURL: firestoreData.photoURL || firebaseUser.photoURL,
+              phoneNumber: firestoreData.phoneNumber || firebaseUser.phoneNumber,
               aboutMe: firestoreData.aboutMe || '',
+              city: firestoreData.city || '',
               createdAt: createdAt,
               averageRating: firestoreData.averageRating || 0,
               reviewCount: firestoreData.reviewCount || 0,
@@ -76,7 +78,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               email: firebaseUser.email,
               displayName: firebaseUser.displayName,
               photoURL: firebaseUser.photoURL,
+              phoneNumber: firebaseUser.phoneNumber,
               aboutMe: '',
+              city: '',
               createdAt: new Date().toISOString(), // Use current date as a fallback for initial state
               averageRating: 0,
               reviewCount: 0,
@@ -87,9 +91,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 displayName: newUser.displayName,
                 email: newUser.email,
                 photoURL: newUser.photoURL,
+                phoneNumber: newUser.phoneNumber,
                 uid: newUser.uid,
                 createdAt: serverTimestamp(), // Use server timestamp for accuracy
                 aboutMe: '',
+                city: '',
                 averageRating: 0,
                 reviewCount: 0,
             }).catch(e => console.error("Error creating user doc:", e));
@@ -130,6 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         photoURL: firebaseUser.photoURL,
         createdAt: serverTimestamp(),
         aboutMe: '',
+        city: '',
         averageRating: 0,
         reviewCount: 0,
     });
@@ -149,7 +156,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await firebaseSignOut(auth);
   };
   
-  const updateAuthProfile = async (profile: { displayName?: string; photoURL?: string | null; }) => {
+  const updateAuthProfile = async (profile: { displayName?: string; photoURL?: string | null; phoneNumber?: string | null }) => {
     if (!auth.currentUser) {
       throw new Error('您必須登入才能更新個人資料。');
     }
@@ -202,3 +209,7 @@ export const useAuth = () => {
   }
   return context;
 };
+
+    
+
+    
