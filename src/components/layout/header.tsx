@@ -90,7 +90,7 @@ export function Header({
       <div className="container mx-auto flex h-12 items-center justify-between px-4 md:px-6">
         {/* Left Section */}
         <div className="flex items-center" style={{ width: '60px' }}>
-          {showBackButton && (
+          {showBackButton ? (
             <Button
               variant="ghost"
               size="icon"
@@ -99,9 +99,8 @@ export function Header({
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
-          )}
-           {!showBackButton && (
-            <div className="flex items-center gap-2">
+          ) : (
+             <div className="flex items-center gap-2">
                 <Flame className="h-7 w-7 text-primary animate-burn" />
             </div>
           )}
@@ -122,7 +121,7 @@ export function Header({
             </Link>
           )}
           {showUserAvatar && user && (
-             <Link href="/profile">
+             <Link href="/profile/settings">
               <Avatar className="h-7 w-7 cursor-pointer">
                 <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
                 <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
