@@ -31,3 +31,29 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+/**
+ * 處理背景通知的點擊事件
+ */
+self.addEventListener('notificationclick', (event) => {
+    console.log('[firebase-messaging-sw.js] 用戶點擊了通知：', event.notification.data);
+
+    // 關閉通知
+    event.notification.close();
+
+    // 這是點擊通知後要開啟的 URL，來自 Cloud Function 的 data payload
+    const targetUrl = event.notification.data?.click_action || '/';
+
+    // 這段程式碼會尋找一個已開啟的視窗並對焦，如果沒有就會開一個新的
+    event.waitUntil(
+        clients.matchAll({ type: "window" }).then((clientList) => {
+            for (const client of clientList) {
+                // 如果找到符合的 URL，就直接 focus 該視窗
+                if (client.url.endsWith(targetUrl) && 'focus' in client) {
+                    return client.focus();
+                }
+            }
+            // 如果沒有符合的視窗，就開新視窗
+            if (clients.openWindow) {
+                return clients.openWindow(targetUrl);
+            }

@@ -50,6 +50,7 @@ import {
   Trophy,
   BadgeCheck,
   ShieldCheck,
+  Flame,
 } from 'lucide-react';
 import {
   Carousel,
@@ -132,6 +133,7 @@ export default function ProductPage() {
   const [product, setProduct] = useState<Product | null>(null);
   const [seller, setSeller] = useState<FullUser | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isFavorited, setIsFavorited] = useState(false);
 
@@ -233,19 +235,22 @@ export default function ProductPage() {
 
   const handleDelete = () => {
     if (!product || !user) return;
-
+    
+    setIsDeleting(true); // Set deleting state to true immediately
     startTransition(async () => {
       const productRef = doc(db, 'products', product.id);
       try {
         await deleteDoc(productRef);
         toast({ title: "商品已刪除" });
         router.push('/');
+        // Keep isDeleting true to prevent re-render until navigation completes
       } catch (e: any) {
          toast({
             title: '刪除失敗',
             description: e.message || '發生未知錯誤，請稍後再試。',
             variant: 'destructive',
         });
+        setIsDeleting(false); // Reset on failure
       }
     });
   };
@@ -445,6 +450,17 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     }
   };
 
+
+  if (isDeleting) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
+            <Flame className="h-16 w-16 text-primary animate-burn" />
+            <p className="text-muted-foreground animate-pulse">刪除中...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (authLoading) {
     return <ProductPageSkeleton scrollDirection={scrollDirection} />;
