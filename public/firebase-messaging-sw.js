@@ -30,7 +30,7 @@ messaging.onBackgroundMessage((payload) => {
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
-});
+}
 
 /**
  * 處理背景通知的點擊事件
@@ -56,4 +56,4 @@ self.addEventListener('notificationclick', (event) => {
             // 如果沒有符合的視窗，就開新視窗
             if (clients.openWindow) {
                 return clients.openWindow(targetUrl);
-            }
+            });
