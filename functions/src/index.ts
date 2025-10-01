@@ -3,7 +3,27 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import type { SystemNotification } from '@/lib/types';
+import { Timestamp } from 'firebase-admin/firestore';
+
+// Define the type directly in the file as it cannot be imported from the frontend.
+type SystemNotification = {
+    id: string;
+    userId: string;
+    type: 'new_favorite' | 'item_sold_to_other' | 'price_drop' | 'new_listing_success' | 'item_sold' | 'new_review' | 'new_message';
+    message: string;
+    isRead: boolean;
+    createdAt: Timestamp | admin.firestore.FieldValue;
+    relatedData?: {
+        click_action?: string;
+        conversationId?: string;
+        productId?: string;
+        productName?: string;
+        productImage?: string;
+        actorId?: string;
+        actorName?: string;
+        price?: number;
+    };
+};
 
 
 admin.initializeApp();
@@ -166,7 +186,7 @@ export const createNotificationOnUpdate = functions
           type: 'new_favorite',
           message: `${likerName} 收藏了您的商品「${product.name}」。`,
           isRead: false,
-          createdAt: admin.firestore.FieldValue.serverTimestamp() as Timestamp,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
           relatedData: {
             productId: productId,
             productName: product.name,
@@ -199,7 +219,7 @@ export const createNotificationOnUpdate = functions
             type: 'price_drop',
             message: `您收藏的商品「${product.name}」已降價至 $${after.price}！`,
             isRead: false,
-            createdAt: admin.firestore.FieldValue.serverTimestamp() as Timestamp,
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
             relatedData: {
               productId: productId,
               productName: product.name,
@@ -229,7 +249,7 @@ export const createNotificationOnUpdate = functions
           type: 'item_sold',
           message: `恭喜！您的商品「${product.name}」已成功售出。`,
           isRead: false,
-          createdAt: admin.firestore.FieldValue.serverTimestamp() as Timestamp,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
           relatedData: {
             productId: productId,
             productName: product.name,
@@ -311,7 +331,7 @@ export const onNewReview = functions
         type: 'new_review',
         message: `${review.reviewerName} 給了您一個 ${review.rating} 星評價。`,
         isRead: false,
-        createdAt: review.createdAt || admin.firestore.FieldValue.serverTimestamp() as Timestamp,
+        createdAt: review.createdAt || admin.firestore.FieldValue.serverTimestamp(),
         relatedData: {
             productId: review.productId,
             productName: review.productName,
