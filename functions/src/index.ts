@@ -3,11 +3,88 @@
 
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
+
+// Define the type directly in the file as it cannot be imported from the frontend.
+type SystemNotification = {
+    id: string;
+    userId: string;
+    type: 'new_favorite' | 'item_sold_to_other' | 'price_drop' | 'new_listing_success' | 'item_sold' | 'new_review' | 'new_message';
+    message: string;
+    isRead: boolean;
+    createdAt: Timestamp | admin.firestore.FieldValue;
+    relatedData?: {
+        click_action?: string;
+        conversationId?: string;
+        productId?: string;
+        productName?: string;
+        productImage?: string;
+        actorId?: string;
+        actorName?: string;
+        price?: number;
+    };
+};
+
 
 admin.initializeApp();
 
 const db = admin.firestore();
 const fcm = admin.messaging();
+
+/**
+ * Sends a push notification to a specific user.
+ * @param {string} userId The ID of the user to send the notification to.
+ * @param {admin.messaging.Notification} notification The notification payload.
+ * @param {string | undefined} link The deep link for the notification.
+ */
+async function sendPushNotification(userId: string, notification: admin.messaging.Notification, link?: string) {
+    const userSnap = await db.collection('users').doc(userId).get();
+    const userData = userSnap.data();
+
+    if (!userData || !userData.fcmTokens?.length) {
+        console.log(`[Push] User ${userId} has no FCM tokens.`);
+        return;
+    }
+
+    const tokens: string[] = userData.fcmTokens;
+
+    const payload: admin.messaging.MulticastMessage = {
+        notification,
+        tokens: tokens,
+        webpush: {
+            fcmOptions: {
+                link: link,
+            },
+            notification: {
+                tag: link, // Use link as tag to group notifications
+            }
+        },
+        data: {
+            click_action: link || '/',
+        }
+    };
+    
+    const response = await fcm.sendEachForMulticast(payload);
+
+    // Cleanup invalid tokens
+    const tokensToRemove: Promise<any>[] = [];
+    response.responses.forEach((result, index) => {
+        const error = result.error;
+        if (error) {
+            console.error(`[Push] Failure sending to ${tokens[index]}:`, error);
+            if (['messaging/invalid-registration-token', 'messaging/registration-token-not-registered'].includes(error.code)) {
+                tokensToRemove.push(
+                    db.collection('users').doc(userId).update({
+                        fcmTokens: admin.firestore.FieldValue.arrayRemove(tokens[index])
+                    })
+                );
+            }
+        }
+    });
+
+    return Promise.all(tokensToRemove);
+}
+
 
 // Kept your original functions to prevent deletion
 export const getConversations = functions
@@ -54,58 +131,17 @@ export const onNewMessage = functions
       console.log(`[${conversationId}] Recipient not found.`);
       return;
     }
-
-    const recipientSnap = await db.collection('users').doc(recipientId).get();
-    const recipientData = recipientSnap.data();
-    if (!recipientData || !recipientData.fcmTokens?.length) {
-      console.log(`[${recipientId}] Recipient has no FCM tokens.`);
-      return;
-    }
-    const tokens: string[] = recipientData.fcmTokens;
+    
     const senderName =
       convoData.participantDetails[senderId]?.displayName || '有人';
       
-    // The type is correctly set to MulticastMessage
-    const payload: admin.messaging.MulticastMessage = {
-      notification: {
+    const notification: admin.messaging.Notification = {
         title: `來自 ${senderName} 的新訊息`,
         body: messageData.text || '傳送了一則訊息給您',
         imageUrl: convoData.participantDetails[senderId]?.photoURL || undefined,
-      },
-      data: {
-        click_action: `/chat/${conversationId}`,
-      },
-      webpush: {
-        notification: {
-            tag: conversationId, 
-        },
-        fcmOptions: {
-          link: `/chat/${conversationId}`,
-        },
-      },
-      tokens: tokens,
     };
     
-    const response = await fcm.sendEachForMulticast(payload);
-    
-    const tokensToRemove: Promise<any>[] = [];
-    response.responses.forEach((result, index) => {
-      const error = result.error;
-      if (error) {
-        console.error('Failure sending notification to', tokens[index], error);
-        if (
-          error.code === 'messaging/invalid-registration-token' ||
-          error.code === 'messaging/registration-token-not-registered'
-        ) {
-          tokensToRemove.push(
-            db.collection('users').doc(recipientId).update({
-              fcmTokens: admin.firestore.FieldValue.arrayRemove(tokens[index]),
-            })
-          );
-        }
-      }
-    });
-    return Promise.all(tokensToRemove);
+    return sendPushNotification(recipientId, notification, `/chat/${conversationId}`);
   });
 
 // Kept your other original functions
@@ -123,6 +159,8 @@ export const createNotificationOnUpdate = functions
     }
 
     const batch = db.batch();
+    const pushPromises: Promise<any>[] = [];
+
 
     if (collectionId === 'products') {
       const product = after;
@@ -141,7 +179,9 @@ export const createNotificationOnUpdate = functions
         const notificationRef = db
           .collection('notifications')
           .doc(notificationId);
-        batch.set(notificationRef, {
+        
+        const notificationData: SystemNotification = {
+          id: notificationId,
           userId: product.sellerId,
           type: 'new_favorite',
           message: `${likerName} 收藏了您的商品「${product.name}」。`,
@@ -153,8 +193,15 @@ export const createNotificationOnUpdate = functions
             productImage: product.image,
             actorId: newLikerId,
             actorName: likerName,
+            click_action: `/products/${productId}`
           },
-        });
+        };
+        batch.set(notificationRef, notificationData);
+        pushPromises.push(sendPushNotification(product.sellerId, {
+            title: '有人收藏了您的商品！',
+            body: notificationData.message,
+            imageUrl: product.image
+        }, `/products/${productId}`));
       }
 
       if (before.price > after.price) {
@@ -165,7 +212,9 @@ export const createNotificationOnUpdate = functions
           const notificationRef = db
             .collection('notifications')
             .doc(notificationId);
-          batch.set(notificationRef, {
+          
+          const notificationData: SystemNotification = {
+            id: notificationId,
             userId: userId,
             type: 'price_drop',
             message: `您收藏的商品「${product.name}」已降價至 $${after.price}！`,
@@ -176,8 +225,15 @@ export const createNotificationOnUpdate = functions
               productName: product.name,
               productImage: product.image,
               price: after.price,
+              click_action: `/products/${productId}`
             },
-          });
+          };
+          batch.set(notificationRef, notificationData);
+          pushPromises.push(sendPushNotification(userId, {
+            title: '您收藏的商品降價了！',
+            body: notificationData.message,
+            imageUrl: product.image,
+          }, `/products/${productId}`));
         }
       }
 
@@ -186,7 +242,9 @@ export const createNotificationOnUpdate = functions
         const notificationRef = db
           .collection('notifications')
           .doc(notificationId);
-        batch.set(notificationRef, {
+        
+        const notificationData: SystemNotification = {
+          id: notificationId,
           userId: product.sellerId,
           type: 'item_sold',
           message: `恭喜！您的商品「${product.name}」已成功售出。`,
@@ -196,12 +254,20 @@ export const createNotificationOnUpdate = functions
             productId: productId,
             productName: product.name,
             productImage: product.image,
+            click_action: `/products/${productId}`
           },
-        });
+        };
+        batch.set(notificationRef, notificationData);
+        pushPromises.push(sendPushNotification(product.sellerId, {
+            title: '您的商品已售出！',
+            body: notificationData.message,
+            imageUrl: product.image,
+        }, `/products/${productId}`));
       }
     }
-
-    return batch.commit();
+    
+    await batch.commit();
+    return Promise.all(pushPromises);
   });
 
 export const onNewReview = functions
@@ -259,23 +325,31 @@ export const onNewReview = functions
 
     const notificationId = `${ratedUserId}_newreview_${snapshot.id}`;
     const notificationRef = db.collection('notifications').doc(notificationId);
-    batch.set(notificationRef, {
+    const notificationData: SystemNotification = {
+        id: notificationId,
         userId: ratedUserId,
         type: 'new_review',
         message: `${review.reviewerName} 給了您一個 ${review.rating} 星評價。`,
         isRead: false,
-        createdAt:
-        review.createdAt || admin.firestore.FieldValue.serverTimestamp(),
+        createdAt: review.createdAt || admin.firestore.FieldValue.serverTimestamp(),
         relatedData: {
-        productId: review.productId,
-        productName: review.productName,
-        productImage: review.productImage,
-        actorId: review.reviewerId,
-        actorName: review.reviewerName,
+            productId: review.productId,
+            productName: review.productName,
+            productImage: review.productImage,
+            actorId: review.reviewerId,
+            actorName: review.reviewerName,
+            click_action: `/profile/${ratedUserId}?tab=reviews`,
         },
-    });
+    };
+    batch.set(notificationRef, notificationData);
 
-    return batch.commit();
+    const pushPromise = sendPushNotification(ratedUserId, {
+        title: '您收到了新的評價！',
+        body: notificationData.message,
+    }, `/profile/${ratedUserId}?tab=reviews`);
+
+    await batch.commit();
+    return pushPromise;
   });
 
 export const onConversationUpdate = functions

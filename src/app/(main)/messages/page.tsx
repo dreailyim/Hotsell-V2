@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useTransition, useRef, useCallback, useMemo } from 'react';
@@ -338,7 +339,11 @@ export default function MessagesPage() {
         const notifRef = doc(db, 'notifications', notification.id);
         updateDoc(notifRef, { isRead: true }).catch(e => console.error("Failed to mark as read", e));
     }
-    if (notification.type === 'new_message' && notification.relatedData?.conversationId) {
+    const clickAction = notification.relatedData?.click_action;
+
+    if (clickAction) {
+        router.push(clickAction);
+    } else if (notification.type === 'new_message' && notification.relatedData?.conversationId) {
         router.push(`/chat/${notification.relatedData.conversationId}`);
     } else if (notification.relatedData?.productId) {
         router.push(`/products/${notification.relatedData.productId}`);
@@ -346,6 +351,7 @@ export default function MessagesPage() {
         router.push(`/profile/${notification.relatedData.actorId}`);
     }
   };
+
 
   const handleMarkAllAsRead = async () => {
     if (!user) return;
