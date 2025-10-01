@@ -126,8 +126,9 @@ export type SystemNotification = {
     type: 'new_favorite' | 'item_sold_to_other' | 'price_drop' | 'new_listing_success' | 'item_sold' | 'new_review' | 'new_message';
     message: string;
     isRead: boolean;
-    createdAt: Timestamp | string;
+    createdAt: Timestamp | string | FieldValue;
     relatedData?: {
+        click_action?: string; // Standard field for deep linking
         conversationId?: string;
         productId?: string;
         productName?: string;
