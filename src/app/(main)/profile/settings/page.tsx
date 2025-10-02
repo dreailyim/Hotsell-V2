@@ -29,7 +29,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import packageInfo from '@/../package.json';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -258,9 +258,33 @@ export default function SettingsPage() {
                                 <SelectValue placeholder="選擇您所在的城市" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="香港島">香港島</SelectItem>
-                                <SelectItem value="九龍">九龍</SelectItem>
-                                <SelectItem value="新界">新界</SelectItem>
+                                <SelectGroup>
+                                    <SelectLabel>香港島</SelectLabel>
+                                    <SelectItem value="中西區">中西區</SelectItem>
+                                    <SelectItem value="灣仔區">灣仔區</SelectItem>
+                                    <SelectItem value="東區">東區</SelectItem>
+                                    <SelectItem value="南區">南區</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>九龍</SelectLabel>
+                                    <SelectItem value="油尖旺區">油尖旺區</SelectItem>
+                                    <SelectItem value="深水埗區">深水埗區</SelectItem>
+                                    <SelectItem value="九龍城區">九龍城區</SelectItem>
+                                    <SelectItem value="黃大仙區">黃大仙區</SelectItem>
+                                    <SelectItem value="觀塘區">觀塘區</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>新界</SelectLabel>
+                                    <SelectItem value="葵青區">葵青區</SelectItem>
+                                    <SelectItem value="荃灣區">荃灣區</SelectItem>
+                                    <SelectItem value="屯門區">屯門區</SelectItem>
+                                    <SelectItem value="元朗區">元朗區</SelectItem>
+                                    <SelectItem value="北區">北區</SelectItem>
+                                    <SelectItem value="大埔區">大埔區</SelectItem>
+                                    <SelectItem value="沙田區">沙田區</SelectItem>
+                                    <SelectItem value="西貢區">西貢區</SelectItem>
+                                    <SelectItem value="離島區">離島區</SelectItem>
+                                </SelectGroup>
                             </SelectContent>
                         </Select>
                     </div>
@@ -401,7 +425,3 @@ export default function SettingsPage() {
     </>
   );
 }
-
-    
-
-    
