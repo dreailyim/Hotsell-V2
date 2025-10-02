@@ -14,6 +14,7 @@ type HeaderProps = {
   showSearch?: boolean;
   title?: string;
   showBackButton?: boolean;
+  backHref?: string; // New prop to specify a fixed back destination
   showSettingsButton?: boolean;
   showUserAvatar?: boolean;
 };
@@ -79,11 +80,20 @@ export function Header({
   showSearch = false,
   title,
   showBackButton = false,
+  backHref,
   showSettingsButton = false,
   showUserAvatar = false,
 }: HeaderProps) {
   const router = useRouter();
   const { user } = useAuth();
+
+  const handleBackClick = () => {
+    if (backHref) {
+      router.push(backHref);
+    } else {
+      router.back();
+    }
+  };
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/30 backdrop-blur-sm">
@@ -95,7 +105,7 @@ export function Header({
               variant="ghost"
               size="icon"
               className="h-9 w-9 rounded-full"
-              onClick={() => router.back()}
+              onClick={handleBackClick}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
