@@ -256,7 +256,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
             <div className="flex w-full justify-between items-center pt-2">
                  <Link href={`/profile/${liveProduct.sellerId}`} className="flex items-center gap-2 min-w-0">
                     <Avatar className="h-6 w-6">
-                        <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
+                        <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} width={24} height={24} />
                         <AvatarFallback className="text-xs">{safeSellerName?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="text-[11px] text-muted-foreground font-medium truncate">{safeSellerName}</span>
