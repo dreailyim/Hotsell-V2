@@ -730,7 +730,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header title={otherUser?.displayName || "對話"} showBackButton />
+      <Header title={otherUser?.displayName || "對話"} showBackButton backHref="/messages" />
       <ChatProductHeader />
 
       <div className={cn("flex-1 overflow-y-auto p-4 space-y-4", hasStickyHeader && "pt-4")}>

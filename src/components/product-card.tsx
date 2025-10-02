@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useTransition, useState, useEffect } from 'react';
@@ -16,7 +17,7 @@ import { Button } from './ui/button';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
-import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot, increment } from 'firebase/firestore';
+import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot, increment, Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
 
@@ -25,39 +26,63 @@ type ProductCardProps = {
   product: Product;
 };
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product: initialProduct }: ProductCardProps) {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+
+  // --- Real-time State ---
+  const [liveProduct, setLiveProduct] = useState<Product | null>(initialProduct);
   const [seller, setSeller] = useState<FullUser | null>(null);
   
   const [isFavorited, setIsFavorited] = useState(false);
-  const [optimisticFavorites, setOptimisticFavorites] = useState(product.favorites || 0);
+  const [optimisticFavorites, setOptimisticFavorites] = useState(initialProduct.favorites || 0);
 
-  
-  // Effect to set initial favorited state from product data when it loads or user changes
+  // Effect to listen for real-time updates on the product itself.
+  // This solves the stale data issue when a product is updated elsewhere.
   useEffect(() => {
-    if (user && product) {
-      setIsFavorited(product.favoritedBy?.includes(user.uid));
+    if (!initialProduct?.id) return;
+    const productRef = doc(db, 'products', initialProduct.id);
+    const unsubscribe = onSnapshot(productRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        const createdAt = data.createdAt instanceof Timestamp 
+            ? data.createdAt.toDate().toISOString() 
+            : new Date().toISOString();
+        const updatedProduct = { id: docSnap.id, ...data, createdAt } as Product;
+        setLiveProduct(updatedProduct);
+      } else {
+        // The product has been deleted.
+        setLiveProduct(null);
+      }
+    });
+    return () => unsubscribe();
+  }, [initialProduct.id]);
+
+  // Effect for setting favorited state and favorite count based on the live product data.
+  useEffect(() => {
+    if (user && liveProduct) {
+      setIsFavorited(liveProduct.favoritedBy?.includes(user.uid));
+      setOptimisticFavorites(liveProduct.favorites || 0);
     }
-    setOptimisticFavorites(product.favorites || 0);
-  }, [product, user]);
+  }, [liveProduct, user]);
 
 
+  // Effect for fetching the seller's real-time information.
   useEffect(() => {
-    if (!product.sellerId) return;
+    if (!liveProduct?.sellerId) return;
     
-    const sellerRef = doc(db, 'users', product.sellerId);
+    const sellerRef = doc(db, 'users', liveProduct.sellerId);
     const unsubscribe = onSnapshot(sellerRef, (docSnap) => {
       if (docSnap.exists()) {
         setSeller(docSnap.data() as FullUser);
       } else {
         // Fallback to data on product if seller doc not found
         setSeller({
-            uid: product.sellerId,
-            displayName: product.sellerName,
-            photoURL: product.sellerAvatar || null,
+            uid: liveProduct.sellerId,
+            displayName: liveProduct.sellerName,
+            photoURL: liveProduct.sellerAvatar || null,
             email: null,
             createdAt: ''
         });
@@ -65,25 +90,23 @@ export function ProductCard({ product }: ProductCardProps) {
     });
 
     return () => unsubscribe();
-  }, [product.sellerId, product.sellerName, product.sellerAvatar]);
+  }, [liveProduct?.sellerId, liveProduct?.sellerName, liveProduct?.sellerAvatar]);
 
 
   const handleFavoriteToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Use direct check to auth object to prevent race conditions with async state
     const currentUser = auth.currentUser;
-
     if (!currentUser) {
         toast({ title: "請先登入", description: "您需要登入才能收藏商品。", variant: "destructive" });
         router.push('/login');
         return;
     }
     
-    if (!product) return;
+    if (!liveProduct) return;
 
-    const productRef = doc(db, 'products', product.id);
+    const productRef = doc(db, 'products', liveProduct.id);
     const newFavoritedState = !isFavorited;
     const originalFavorites = optimisticFavorites;
     
@@ -116,12 +139,13 @@ export function ProductCard({ product }: ProductCardProps) {
   }
 
   const handleShare = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigating to product page
+    e.preventDefault();
     e.stopPropagation();
+    if (!liveProduct) return;
     const shareData = {
-      title: product.name,
-      text: `來看看這個超讚的商品：${product.name}`,
-      url: `${window.location.origin}/products/${id}`,
+      title: liveProduct.name,
+      text: `來看看這個超讚的商品：${liveProduct.name}`,
+      url: `${window.location.origin}/products/${liveProduct.id}`,
     };
 
     if (navigator.share) {
@@ -136,37 +160,32 @@ export function ProductCard({ product }: ProductCardProps) {
   };
 
 
-  if (!product?.id) {
-    return (
-        <div className="flex flex-col space-y-3">
-            <Skeleton className="h-[125px] w-full rounded-xl" />
-            <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-            </div>
-        </div>
-    )
+  if (!liveProduct) {
+    // If liveProduct becomes null (e.g., deleted), render nothing.
+    return null;
   }
   
-  const { id, name, price, image, images, favorites, status, condition, originalPrice } = product;
+  const { id, name, price, image, images, favorites, status, condition, originalPrice } = liveProduct;
   
   const safeImage = images?.[0] || image || 'https://picsum.photos/600/400';
   const safeName = name || '無標題商品';
   
-  const safeSellerName = seller?.displayName || product.sellerName || '匿名賣家';
-  const sellerAvatar = seller?.photoURL || product.sellerAvatar;
+  const safeSellerName = seller?.displayName || liveProduct.sellerName || '匿名賣家';
+  const sellerAvatar = seller?.photoURL || liveProduct.sellerAvatar;
   const isDiscounted = typeof originalPrice === 'number' && typeof price === 'number' && price < originalPrice;
 
 
   return (
     <Card className="w-full h-full flex flex-col overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
-        <div className="relative aspect-square w-full">
+        <div className="relative w-full overflow-hidden aspect-square">
             <Link href={`/products/${id}`} aria-label={safeName}>
               <Image
                 src={safeImage}
                 alt={safeName}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                width={400}
+                height={400}
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
                 data-ai-hint="product image"
                 onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/600/400'; }}
               />
@@ -235,9 +254,9 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
 
             <div className="flex w-full justify-between items-center pt-2">
-                 <Link href={`/profile/${product.sellerId}`} className="flex items-center gap-2 min-w-0">
+                 <Link href={`/profile/${liveProduct.sellerId}`} className="flex items-center gap-2 min-w-0">
                     <Avatar className="h-6 w-6">
-                        <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} />
+                        <AvatarImage src={sellerAvatar || undefined} alt={safeSellerName} width={24} height={24} />
                         <AvatarFallback className="text-xs">{safeSellerName?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <span className="text-[11px] text-muted-foreground font-medium truncate">{safeSellerName}</span>
