@@ -3,12 +3,13 @@
 import { ReactNode, useEffect } from 'react';
 import { useAuth } from '@/hooks/use-auth';
 import { BottomNav } from '@/components/layout/bottom-nav';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Flame } from 'lucide-react';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
   
   // The useFcm hook has been moved to the root layout via FcmRegistrar component.
 
@@ -34,6 +35,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       </div>
     );
   }
+  
+  const showBottomNav = !pathname.startsWith('/chat/');
 
   // If user is authenticated, render the layout with the children pages.
   return (
@@ -41,7 +44,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         <div className="flex-1 animate-zoom-in">
             <main className="pb-24 md:pb-0">{children}</main>
         </div>
-        <BottomNav />
+        {showBottomNav && <BottomNav />}
     </div>
   );
 }
