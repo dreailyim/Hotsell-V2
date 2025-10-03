@@ -28,10 +28,10 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const storedLang = localStorage.getItem('app-language') as Language;
-    if (storedLang && storedLang !== language) {
+    if (storedLang) {
       setLanguage(storedLang);
     }
-  }, [language]);
+  }, []);
 
   const handleSetLanguage = (newLanguage: Language) => {
     setLanguage(newLanguage);
