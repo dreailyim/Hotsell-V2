@@ -1,8 +1,10 @@
+
 export const en = {
   // General
   'loading': 'Loading...',
   'save': 'Save',
   'cancel': 'Cancel',
+  'delete': 'Delete',
 
   // Bottom Nav
   'nav.home': 'Home',
@@ -86,8 +88,8 @@ export const en = {
   'profile.about.items_sold': 'Items Sold',
   'profile.about.reviews_given': 'Reviews Given',
   'profile.about.bio': 'Bio',
-  'profile.about.bio.empty.own': 'You haven\'t written anything about yourself.',
-  'profile.about.bio.empty.other': 'This user hasn\'t written anything about themselves.',
+  'profile.about.bio.empty.own': "You haven't written anything about yourself.",
+  'profile.about.bio.empty.other': "This user hasn't written anything about themselves.",
   'profile.about.rating.new': 'New User',
   'profile.about.rating.top': 'Top Seller',
   'profile.about.rating.excellent': 'Excellent',
@@ -95,6 +97,8 @@ export const en = {
   'profile.about.rating.fair': 'Fair',
 
   // Settings Page
+  'settings.language.title': 'Language',
+  'settings.language.description': 'Choose the language of the application interface.',
   'settings.profile.title': 'Profile',
   'settings.profile.description': 'Update your public profile. This will be displayed on your profile and product pages.',
   'settings.profile.display_name': 'Display Name',
@@ -170,4 +174,37 @@ export const en = {
   'listing_form.create_fail': 'Listing failed',
   'listing_form.edit_success': 'Updated successfully!',
   'listing_form.edit_fail': 'Update failed',
+  
+  // Product Page
+  'product_page.bid': 'Bid',
+  'product_page.bid_dialog.title': 'How much do you want to bid?',
+  'product_page.bid_dialog.price': 'Price',
+  'product_page.bid_dialog.confirm': 'Confirm Bid',
+  'product_page.bid_dialog.invalid_price': 'Please enter a valid bid amount.',
+  'product_page.special_price': 'On Sale',
+  'product_page.sold': 'Sold',
+  'product_page.reserved': 'Reserved',
+  'product_page.share': 'Share',
+  'product_page.unfavorite': 'Unfavorite',
+  'product_page.favorite': 'Favorite',
+  'product_page.link_copied': 'Product link copied!',
+  'product_page.details': 'Product Details',
+  'product_page.condition': 'Condition',
+  'product_page.posted_time': 'Posted',
+  'product_page.shipping_methods': 'Shipping',
+  'product_page.location': 'Location',
+  'product_page.seller_avatar': 'Seller Avatar',
+  'product_page.anonymous_seller': 'Anonymous Seller',
+  'product_page.description': 'Product Description',
+  'product_page.delete_dialog.title': 'Are you sure you want to delete?',
+  'product_page.delete_dialog.description_sold': 'This action cannot be undone. This will permanently delete your product data, and the product info in related chats will not be updated.',
+  'product_page.delete_dialog.description': 'This action cannot be undone. This will permanently delete your product data.',
+  'product_page.delete_dialog.confirm': 'Confirm Delete',
+  'product_page.relist': 'Relist',
+  'product_page.edit': 'Edit',
+  'product_page.reserve': 'Reserve',
+  'product_page.mark_as_sold': 'Sold',
+  'product_page.chat': 'Chat',
 };
+
+    

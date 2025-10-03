@@ -1,8 +1,10 @@
+
 export const zh = {
   // General
   'loading': '載入中...',
   'save': '儲存',
   'cancel': '取消',
+  'delete': '刪除',
 
   // Bottom Nav
   'nav.home': '主頁',
@@ -97,6 +99,8 @@ export const zh = {
 
 
   // Settings Page
+  'settings.language.title': '語言',
+  'settings.language.description': '選擇應用程式介面的語言。',
   'settings.profile.title': '個人檔案',
   'settings.profile.description': '更新您的公開個人資料。這將會顯示在您的個人主頁和商品頁面上。',
   'settings.profile.display_name': '顯示名稱',
@@ -126,7 +130,7 @@ export const zh = {
   'settings.theme.system': '系統',
   'settings.about.title': '關於我們',
   'settings.about.disclaimer': '免責聲明',
-  'settings.about.disclaimer.content': '此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有顯示的商品、價格、用戶資料和交易均為模擬數據，並非真實。\n\n請勿在此應用程式上分享任何真實的個人敏感資訊或進行任何真實的金融交易。開發者對因使用此應用程式而導致的任何形式的損失或損害概不負責。\n\n所有圖片均來自公開的圖片服務 (Picsum Photos)，版權歸原作者所有。',
+  'settings.about.disclaimer.content': '此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有顯示的商品、價格、用戶資料和交易均為模擬數據，並非真實。\n\n請勿在此應用程式上分享任何真實的個人敏感資訊或进行任何真實的金融交易。開發者對因使用此應用程式而導致的任何形式的損失或損害概不負責。\n\n所有圖片均來自公開的圖片服務 (Picsum Photos)，版權歸原作者所有。',
   'settings.about.disclaimer.understood': '我已了解',
   'settings.support.title': '技術支援',
   'settings.logout.button': '登出',
@@ -172,4 +176,37 @@ export const zh = {
   'listing_form.create_fail': '刊登失敗',
   'listing_form.edit_success': '更新成功！',
   'listing_form.edit_fail': '更新失敗',
+  
+  // Product Page
+  'product_page.bid': '出價',
+  'product_page.bid_dialog.title': '您想出價多少？',
+  'product_page.bid_dialog.price': '價格',
+  'product_page.bid_dialog.confirm': '確認出價',
+  'product_page.bid_dialog.invalid_price': '請輸入有效的出價金額。',
+  'product_page.special_price': '特價中',
+  'product_page.sold': '已售出',
+  'product_page.reserved': '已預留',
+  'product_page.share': '分享',
+  'product_page.unfavorite': '取消收藏',
+  'product_page.favorite': '加入收藏',
+  'product_page.link_copied': '已複製商品連結！',
+  'product_page.details': '商品詳情',
+  'product_page.condition': '狀況',
+  'product_page.posted_time': '刊登時間',
+  'product_page.shipping_methods': '交收方式',
+  'product_page.location': '地點',
+  'product_page.seller_avatar': '賣家頭像',
+  'product_page.anonymous_seller': '匿名賣家',
+  'product_page.description': '商品描述',
+  'product_page.delete_dialog.title': '確定要永久刪除嗎？',
+  'product_page.delete_dialog.description_sold': '此操作無法復原。這將會永久刪除您的商品資料，相關對話中的商品資訊將不會更新。',
+  'product_page.delete_dialog.description': '此操作無法復原。這將會永久刪除您的商品資料。',
+  'product_page.delete_dialog.confirm': '確認刪除',
+  'product_page.relist': '重刊',
+  'product_page.edit': '編輯',
+  'product_page.reserve': '保留',
+  'product_page.mark_as_sold': '售出',
+  'product_page.chat': '傾傾',
 };
+
+    
