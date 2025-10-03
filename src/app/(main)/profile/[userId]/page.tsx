@@ -576,7 +576,7 @@ export default function UserProfilePage() {
                         <TabsTrigger
                             key={item.value}
                             value={item.value}
-                            className="relative z-10 h-14 w-14 flex flex-col items-center justify-center gap-1 rounded-full text-xs font-medium data-[state=active]:bg-transparent data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black"
+                            className="relative z-10 h-14 px-2 flex flex-col items-center justify-center gap-1 rounded-full text-xs font-medium data-[state=active]:bg-transparent data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black"
                         >
                             <item.icon className="h-5 w-5" />
                             <span>{item.label}</span>
