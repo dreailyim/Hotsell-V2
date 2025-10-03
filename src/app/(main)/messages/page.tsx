@@ -477,9 +477,18 @@ export default function MessagesPage() {
 
     return (
       <>
-        <div className="flex justify-end px-2 border-b">
-            <Button variant="link" size="sm" onClick={handleMarkAllAsRead} disabled={!notifications.some(n => !n.isRead)}>全部標記為已讀</Button>
+        <div className="flex justify-end px-4 py-2">
+            <Button
+              variant="link"
+              size="sm"
+              onClick={handleMarkAllAsRead}
+              disabled={systemNotificationsUnreadCount === 0}
+              className="text-muted-foreground disabled:text-muted-foreground/50 disabled:no-underline"
+            >
+              全部標記為已讀
+            </Button>
         </div>
+        <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
         <div>
             {notifications.map((notif, index) => (
                 <div key={notif.id}>
