@@ -561,7 +561,7 @@ export default function ChatPage() {
 
 
       return (
-        <div className="sticky top-[56px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
+        <div className="sticky top-[48px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
           <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
@@ -661,7 +661,7 @@ export default function ChatPage() {
 
     // Default view when no special status
     return (
-      <div className="sticky top-[56px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
+      <div className="sticky top-[48px] z-10 w-full border-b bg-background/80 backdrop-blur-sm">
          <div className="container mx-auto flex items-center justify-between gap-3 p-2">
             <div className="flex items-center gap-3 cursor-pointer min-w-0" onClick={() => router.push(`/products/${product.id}`)}>
               <div className="relative h-12 w-12 flex-shrink-0">
@@ -722,18 +722,17 @@ export default function ChatPage() {
     );
   }
 
-  const hasStickyHeader = conversation?.product?.status === 'sold';
-  const chatPaddingTop = hasStickyHeader ? 'pt-[92px]' : 'pt-4';
-  const headerHeight = 56; // from Header component h-14
-  const chatProductHeaderHeight = 68; // from ChatProductHeader p-2(8) + h-12(48) + p-2(8) + border-b(1) ~approx 68px
-  const stickyTopValue = `${headerHeight}px`;
-
+  const hasStickyHeader = conversation?.product;
+  
   return (
     <div className="flex flex-col h-screen">
       <Header title={otherUser?.displayName || "對話"} showBackButton backHref="/messages" />
-      <ChatProductHeader />
+      {hasStickyHeader && <ChatProductHeader />}
 
-      <div className={cn("flex-1 overflow-y-auto p-4 space-y-4", hasStickyHeader && "pt-4")}>
+      <main 
+        className="flex-1 overflow-y-auto p-4 space-y-4"
+        style={{ paddingTop: hasStickyHeader ? '1rem' : '1rem' }}
+      >
         {error && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -790,7 +789,7 @@ export default function ChatPage() {
           );
         })}
         <div ref={messagesEndRef} />
-      </div>
+      </main>
 
       <div className="bg-background/50 backdrop-blur-sm border-t p-2 border-white/10">
         <form onSubmit={handleSubmit} className="container mx-auto flex items-center gap-2 px-4">
