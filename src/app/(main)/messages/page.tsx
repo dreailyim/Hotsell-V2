@@ -488,8 +488,10 @@ export default function MessagesPage() {
                     onClick={() => handleNotificationClick(notif)}
                 >
                     <div className="relative flex-shrink-0 mt-1">
-                        {NOTIFICATION_ICONS[notif.type] || <Bell className="h-5 w-5 text-muted-foreground" />}
-                        {!notif.isRead && (<span className="absolute -top-1 -left-1 block h-2.5 w-2.5 rounded-full bg-blue-500 ring-2 ring-background"></span>)}
+                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted">
+                           {NOTIFICATION_ICONS[notif.type] || <Bell className="h-5 w-5 text-muted-foreground" />}
+                        </div>
+                        {!notif.isRead && (<span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-blue-500 ring-2 ring-background"></span>)}
                     </div>
                     <div className="flex-1">
                         <p className="text-sm">{notif.message}</p>
