@@ -31,6 +31,7 @@ import {
 import packageInfo from '@/../package.json';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Link from 'next/link';
+import React from 'react';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -191,6 +192,12 @@ export default function SettingsPage() {
   }
 
   const isSaveDisabled = isPending || isUploading;
+
+  const supportLinks = [
+    { href: "https://wa.me/85212345678", icon: <MessageCircle className="h-5 w-5 text-green-500" />, label: "WhatsApp" },
+    { href: "https://signal.me/#p/+85212345678", icon: <Phone className="h-5 w-5 text-blue-500" />, label: "Signal" },
+    { href: "mailto:support@example.com", icon: <Mail className="h-5 w-5 text-muted-foreground" />, label: "Email" },
+  ];
 
   return (
     <>
@@ -387,28 +394,21 @@ export default function SettingsPage() {
                 <CardTitle className="text-lg">技術支援</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="divide-y divide-border">
-                     <Link href="https://wa.me/85212345678" target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                            <MessageCircle className="h-5 w-5 text-green-500" />
-                            <span className="text-sm">WhatsApp</span>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </Link>
-                    <Link href="https://signal.me/#p/+85212345678" target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                            <Phone className="h-5 w-5 text-blue-500" />
-                            <span className="text-sm">Signal</span>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </Link>
-                    <Link href="mailto:support@example.com" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
-                        <div className="flex items-center gap-4">
-                            <Mail className="h-5 w-5 text-muted-foreground" />
-                            <span className="text-sm">Email</span>
-                        </div>
-                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
-                    </Link>
+                <div>
+                    {supportLinks.map((link, index) => (
+                        <React.Fragment key={link.href}>
+                            <Link href={link.href} target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    {link.icon}
+                                    <span className="text-sm">{link.label}</span>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </Link>
+                            {index < supportLinks.length - 1 && (
+                                <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+                            )}
+                        </React.Fragment>
+                    ))}
                 </div>
             </CardContent>
         </Card>
@@ -494,5 +494,3 @@ export default function SettingsPage() {
     </>
   );
 }
-
-    
