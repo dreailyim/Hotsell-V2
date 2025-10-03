@@ -10,7 +10,7 @@ import type { Conversation, FullUser, SystemNotification } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { zhHK } from 'date-fns/locale';
+import { enUS, zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion, increment, getDocs } from 'firebase/firestore';
@@ -134,7 +134,7 @@ export default function MessagesPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   // --- States for Private Messages ---
   const [conversations, setConversations] = useState<EnrichedConversation[]>([]);
@@ -373,7 +373,7 @@ export default function MessagesPage() {
     if (!timestamp) return '';
     try {
       const date = timestamp.seconds ? new Timestamp(timestamp.seconds, timestamp.nanoseconds).toDate() : new Date(timestamp);
-      return formatDistanceToNow(date, { addSuffix: true, locale: zhHK });
+      return formatDistanceToNow(date, { addSuffix: true, locale: language === 'en' ? enUS : zhHK });
     } catch (error) {
       console.error("Error formatting date:", error, "with value:", timestamp);
       return '剛剛';

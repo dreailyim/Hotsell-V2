@@ -18,7 +18,7 @@ import type { Product, Review, FullUser } from '@/lib/types';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow, format } from 'date-fns';
-import { zhHK } from 'date-fns/locale';
+import { enUS, zhHK } from 'date-fns/locale';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Separator } from '@/components/ui/separator';
@@ -214,7 +214,7 @@ export default function UserProfilePage() {
     if (!timestamp) return '';
     try {
       const date = timestamp instanceof Timestamp ? timestamp.toDate() : new Date(timestamp);
-      return formatDistanceToNow(date, { addSuffix: true, locale: zhHK });
+      return formatDistanceToNow(date, { addSuffix: true, locale: language === 'en' ? enUS : zhHK });
     } catch (error) {
       console.error("Error formatting date:", error, "with value:", timestamp);
       return '';

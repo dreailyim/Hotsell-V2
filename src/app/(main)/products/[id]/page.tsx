@@ -11,7 +11,7 @@ import type { Product, FullUser, Conversation } from '@/lib/types';
 import { useAuth } from '@/hooks/use-auth';
 import { useToast } from '@/hooks/use-toast';
 import { formatDistanceToNow } from 'date-fns';
-import { zhHK } from 'date-fns/locale';
+import { enUS, zhHK } from 'date-fns/locale';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
@@ -130,7 +130,7 @@ export default function ProductPage() {
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const scrollDirection = useScrollDirection();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   const productId = Array.isArray(params.id) ? params.id[0] : params.id as string;
   
   const [product, setProduct] = useState<Product | null>(null);
@@ -207,7 +207,7 @@ export default function ProductPage() {
       const date = typeof product.createdAt === 'string'
         ? new Date(product.createdAt)
         : (product.createdAt as unknown as Timestamp).toDate();
-      return formatDistanceToNow(date, { addSuffix: true, locale: zhHK });
+      return formatDistanceToNow(date, { addSuffix: true, locale: language === 'en' ? enUS : zhHK });
     } catch (error) {
       console.error("Error formatting date:", error);
       return '';
