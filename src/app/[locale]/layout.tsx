@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Providers } from "./providers";
+import { Providers } from "../providers";
 import { Toaster } from "@/components/ui/toaster";
-import "./globals.css";
+import "../globals.css";
 import Script from "next/script";
 import { FcmRegistrar } from "@/components/fcm-registrar";
+import { I18nProvider } from '../../i18n/client';
 
 export const metadata: Metadata = {
   title: "HotSell",
@@ -13,11 +14,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
+  params: { locale }
 }: Readonly<{
   children: React.ReactNode;
+  params: { locale: string };
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script
           async
@@ -26,11 +29,13 @@ export default function RootLayout({
         ></script>
       </head>
       <body className="font-body antialiased" suppressHydrationWarning>
-        <Providers>
-          <FcmRegistrar />
-          {children}
-          <Toaster />
-        </Providers>
+        <I18nProvider locale={locale}>
+          <Providers>
+            <FcmRegistrar />
+            {children}
+            <Toaster />
+          </Providers>
+        </I18nProvider>
       </body>
     </html>
   );

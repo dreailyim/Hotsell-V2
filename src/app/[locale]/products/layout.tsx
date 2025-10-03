@@ -1,5 +1,5 @@
 
-import MainLayout from "@/app/(main)/layout";
+import MainLayout from "@/app/[locale]/(main)/layout";
 
 export default function ProductsLayout({
   children,
