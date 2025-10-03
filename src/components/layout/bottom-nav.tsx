@@ -13,7 +13,7 @@ export function BottomNav() {
   const pathname = usePathname();
   const scrollDirection = useScrollDirection();
   const totalUnreadCount = useUnreadCount();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
 
   const navItems = useMemo(() => [
     { href: '/', icon: Home, label: t('nav.home') },
@@ -48,7 +48,7 @@ export function BottomNav() {
         opacity: 1,
       });
     }
-  }, [pathname, t]); // Use `t` as dependency, which changes only when language changes.
+  }, [pathname, navItems]);
 
   return (
     <nav
@@ -87,7 +87,7 @@ export function BottomNav() {
                 </span>
               )}
               <item.icon className="h-5 w-5" />
-              <span className="text-xs">{item.label}</span>
+              <span className={cn('text-xs', language === 'en' && 'text-[10px]')}>{item.label}</span>
             </Link>
           );
         })}
