@@ -29,6 +29,34 @@ import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/use-translation';
+import { cn } from '@/lib/utils';
+
+function LanguageSwitcher() {
+  const { language, setLanguage, t } = useTranslation();
+
+  return (
+      <div className="flex justify-center gap-2 mb-4">
+          <Button
+              onClick={() => setLanguage('zh')}
+              variant={language === 'zh' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-full"
+          >
+              繁體中文
+          </Button>
+          <Button
+              onClick={() => setLanguage('en')}
+              variant={language === 'en' ? 'secondary' : 'ghost'}
+              size="sm"
+              className="rounded-full"
+          >
+              English
+          </Button>
+      </div>
+  )
+}
+
 
 export default function LoginPage() {
   const { user, loading: authLoading, signIn, sendPasswordReset } = useAuth();
@@ -36,6 +64,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // If the user is already logged in, redirect to the home page.
@@ -131,7 +160,7 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-4">
                 <Flame className="h-16 w-16 text-primary animate-burn" />
-                <p className="text-muted-foreground animate-pulse">載入中...</p>
+                <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
             </div>
         </div>
     )
@@ -144,6 +173,7 @@ export default function LoginPage() {
             <Flame className="h-12 w-12 text-primary animate-burn" />
             <h1 className="text-2xl font-bold tracking-tight text-primary">HotSell</h1>
         </div>
+        <LanguageSwitcher />
         <Card>
           <CardHeader>
             <CardTitle>登入</CardTitle>

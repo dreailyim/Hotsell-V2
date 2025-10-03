@@ -18,12 +18,14 @@ import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function RegisterPage() {
   const { user, loading: authLoading, signUp } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // If the user is already logged in, redirect to the home page.
@@ -93,7 +95,7 @@ export default function RegisterPage() {
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-4">
                 <Flame className="h-16 w-16 text-primary animate-burn" />
-                <p className="text-muted-foreground animate-pulse">載入中...</p>
+                <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
             </div>
         </div>
     )

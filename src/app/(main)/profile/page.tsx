@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
 import { Flame } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 /**
  * This page acts as a redirector.
@@ -15,6 +16,7 @@ import { Flame } from 'lucide-react';
 export default function ProfileRedirectPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const { t } = useTranslation();
 
   useEffect(() => {
     // Wait until the authentication state is determined
@@ -34,7 +36,7 @@ export default function ProfileRedirectPage() {
     <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center gap-4">
             <Flame className="h-16 w-16 text-primary animate-burn" />
-            <p className="text-muted-foreground animate-pulse">載入中...</p>
+            <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
         </div>
     </div>
   );

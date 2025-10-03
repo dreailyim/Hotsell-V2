@@ -5,11 +5,13 @@ import { useAuth } from '@/hooks/use-auth';
 import { BottomNav } from '@/components/layout/bottom-nav';
 import { useRouter, usePathname } from 'next/navigation';
 import { Flame } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
+  const { t } = useTranslation();
   
   // The useFcm hook has been moved to the root layout via FcmRegistrar component.
 
@@ -30,7 +32,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center gap-4">
             <Flame className="h-16 w-16 text-primary animate-burn" />
-            <p className="text-muted-foreground animate-pulse">載入中...</p>
+            <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
         </div>
       </div>
     );
