@@ -1,12 +1,18 @@
 'use client';
 
-import React, { createContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useState, useEffect, ReactNode, useCallback, useMemo } from 'react';
+import { en } from '@/i18n/en';
+import { zh } from '@/i18n/zh';
 
 export type Language = 'en' | 'zh';
+
+const translations = { en, zh };
+type TranslationKey = keyof typeof en | keyof typeof zh;
 
 export interface LanguageContextType {
   language: Language;
   setLanguage: (language: Language) => void;
+  t: (key: TranslationKey) => string;
 }
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -31,6 +37,7 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
     if (storedLang) {
       setLanguage(storedLang);
     }
+    // Empty dependency array ensures this runs only once on mount
   }, []);
 
   const handleSetLanguage = (newLanguage: Language) => {
@@ -45,10 +52,22 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
      if (typeof window !== 'undefined') {
         document.documentElement.lang = language;
      }
-  }, [language])
+  }, [language]);
+
+  // The `t` function is now memoized and will only be a new function instance
+  // when the `language` state changes. This is crucial for hooks that depend on `t`.
+  const t = useCallback((key: TranslationKey): string => {
+    return translations[language][key] || translations['en'][key] || String(key);
+  }, [language]);
+
+  const contextValue = useMemo(() => ({
+    language,
+    setLanguage: handleSetLanguage,
+    t,
+  }), [language, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

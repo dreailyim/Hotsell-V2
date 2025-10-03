@@ -48,7 +48,7 @@ export function BottomNav() {
         opacity: 1,
       });
     }
-  }, [pathname, navItems]);
+  }, [pathname, t]); // Use `t` as dependency, which changes only when language changes.
 
   return (
     <nav
