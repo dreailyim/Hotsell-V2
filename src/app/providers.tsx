@@ -1,16 +1,27 @@
-
 'use client';
 
-import type { ReactNode } from 'react';
-import { ThemeProvider } from 'next-themes';
 import { AuthProvider } from '@/hooks/use-auth';
+import { ThemeProvider } from '@/components/theme-provider';
+import { I18nProvider } from '@/i18n/client';
+import { ReactNode } from 'react';
 
-export function Providers({ children }: { children: ReactNode }) {
+export function Providers({
+  children,
+  locale
+}: {
+  children: ReactNode;
+  locale: string;
+}) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <AuthProvider>
-        {children}
-      </AuthProvider>
-    </ThemeProvider>
+    <I18nProvider locale={locale}>
+      <ThemeProvider
+        attribute="class"
+        defaultTheme="system"
+        enableSystem
+        disableTransitionOnChange
+      >
+        <AuthProvider>{children}</AuthProvider>
+      </ThemeProvider>
+    </I18nProvider>
   );
 }
