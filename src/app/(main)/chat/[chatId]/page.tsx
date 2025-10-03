@@ -32,6 +32,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
+import { useTranslation } from '@/hooks/use-translation';
+
 
 // Reusable BidDialog component for initial bids and re-bids
 function BidDialog({
@@ -48,11 +50,12 @@ function BidDialog({
     const [open, setOpen] = useState(false);
     const [newBidPrice, setNewBidPrice] = useState<string>(String(initialPrice));
     const { toast } = useToast();
+    const { t } = useTranslation();
 
     const handleSubmit = () => {
         const priceNum = parseFloat(newBidPrice);
         if (isNaN(priceNum) || priceNum <= 0) {
-             toast({ title: "請輸入有效的出價金額。", variant: "destructive" });
+             toast({ title: t('product_page.bid_dialog.invalid_price'), variant: "destructive" });
             return;
         }
         onBid(priceNum);
@@ -64,23 +67,23 @@ function BidDialog({
             <AlertDialogTrigger asChild>
                  <Button className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
                     <HandCoins className="mr-1 h-4 w-4" />
-                    {isReBid ? '重新出價' : '出價'}
+                    {isReBid ? t('chat.rebid') : t('product_page.bid')}
                 </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>您想出價多少？</AlertDialogTitle>
+                    <AlertDialogTitle>{t('product_page.bid_dialog.title')}</AlertDialogTitle>
                     <div className="grid gap-4 py-4">
                         <div className="grid grid-cols-4 items-center gap-4">
-                            <Label htmlFor="bid-price" className="text-right">價格</Label>
+                            <Label htmlFor="bid-price" className="text-right">{t('product_page.bid_dialog.price')}</Label>
                             <Input id="bid-price" type="number" value={newBidPrice} onChange={(e) => setNewBidPrice(e.target.value)} className="col-span-3"/>
                         </div>
                     </div>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel>取消</AlertDialogCancel>
+                    <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
-                       {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '確認出價'}
+                       {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('product_page.bid_dialog.confirm')}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
@@ -94,6 +97,7 @@ function ReviewDialog({
 }: {
   conversationData: Conversation;
 }) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
@@ -136,11 +140,11 @@ function ReviewDialog({
   const handleSubmitReview = async () => {
     if (!user || !conversationId) return;
     if (rating === 0) {
-      toast({ title: "請給予評分", variant: 'destructive' });
+      toast({ title: t('chat.review_dialog.rating_required'), variant: 'destructive' });
       return;
     }
      if (comment.trim().length < 5) {
-      toast({ title: "評論內容過短", description: "請輸入至少5個字。", variant: 'destructive' });
+      toast({ title: t('chat.review_dialog.comment_too_short_title'), description: t('chat.review_dialog.comment_too_short_desc'), variant: 'destructive' });
       return;
     }
 
@@ -149,7 +153,7 @@ function ReviewDialog({
       const batch = writeBatch(db);
       
       const ratedUserId = participantIds.find(p => p !== user.uid);
-      if (!ratedUserId) throw new Error("找不到被評價的用戶");
+      if (!ratedUserId) throw new Error(t('chat.review_dialog.rated_user_not_found'));
 
       // 1. Add the new review document
       const reviewRef = doc(collection(db, 'reviews'));
@@ -175,7 +179,7 @@ function ReviewDialog({
 
       await batch.commit();
 
-      toast({ title: "評價已成功送出！", description: "感謝您的反饋。" });
+      toast({ title: t('chat.review_dialog.submit_success_title'), description: t('chat.review_dialog.submit_success_desc') });
       setOpen(false);
       setHasReviewed(true); // Update state immediately
       setRating(0);
@@ -183,7 +187,7 @@ function ReviewDialog({
 
     } catch (e: any) {
       console.error("Error submitting review:", e);
-      toast({ title: "評價送出失敗", description: e.message, variant: 'destructive' });
+      toast({ title: t('chat.review_dialog.submit_fail_title'), description: e.message, variant: 'destructive' });
     } finally {
       setIsSubmitting(false);
     }
@@ -193,7 +197,7 @@ function ReviewDialog({
       return (
         <Button className="h-8 rounded-full px-3 text-xs bg-muted text-muted-foreground hover:bg-muted cursor-not-allowed" disabled>
             <Star className="mr-1 h-4 w-4" />
-            已評價
+            {t('chat.already_reviewed')}
         </Button>
       )
   }
@@ -205,13 +209,13 @@ function ReviewDialog({
               className="h-8 rounded-full px-3 mr-1.5 text-xs bg-gradient-to-r from-blue-500 to-cyan-400 text-primary-foreground hover:opacity-90 transition-opacity"
             >
               <Star className="mr-1 h-4 w-4" />
-              留下評價
+              {t('chat.leave_review')}
             </Button>
         </AlertDialogTrigger>
         <AlertDialogContent>
             <AlertDialogHeader>
-            <AlertDialogTitle>為這次交易留下評價</AlertDialogTitle>
-            <AlertDialogDescription>您的反饋對賣家和其他買家都非常重要。</AlertDialogDescription>
+            <AlertDialogTitle>{t('chat.review_dialog.title')}</AlertDialogTitle>
+            <AlertDialogDescription>{t('chat.review_dialog.description')}</AlertDialogDescription>
             </AlertDialogHeader>
             <div className="grid gap-4 py-4">
             <div className="flex items-center justify-center gap-2">
@@ -227,7 +231,7 @@ function ReviewDialog({
                 ))}
             </div>
             <Textarea
-                placeholder="分享您的交易體驗..."
+                placeholder={t('chat.review_dialog.comment_placeholder')}
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 className="min-h-[100px]"
@@ -239,9 +243,9 @@ function ReviewDialog({
                 disabled={isSubmitting}
                 className="w-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                 >
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '送出評價'}
+                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('chat.review_dialog.submit_button')}
             </AlertDialogAction>
-            <AlertDialogCancel className="w-full mt-0">稍後再說</AlertDialogCancel>
+            <AlertDialogCancel className="w-full mt-0">{t('chat.review_dialog.cancel_button')}</AlertDialogCancel>
             </AlertDialogFooter>
         </AlertDialogContent>
     </AlertDialog>
@@ -254,6 +258,7 @@ export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const conversationId = params.chatId as string;
   const [message, setMessage] = useState('');
@@ -307,9 +312,9 @@ export default function ChatPage() {
       setError(null);
     } catch (error: any) {
       console.error("Error sending message:", error);
-      setError(`訊息傳送失敗: ${error.message}`);
+      setError(t('chat.send_fail_message').replace('{error_message}', error.message));
     }
-  }, [user, conversationId, conversation, message, authLoading]);
+  }, [user, conversationId, conversation, message, authLoading, t]);
   
   
   useEffect(() => {
@@ -354,12 +359,12 @@ export default function ChatPage() {
                  setOtherUser(otherParticipant);
             }
         } else {
-            setError("找不到此對話。");
+            setError(t('chat.conversation_not_found'));
         }
         setLoading(false);
     }, (err) => {
         console.error("Error listening to conversation document: ", err);
-        setError(`無法讀取對話資訊: ${err.message}`);
+        setError(t('chat.load_conversation_fail').replace('{error_message}', err.message));
         setLoading(false);
     });
 
@@ -379,14 +384,14 @@ export default function ChatPage() {
       setMessages(fetchedMessages);
     }, (err) => {
       console.error("Error listening to chat messages: ", err);
-      setError(`無法讀取訊息: ${err.message}`);
+      setError(t('chat.load_messages_fail').replace('{error_message}', err.message));
     });
 
     return () => {
         convoUnsubscribe();
         messagesUnsubscribe();
     };
-  }, [user, conversationId, authLoading]);
+  }, [user, conversationId, authLoading, t]);
 
   // Handle bid actions (accept, decline, cancel, re-bid)
   const handleBidAction = (action: 'accept' | 'decline' | 'cancel' | 'bid', payload?: any) => {
@@ -406,7 +411,7 @@ export default function ChatPage() {
               }
 
               if (!convoId) {
-                  toast({ title: "操作失敗", description: "找不到對話 ID。", variant: "destructive" });
+                  toast({ title: t('chat.action_fail'), description: t('chat.conversation_id_not_found'), variant: "destructive" });
                   return;
               }
               
@@ -417,7 +422,7 @@ export default function ChatPage() {
               switch (action) {
                   case 'accept': {
                       if (!currentBidPrice) return;
-                      autoMessage = `賣家已接受您的出價 $${currentBidPrice}，交易成立！`;
+                      autoMessage = t('chat.bid_accept_message').replace('{price}', String(currentBidPrice));
                       newStatus = 'accepted';
                       
                       const productRef = doc(db, 'products', conversation!.product.id);
@@ -433,14 +438,14 @@ export default function ChatPage() {
 
                   case 'decline':
                       if (!currentBidPrice) return;
-                      autoMessage = `賣家拒絕了您的出價 $${currentBidPrice}。`;
+                      autoMessage = t('chat.bid_decline_message').replace('{price}', String(currentBidPrice));
                       newStatus = 'declined';
                       await updateDoc(convoRef, { bidStatus: newStatus });
                       break;
 
                   case 'cancel':
                       if (!currentBidPrice) return;
-                      autoMessage = `我已取消出價 $${currentBidPrice}。`;
+                      autoMessage = t('chat.bid_cancel_message').replace('{price}', String(currentBidPrice));
                       newStatus = 'cancelled';
                       await updateDoc(convoRef, { bidStatus: newStatus });
                       break;
@@ -448,10 +453,10 @@ export default function ChatPage() {
                   case 'bid': {
                       const priceNum = payload as number;
                       if (!priceNum || priceNum <= 0) {
-                          toast({ title: "請輸入有效的出價金額。", variant: "destructive" });
+                          toast({ title: t('product_page.bid_dialog.invalid_price'), variant: "destructive" });
                           return;
                       }
-                      autoMessage = `你好，我出價 $${priceNum}。`;
+                      autoMessage = t('chat.bid_initiate_message').replace('{price}', String(priceNum));
                       newStatus = 'pending';
                       await updateDoc(convoRef, { bidStatus: newStatus, bidPrice: priceNum, bidderId: user.uid });
                       break;
@@ -462,10 +467,10 @@ export default function ChatPage() {
                   await sendMessage(autoMessage);
               }
               
-              toast({ title: "操作成功！" });
+              toast({ title: t('chat.action_success') });
           } catch (e: any) {
               console.error("Error handling bid action:", e);
-              toast({ title: "操作失敗", description: e.message, variant: "destructive" });
+              toast({ title: t('chat.action_fail'), description: e.message, variant: "destructive" });
           }
       });
   };
@@ -494,8 +499,8 @@ export default function ChatPage() {
   const getFormattedDate = (timestamp: Message['timestamp']) => {
     if (!timestamp) return '';
     const date = new Date(timestamp as string);
-    if (isToday(date)) return '今日';
-    if (isYesterday(date)) return '昨日';
+    if (isToday(date)) return t('chat.today');
+    if (isYesterday(date)) return t('chat.yesterday');
     return format(date, 'M月d日', { locale: zhHK });
   };
 
@@ -527,7 +532,7 @@ export default function ChatPage() {
             <Button asChild className="h-8 rounded-full px-3 text-xs bg-gradient-to-r from-purple-500 to-indigo-600 text-primary-foreground hover:opacity-90 transition-opacity">
               <Link href={`/profile/${otherUserId}?tab=reviews`}>
                 <MessageSquareQuote className="mr-1 h-4 w-4" />
-                查看評價
+                {t('chat.view_review')}
               </Link>
             </Button>
           );
@@ -538,7 +543,7 @@ export default function ChatPage() {
           return (
             <Button className="h-8 rounded-full px-3 text-xs bg-muted text-muted-foreground hover:bg-muted cursor-not-allowed" disabled>
                 <Loader2 className="mr-1 h-4 w-4 animate-spin" />
-                等待對方
+                {t('chat.waiting_for_other_party')}
             </Button>
           )
         }
@@ -548,15 +553,15 @@ export default function ChatPage() {
       
        const renderReviewStatusText = () => {
         if (hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-green-600 mt-1">雙方已互相評價！</p>;
+          return <p className="text-xs text-green-600 mt-1">{t('chat.review_status.both_reviewed')}</p>;
         }
         if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
-          return <p className="text-xs text-muted-foreground mt-1 animate-pulse">等待對方評價...</p>;
+          return <p className="text-xs text-muted-foreground mt-1 animate-pulse">{t('chat.review_status.waiting_for_other')}</p>;
         }
         if (!hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-blue-500 mt-1 animate-pulse">對方已對您留下評價！</p>;
+          return <p className="text-xs text-blue-500 mt-1 animate-pulse">{t('chat.review_status.other_has_reviewed')}</p>;
         }
-        return <p className="text-xs text-muted-foreground mt-1">交易已完成，快來評價對方吧！</p>;
+        return <p className="text-xs text-muted-foreground mt-1">{t('chat.review_status.prompt_to_review')}</p>;
       };
 
 
@@ -569,7 +574,7 @@ export default function ChatPage() {
               </div>
               <div className="truncate">
                 <p className="font-semibold text-sm truncate">{product.name}</p>
-                <p className="text-xs text-green-600 font-bold">已售出 ${finalPrice?.toLocaleString()}</p>
+                <p className="text-xs text-green-600 font-bold">{t('chat.sold_for').replace('{price}', finalPrice?.toLocaleString() || '')}</p>
                  {renderReviewStatusText()}
               </div>
             </div>
@@ -592,7 +597,7 @@ export default function ChatPage() {
                         onClick={() => handleBidAction('cancel')} 
                         disabled={isBidActionPending}
                     >
-                        取消出價
+                        {t('chat.cancel_bid')}
                     </Button>
                 );
             }
@@ -627,14 +632,14 @@ export default function ChatPage() {
                         onClick={() => handleBidAction('decline', { conversationId: conversation.id, bidPrice: bidPrice })}
                         disabled={isBidActionPending}
                     >
-                        拒絕
+                        {t('chat.decline_bid')}
                     </Button>
                     <Button
                         className="h-8 rounded-full px-4 text-xs bg-gradient-to-r from-green-500 to-teal-600 text-primary-foreground hover:opacity-90 transition-opacity"
                         onClick={() => handleBidAction('accept', { conversationId: conversation.id, bidPrice: bidPrice })}
                         disabled={isBidActionPending}
                     >
-                        接受
+                        {t('chat.accept_bid')}
                     </Button>
                 </div>
             );
@@ -643,17 +648,17 @@ export default function ChatPage() {
     }
     
     const renderBidStatusText = () => {
-        const buyerName = otherUser?.displayName || '買家';
+        const buyerName = otherUser?.displayName || t('chat.buyer');
         if (bidStatus === 'pending') {
             if (isSeller) {
-                return <p className="text-xs text-muted-foreground mt-1">{buyerName} 已出價 <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
+                return <p className="text-xs text-muted-foreground mt-1">{t('chat.bid_status.seller_pending').replace('{buyerName}', buyerName)} <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
             }
             if (bidderId === user.uid) {
-                return <p className="text-xs text-muted-foreground mt-1">你已出價 <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
+                return <p className="text-xs text-muted-foreground mt-1">{t('chat.bid_status.buyer_pending')} <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
             }
         }
         if (bidStatus === 'declined' && bidderId === user.uid) {
-             return <p className="text-xs text-destructive mt-1">賣家已拒絕你 <span className='font-bold'>${bidPriceDisplay}</span> 的出價</p>;
+             return <p className="text-xs text-destructive mt-1">{t('chat.bid_status.declined')} <span className='font-bold'>${bidPriceDisplay}</span></p>;
         }
         return null;
     }
@@ -691,7 +696,7 @@ export default function ChatPage() {
   if (authLoading || loading) {
     return (
       <div className="flex flex-col h-screen">
-        <Header title="讀取中..." showBackButton />
+        <Header title={t('header.title.loading')} showBackButton />
         <div className="flex-1 p-4 space-y-4">
           <Skeleton className="h-10 w-3/4 self-start rounded-lg" />
           <Skeleton className="h-10 w-3/4 self-end rounded-lg" />
@@ -710,12 +715,12 @@ export default function ChatPage() {
     }
     return (
       <div className="flex flex-col h-screen">
-        <Header title="錯誤" showBackButton />
+        <Header title={t('chat.error_title')} showBackButton />
         <div className="flex-1 flex items-center justify-center p-4">
             <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>無法載入對話</AlertTitle>
-                <AlertDescription>{error || '請確認您有權限瀏覽此對話，或返回上一頁。'}</AlertDescription>
+                <AlertTitle>{t('chat.load_fail_title')}</AlertTitle>
+                <AlertDescription>{error || t('chat.load_fail_desc')}</AlertDescription>
             </Alert>
         </div>
       </div>
@@ -726,21 +731,21 @@ export default function ChatPage() {
   
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <Header title={otherUser?.displayName || "對話"} showBackButton backHref="/messages" />
+      <Header title={otherUser?.displayName || t('header.title.chat')} showBackButton backHref="/messages" />
       {hasStickyHeader && <ChatProductHeader />}
 
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
         {error && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>錯誤</AlertTitle>
+            <AlertTitle>{t('chat.error_title')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
         {!loading && messages.length === 0 && !error && (
           <div className="text-center text-muted-foreground py-16">
-            <p>這裏沒有訊息。</p>
-            <p>快來傳送您的第一則訊息吧！</p>
+            <p>{t('chat.no_messages')}</p>
+            <p>{t('chat.send_first_message')}</p>
           </div>
         )}
         {messages.map((msg, index) => {
@@ -798,7 +803,7 @@ export default function ChatPage() {
           <input id="file-upload" type="file" className="hidden" />
           <div className="relative flex-1">
             <Input
-              placeholder="輸入訊息..."
+              placeholder={t('chat.message_placeholder')}
               className="rounded-full pr-4"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
