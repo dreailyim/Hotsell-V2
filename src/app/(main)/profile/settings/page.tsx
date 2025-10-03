@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame, Info, ChevronRight, MessageCircle, Mail, Phone } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import packageInfo from '@/../package.json';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -344,6 +345,74 @@ export default function SettingsPage() {
                 <ThemeToggle />
             </CardContent>
         </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle>關於我們</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="divide-y divide-border">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <Info className="h-5 w-5 text-muted-foreground" />
+                                    <span>免責聲明</span>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>免責聲明</AlertDialogTitle>
+                                <AlertDialogDescription className="max-h-[60vh] overflow-y-auto">
+                                    此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有显示的商品、價格、用戶資料和交易均為模擬數據，並非真實。
+                                    <br /><br />
+                                    請勿在此應用程式上分享任何真實的個人敏感資訊或進行任何真實的金融交易。開發者對因使用此應用程式而導致的任何形式的損失或損害概不負責。
+                                    <br /><br />
+                                    所有圖片均來自公開的圖片服務 (Picsum Photos)，版權歸原作者所有。
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction>我已了解</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </CardContent>
+        </Card>
+
+         <Card>
+            <CardHeader>
+                <CardTitle>技術支援</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="divide-y divide-border">
+                     <Link href="https://wa.me/85212345678" target="_blank" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                            <MessageCircle className="h-5 w-5 text-green-500" />
+                            <span>WhatsApp</span>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </Link>
+                    <Link href="https://signal.me/#p/+85212345678" target="_blank" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                            <Phone className="h-5 w-5 text-blue-500" />
+                            <span>Signal</span>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </Link>
+                    <Link href="mailto:support@example.com" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                        <div className="flex items-center gap-4">
+                            <Mail className="h-5 w-5 text-muted-foreground" />
+                            <span>Email</span>
+                        </div>
+                        <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                    </Link>
+                </div>
+            </CardContent>
+        </Card>
+
 
         <div className="flex justify-center">
             <AlertDialog>
