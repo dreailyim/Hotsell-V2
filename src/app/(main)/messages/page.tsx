@@ -480,27 +480,31 @@ export default function MessagesPage() {
         <div className="flex justify-end px-2 border-b">
             <Button variant="link" size="sm" onClick={handleMarkAllAsRead} disabled={!notifications.some(n => !n.isRead)}>全部標記為已讀</Button>
         </div>
-        <div className="divide-y divide-border">
-            {notifications.map((notif) => (
-                <div 
-                    key={notif.id}
-                    className={cn("flex items-start gap-4 p-4 transition-colors cursor-pointer", !notif.isRead ? "bg-blue-500/5" : "hover:bg-muted/50")}
-                    onClick={() => handleNotificationClick(notif)}
-                >
-                    <div className="relative flex-shrink-0 mt-1">
-                        <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted">
-                           {NOTIFICATION_ICONS[notif.type] || <Bell className="h-5 w-5 text-muted-foreground" />}
+        <div>
+            {notifications.map((notif, index) => (
+                <div key={notif.id}>
+                    <div 
+                        className={cn("flex items-start gap-4 p-4 transition-colors cursor-pointer", !notif.isRead ? "bg-blue-500/5" : "hover:bg-muted/50")}
+                        onClick={() => handleNotificationClick(notif)}
+                    >
+                        <div className="relative flex-shrink-0 mt-1">
+                            <div className="h-10 w-10 rounded-full flex items-center justify-center bg-muted">
+                               {NOTIFICATION_ICONS[notif.type] || <Bell className="h-5 w-5 text-muted-foreground" />}
+                            </div>
+                            {!notif.isRead && (<span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-blue-500 ring-2 ring-background"></span>)}
                         </div>
-                        {!notif.isRead && (<span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-blue-500 ring-2 ring-background"></span>)}
-                    </div>
-                    <div className="flex-1">
-                        <p className="text-sm">{notif.message}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{getFormattedTime(notif.createdAt)}</p>
-                    </div>
-                    {notif.relatedData?.productImage && (
-                         <div className="relative h-14 w-14 flex-shrink-0">
-                            <Image src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                        <div className="flex-1">
+                            <p className="text-sm">{notif.message}</p>
+                            <p className="text-xs text-muted-foreground mt-1">{getFormattedTime(notif.createdAt)}</p>
                         </div>
+                        {notif.relatedData?.productImage && (
+                             <div className="relative h-14 w-14 flex-shrink-0">
+                                <Image src={notif.relatedData.productImage} alt={notif.relatedData.productName || 'Product'} fill className="object-cover rounded-md" data-ai-hint="product image" />
+                            </div>
+                        )}
+                    </div>
+                    {index < notifications.length - 1 && (
+                      <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
                     )}
                 </div>
             ))}
