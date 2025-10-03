@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
+import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function RegisterPage() {
   const { user, loading: authLoading, signUp } = useAuth();
@@ -38,13 +39,13 @@ export default function RegisterPage() {
   const getFriendlyErrorMessage = (error: FirebaseError): string => {
       switch (error.code) {
           case 'auth/email-already-in-use':
-              return '此電郵地址已被註冊。';
+              return t('register.error.email_in_use');
           case 'auth/weak-password':
-              return '密碼強度不足，請設定至少6位數的密碼。';
+              return t('register.error.weak_password');
           case 'auth/invalid-email':
-              return '電郵地址格式不正確。';
+              return t('register.error.invalid_email');
           default:
-              return `發生未知錯誤: ${error.code}`;
+              return t('login.error.unknown').replace('{error_code}', error.code);
       }
   };
 
@@ -59,8 +60,8 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
         toast({
-            title: '註冊失敗',
-            description: '兩次輸入的密碼不一致。',
+            title: t('register.fail_title'),
+            description: t('register.error.password_mismatch'),
             variant: 'destructive',
         });
         setLoading(false);
@@ -69,18 +70,18 @@ export default function RegisterPage() {
 
     try {
       await signUp(email, password, displayName);
-      toast({ title: '註冊成功！', description: '驗證郵件已寄出，請檢查您的收件箱。' });
+      toast({ title: t('register.success_title'), description: t('register.success_desc') });
       router.push('/login');
     } catch (error) {
       if (error instanceof FirebaseError) {
         toast({
-          title: '註冊失敗',
+          title: t('register.fail_title'),
           description: getFriendlyErrorMessage(error),
           variant: 'destructive',
         });
       } else {
         toast({
-          title: '發生未知錯誤',
+          title: t('login.unknown_error_title'),
           description: String(error),
           variant: 'destructive',
         });
@@ -110,39 +111,40 @@ export default function RegisterPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>註冊</CardTitle>
-            <CardDescription>建立一個新帳戶。</CardDescription>
+            <CardTitle>{t('register.title')}</CardTitle>
+            <CardDescription>{t('register.description')}</CardDescription>
           </CardHeader>
             <form onSubmit={handleSignUp}>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                <Label htmlFor="signup-displayName">顯示名稱</Label>
-                <Input id="signup-displayName" name="displayName" type="text" placeholder="您的名稱" required />
+                <Label htmlFor="signup-displayName">{t('register.display_name_label')}</Label>
+                <Input id="signup-displayName" name="displayName" type="text" placeholder={t('register.display_name_placeholder')} required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-email">電子郵件</Label>
+                <Label htmlFor="signup-email">{t('login.email_label')}</Label>
                 <Input id="signup-email" name="email" type="email" placeholder="m@example.com" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password">密碼</Label>
+                <Label htmlFor="signup-password">{t('login.password_label')}</Label>
                 <Input id="signup-password" name="password" type="password" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-confirm-password">確認密碼</Label>
+                <Label htmlFor="signup-confirm-password">{t('register.confirm_password_label')}</Label>
                 <Input id="signup-confirm-password" name="confirm-password" type="password" required />
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4">
               <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                註冊
+                {t('register.register_button')}
               </Button>
             </CardFooter>
           </form>
         </Card>
         <div className="text-center text-sm">
-            已經有帳戶？ <Link href="/login" className="underline">立即登入</Link>
+            {t('register.has_account')} <Link href="/login" className="underline">{t('register.login_now')}</Link>
         </div>
+        <LanguageSwitcher />
       </div>
     </div>
   );
