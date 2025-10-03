@@ -446,7 +446,8 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         console.error('分享失敗或被取消:', error);
       }
     } else {
-       toast({ title: '分享失敗', description: '您的瀏覽器不支援分享功能。', variant: 'destructive' });
+       navigator.clipboard.writeText(window.location.href);
+       toast({ title: '已複製商品連結！' });
     }
   };
 
@@ -803,7 +804,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
 
           <Separator className="my-4" />
 
-          <Link href={`/profile/${product.sellerId}`} className="flex justify-between items-start">
+          <Link href={`/profile/${product.sellerId}?tab=reviews`} className="flex justify-between items-start">
             <div className="flex items-start gap-3">
               <Avatar className="h-10 w-10">
                 <AvatarImage src={sellerDisplayAvatar || undefined} alt={sellerDisplayName || '賣家頭像'} />
@@ -870,7 +871,3 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
-
-    
-
-    

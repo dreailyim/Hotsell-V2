@@ -448,6 +448,26 @@ export default function UserProfilePage() {
     });
   };
 
+  const handleShare = async () => {
+    const shareData = {
+        title: `${profileUser?.displayName || '用戶'} 的個人檔案`,
+        text: `來看看 ${profileUser?.displayName || '用戶'} 在 HotSell 上的個人檔案和商品！`,
+        url: window.location.href,
+    };
+
+    if (navigator.share) {
+        try {
+            await navigator.share(shareData);
+        } catch (error) {
+            console.error('分享失敗或被取消:', error);
+        }
+    } else {
+        navigator.clipboard.writeText(window.location.href);
+        toast({ title: '已複製用戶檔案連結！' });
+    }
+  };
+
+
   const handleBackfillSearchData = () => {
     if (!currentUser || !isOwnProfile) return;
 
@@ -565,7 +585,7 @@ export default function UserProfilePage() {
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
         <div className="flex justify-between items-start mb-4">
-            <div className="flex items-center gap-4">
+            <div className="flex items-start gap-4">
                 <Avatar className="h-16 w-16 self-center">
                     <AvatarImage src={profileUser.photoURL || undefined} alt={profileUser.displayName || '使用者頭像'} />
                     <AvatarFallback>{profileUser.displayName?.charAt(0) || 'U'}</AvatarFallback>
@@ -596,7 +616,7 @@ export default function UserProfilePage() {
                       variant="ghost"
                       size="icon"
                       className="h-9 w-9 rounded-full bg-background/30 shadow-xl backdrop-blur-[2px] border-t border-white/30 border-b border-white/10 hover:bg-transparent hover:text-foreground/80"
-                      onClick={() => toast({ title: '已複製用戶檔案連結！' })}
+                      onClick={handleShare}
                   >
                       <Share2 className="h-4 w-4 text-foreground" />
                   </Button>
@@ -781,3 +801,5 @@ export default function UserProfilePage() {
     </>
   );
 }
+
+    

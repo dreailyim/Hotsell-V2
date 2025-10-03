@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { updateDoc, doc } from 'firebase/firestore';
 import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { db, storage } from '@/lib/firebase/client-app';
-import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame } from 'lucide-react';
+import { Loader2, Bell, BellOff, Camera, AlertTriangle, Flame, Info, ChevronRight, MessageCircle, Mail, Phone } from 'lucide-react';
 import { ThemeToggle } from '@/components/layout/theme-toggle';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Switch } from '@/components/ui/switch';
@@ -29,7 +29,9 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import packageInfo from '@/../package.json';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
+import Link from 'next/link';
+import React from 'react';
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -191,17 +193,23 @@ export default function SettingsPage() {
 
   const isSaveDisabled = isPending || isUploading;
 
+  const supportLinks = [
+    { href: "https://wa.me/85212345678", icon: <MessageCircle className="h-5 w-5 text-green-500" />, label: "WhatsApp" },
+    { href: "https://signal.me/#p/+85212345678", icon: <Phone className="h-5 w-5 text-blue-500" />, label: "Signal" },
+    { href: "mailto:support@example.com", icon: <Mail className="h-5 w-5 text-muted-foreground" />, label: "Email" },
+  ];
+
   return (
     <>
       <Header title="設定" showBackButton />
-      <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-8">
+      <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>個人檔案</CardTitle>
-            <CardDescription>更新您的公開個人資料。這將會顯示在您的個人主頁和商品頁面上。</CardDescription>
+            <CardTitle className="text-lg">個人檔案</CardTitle>
+            <CardDescription className="text-sm">更新您的公開個人資料。這將會顯示在您的個人主頁和商品頁面上。</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div className="flex items-center gap-4">
                      <div className="relative group flex-shrink-0">
                          <input
@@ -211,12 +219,12 @@ export default function SettingsPage() {
                             className="hidden"
                             accept="image/png, image/jpeg"
                           />
-                         <Avatar className="h-20 w-20 cursor-pointer" onClick={handleAvatarClick}>
+                         <Avatar className="h-16 w-16 cursor-pointer" onClick={handleAvatarClick}>
                             <AvatarImage src={newAvatar || user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
                             <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
                          <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
-                            <Camera className="h-8 w-8 text-white" />
+                            <Camera className="h-6 w-6 text-white" />
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
@@ -250,7 +258,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                     <Label htmlFor="city">我的城市</Label>
                     <div className="flex items-center gap-2">
                         <Select onValueChange={setCity} value={city} disabled={isSaveDisabled}>
@@ -258,15 +266,39 @@ export default function SettingsPage() {
                                 <SelectValue placeholder="選擇您所在的城市" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="香港島">香港島</SelectItem>
-                                <SelectItem value="九龍">九龍</SelectItem>
-                                <SelectItem value="新界">新界</SelectItem>
+                                <SelectGroup>
+                                    <SelectLabel>香港島</SelectLabel>
+                                    <SelectItem value="中西區">中西區</SelectItem>
+                                    <SelectItem value="灣仔區">灣仔區</SelectItem>
+                                    <SelectItem value="東區">東區</SelectItem>
+                                    <SelectItem value="南區">南區</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>九龍</SelectLabel>
+                                    <SelectItem value="油尖旺區">油尖旺區</SelectItem>
+                                    <SelectItem value="深水埗區">深水埗區</SelectItem>
+                                    <SelectItem value="九龍城區">九龍城區</SelectItem>
+                                    <SelectItem value="黃大仙區">黃大仙區</SelectItem>
+                                    <SelectItem value="觀塘區">觀塘區</SelectItem>
+                                </SelectGroup>
+                                <SelectGroup>
+                                    <SelectLabel>新界</SelectLabel>
+                                    <SelectItem value="葵青區">葵青區</SelectItem>
+                                    <SelectItem value="荃灣區">荃灣區</SelectItem>
+                                    <SelectItem value="屯門區">屯門區</SelectItem>
+                                    <SelectItem value="元朗區">元朗區</SelectItem>
+                                    <SelectItem value="北區">北區</SelectItem>
+                                    <SelectItem value="大埔區">大埔區</SelectItem>
+                                    <SelectItem value="沙田區">沙田區</SelectItem>
+                                    <SelectItem value="西貢區">西貢區</SelectItem>
+                                    <SelectItem value="離島區">離島區</SelectItem>
+                                </SelectGroup>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="aboutMe">關於我</Label>
                 <Textarea
                   id="aboutMe"
@@ -274,7 +306,7 @@ export default function SettingsPage() {
                   onChange={(e) => setAboutMe(e.target.value)}
                   placeholder="告訴大家一些關於您的事..."
                   disabled={isSaveDisabled}
-                  className="min-h-[120px]"
+                  className="min-h-[100px]"
                 />
               </div>
               <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
@@ -287,8 +319,8 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>通知</CardTitle>
-                <CardDescription>管理您的推播通知設定。</CardDescription>
+                <CardTitle className="text-lg">通知</CardTitle>
+                <CardDescription className="text-sm">管理您的推播通知設定。</CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
@@ -313,15 +345,76 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>佈景主題</CardTitle>
-                <CardDescription>選擇您喜歡的應用程式外觀。</CardDescription>
+                <CardTitle className="text-lg">佈景主題</CardTitle>
+                <CardDescription className="text-sm">選擇您喜歡的應用程式外觀。</CardDescription>
             </CardHeader>
             <CardContent>
                 <ThemeToggle />
             </CardContent>
         </Card>
 
-        <div className="flex justify-center">
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-lg">關於我們</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div className="divide-y divide-border">
+                    <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <button className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <Info className="h-5 w-5 text-muted-foreground" />
+                                    <span className="text-sm">免責聲明</span>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>免責聲明</AlertDialogTitle>
+                                <AlertDialogDescription className="max-h-[60vh] overflow-y-auto">
+                                    此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有显示的商品、價格、用戶資料和交易均為模擬數據，並非真實。
+                                    <br /><br />
+                                    請勿在此應用程式上分享任何真實的個人敏感資訊或進行任何真實的金融交易。開發者對因使用此應用程式而導致的任何形式的損失或損害概不負責。
+                                    <br /><br />
+                                    所有圖片均來自公開的圖片服務 (Picsum Photos)，版權歸原作者所有。
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogAction>我已了解</AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </div>
+            </CardContent>
+        </Card>
+
+         <Card>
+            <CardHeader>
+                <CardTitle className="text-lg">技術支援</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+                <div>
+                    {supportLinks.map((link, index) => (
+                        <React.Fragment key={link.href}>
+                            <Link href={link.href} target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    {link.icon}
+                                    <span className="text-sm">{link.label}</span>
+                                </div>
+                                <ChevronRight className="h-5 w-5 text-muted-foreground" />
+                            </Link>
+                            {index < supportLinks.length - 1 && (
+                                <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+                            )}
+                        </React.Fragment>
+                    ))}
+                </div>
+            </CardContent>
+        </Card>
+
+
+        <div className="flex justify-center pt-4">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
@@ -348,8 +441,8 @@ export default function SettingsPage() {
         
         <Card className="border-destructive">
             <CardHeader>
-                <CardTitle className="text-destructive">危險區域</CardTitle>
-                <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
+                <CardTitle className="text-destructive text-lg">危險區域</CardTitle>
+                <CardDescription className="text-sm">以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
             </CardHeader>
             <CardContent>
                 <AlertDialog>
@@ -394,14 +487,10 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
         
-        <div className="text-center text-xs text-muted-foreground mt-8">
+        <div className="text-center text-xs text-muted-foreground pt-4">
             App Version: {packageInfo.version || 'N/A'}
         </div>
       </div>
     </>
   );
 }
-
-    
-
-    
