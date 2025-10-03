@@ -725,7 +725,7 @@ export default function ChatPage() {
   const hasStickyHeader = conversation?.product;
   
   return (
-    <div className="flex flex-col h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background">
       <Header title={otherUser?.displayName || "對話"} showBackButton backHref="/messages" />
       {hasStickyHeader && <ChatProductHeader />}
 
