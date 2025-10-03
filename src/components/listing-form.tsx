@@ -38,14 +38,9 @@ import { ref, uploadString, getDownloadURL } from 'firebase/storage';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import type { ShippingMethod } from '@/lib/types';
+import { useTranslation } from '@/hooks/use-translation';
 
 const MAX_IMAGES = 5;
-
-const shippingMethodOptions: { id: ShippingMethod; label: string }[] = [
-  { id: '面交', label: '面交' },
-  { id: '速遞包郵', label: '速遞包郵' },
-  { id: '速遞到付', label: '速遞到付' },
-];
 
 const formSchema = z.object({
   productName: z.string().min(2, { message: '產品名稱至少需要2個字' }),
@@ -72,6 +67,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const ShippingMethodWatcher = ({ control }: { control: any }) => {
+  const { t } = useTranslation();
   const shippingMethods = useWatch({
     control,
     name: 'shippingMethods',
@@ -84,9 +80,9 @@ const ShippingMethodWatcher = ({ control }: { control: any }) => {
         name="pickupLocation"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>交收地點</FormLabel>
+            <FormLabel>{t('listing_form.location.label')}</FormLabel>
             <FormControl>
-              <Input placeholder="例如：旺角地鐵站" {...field} />
+              <Input placeholder={t('listing_form.location.placeholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -98,6 +94,7 @@ const ShippingMethodWatcher = ({ control }: { control: any }) => {
 
 
 export function ListingForm() {
+  const { t } = useTranslation();
   const [isAiPending, startAiTransition] = useTransition();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imagesData, setImagesData] = useState<string[]>([]);
@@ -105,6 +102,12 @@ export function ListingForm() {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+
+  const shippingMethodOptions: { id: ShippingMethod; label: string }[] = [
+    { id: '面交', label: t('listing_form.shipping.meetup') },
+    { id: '速遞包郵', label: t('listing_form.shipping.delivery_included') },
+    { id: '速遞到付', label: t('listing_form.shipping.delivery_cod') },
+  ];
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -237,8 +240,7 @@ export function ListingForm() {
         });
 
         toast({
-            title: '刊登成功！',
-            description: '您的產品已成功刊登。',
+            title: t('listing_form.create_success'),
         });
         
         router.push(`/products/${newDocRef.id}`);
@@ -246,7 +248,7 @@ export function ListingForm() {
     } catch (error: any) {
         console.error("Error creating listing:", error);
         toast({
-            title: '刊登失敗',
+            title: t('listing_form.create_fail'),
             description: error.message || '發生未知錯誤，請稍後再試。',
             variant: 'destructive'
         });
@@ -259,8 +261,8 @@ export function ListingForm() {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
-          <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormLabel>{t('listing_form.images.label')}</FormLabel>
+          <FormDescription>{t('listing_form.images.description').replace('{max_images}', String(MAX_IMAGES))}</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {imagesData.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
@@ -288,7 +290,7 @@ export function ListingForm() {
                         <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center relative bg-muted/50">
                             <div className="text-center text-muted-foreground p-2">
                                 <Plus className="mx-auto h-8 w-8" />
-                                <p className="text-[10px] leading-tight mt-1">{imagesData.length === 0 ? '點擊上傳封面' : '新增圖片'}</p>
+                                <p className="text-[10px] leading-tight mt-1">{imagesData.length === 0 ? t('listing_form.images.add_cover') : t('listing_form.images.add')}</p>
                             </div>
                             <Input
                                 type="file"
@@ -310,9 +312,9 @@ export function ListingForm() {
           name="productName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>產品名稱</FormLabel>
+              <FormLabel>{t('listing_form.name.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="例如：復古皮質沙發" {...field} />
+                <Input placeholder={t('listing_form.name.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -324,11 +326,11 @@ export function ListingForm() {
           name="productCategory"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>產品類別</FormLabel>
+              <FormLabel>{t('listing_form.category.label')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="選擇一個類別" />
+                    <SelectValue placeholder={t('listing_form.category.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -356,9 +358,9 @@ export function ListingForm() {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>價格</FormLabel>
+              <FormLabel>{t('listing_form.price.label')}</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="例如：1500" {...field} />
+                <Input type="number" placeholder={t('listing_form.price.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -370,11 +372,11 @@ export function ListingForm() {
           name="condition"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>新舊程度</FormLabel>
+              <FormLabel>{t('listing_form.condition.label')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="選擇新舊程度" />
+                    <SelectValue placeholder={t('listing_form.condition.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -396,7 +398,7 @@ export function ListingForm() {
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel className="text-base">交收方式</FormLabel>
+                <FormLabel className="text-base">{t('listing_form.shipping.label')}</FormLabel>
               </div>
               {shippingMethodOptions.map((item) => (
                 <FormField
@@ -440,7 +442,7 @@ export function ListingForm() {
         
         <FormItem>
           <div className="flex items-center justify-between">
-            <FormLabel>產品描述</FormLabel>
+            <FormLabel>{t('listing_form.description.label')}</FormLabel>
             <Button
               type="button"
               variant="outline"
@@ -448,7 +450,7 @@ export function ListingForm() {
               disabled
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              AI 生成描述 (稍後推出)
+              {t('listing_form.ai_button')}
             </Button>
           </div>
           <FormField
@@ -458,7 +460,7 @@ export function ListingForm() {
              <>
               <FormControl>
                 <Textarea
-                  placeholder="描述您的產品..."
+                  placeholder={t('listing_form.description.placeholder')}
                   className="min-h-[150px]"
                   {...field}
                 />
@@ -471,7 +473,7 @@ export function ListingForm() {
 
         <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" disabled={isSubmitting}>
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          刊登物品
+          {t('listing_form.submit_button.create')}
         </Button>
       </form>
     </Form>

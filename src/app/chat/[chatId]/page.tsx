@@ -32,6 +32,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { zhHK } from 'date-fns/locale';
+import { useTranslation } from '@/hooks/use-translation';
 
 // Reusable BidDialog component for initial bids and re-bids
 function BidDialog({
@@ -254,6 +255,7 @@ export default function ChatPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const conversationId = params.chatId as string;
   const [message, setMessage] = useState('');
@@ -691,7 +693,7 @@ export default function ChatPage() {
   if (authLoading || loading) {
     return (
       <div className="flex flex-col h-screen">
-        <Header title="讀取中..." showBackButton />
+        <Header title={t('header.title.loading')} showBackButton />
         <div className="flex-1 p-4 space-y-4">
           <Skeleton className="h-10 w-3/4 self-start rounded-lg" />
           <Skeleton className="h-10 w-3/4 self-end rounded-lg" />
@@ -730,7 +732,7 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen">
-      <Header title={otherUser?.displayName || "對話"} showBackButton backHref="/messages" />
+      <Header title={otherUser?.displayName ? t('header.title.chat_with', { name: otherUser.displayName }) : t('header.title.chat')} showBackButton backHref="/messages" />
       <ChatProductHeader />
 
       <div className={cn("flex-1 overflow-y-auto p-4 space-y-4", hasStickyHeader && "pt-4")}>

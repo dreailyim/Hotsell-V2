@@ -38,14 +38,9 @@ import { uploadString, getDownloadURL, ref } from 'firebase/storage';
 import { doc, updateDoc } from 'firebase/firestore';
 import type { Product, ShippingMethod } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 const MAX_IMAGES = 5;
-
-const shippingMethodOptions: { id: ShippingMethod; label: string }[] = [
-  { id: '面交', label: '面交' },
-  { id: '速遞包郵', label: '速遞包郵' },
-  { id: '速遞到付', label: '速遞到付' },
-];
 
 const formSchema = z.object({
   productName: z.string().min(2, { message: '產品名稱至少需要2個字' }),
@@ -72,6 +67,7 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const ShippingMethodWatcher = ({ control }: { control: any }) => {
+  const { t } = useTranslation();
   const shippingMethods = useWatch({
     control,
     name: 'shippingMethods',
@@ -84,9 +80,9 @@ const ShippingMethodWatcher = ({ control }: { control: any }) => {
         name="pickupLocation"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>交收地點</FormLabel>
+            <FormLabel>{t('listing_form.location.label')}</FormLabel>
             <FormControl>
-              <Input placeholder="例如：旺角地鐵站" {...field} />
+              <Input placeholder={t('listing_form.location.placeholder')} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -96,13 +92,12 @@ const ShippingMethodWatcher = ({ control }: { control: any }) => {
   );
 };
 
-
 type EditListingFormProps = {
     product: Product;
 }
 
 export function EditListingForm({ product }: EditListingFormProps) {
-  const [isAiPending, startAiTransition] = useTransition();
+  const { t } = useTranslation();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const initialImages = (product.images || [product.image]).filter(Boolean);
@@ -112,6 +107,12 @@ export function EditListingForm({ product }: EditListingFormProps) {
   const { toast } = useToast();
   const { user } = useAuth();
   const router = useRouter();
+
+  const shippingMethodOptions: { id: ShippingMethod; label: string }[] = [
+    { id: '面交', label: t('listing_form.shipping.meetup') },
+    { id: '速遞包郵', label: t('listing_form.shipping.delivery_included') },
+    { id: '速遞到付', label: t('listing_form.shipping.delivery_cod') },
+  ];
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -157,55 +158,6 @@ export function EditListingForm({ product }: EditListingFormProps) {
   const handleRemoveImage = (index: number) => {
     setImages(prev => prev.filter((_, i) => i !== index));
   }
-
-
-  const handleGenerateDescription = () => {
-    const values = form.getValues();
-    const firstImage = images[0]; 
-
-     if (!firstImage) {
-      toast({
-        title: '請先上傳圖片',
-        description: 'AI 需要圖片來生成描述。',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!values.productName || !values.productCategory) {
-      toast({
-        title: '缺少產品資訊',
-        description: '請填寫產品名稱和類別。',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    startAiTransition(async () => {
-      let imageAsDataUri = firstImage;
-      
-      const result = await generateDescriptionAction({
-        productName: values.productName,
-        productCategory: values.productCategory,
-        productImage: imageAsDataUri,
-        productDetails: '',
-      });
-
-      if (result.error) {
-        toast({
-          title: '生成失敗',
-          description: result.error,
-          variant: 'destructive',
-        });
-      } else if (result.data) {
-        form.setValue('productDescription', result.data.productDescription);
-        toast({
-          title: '描述已生成！',
-          description: 'AI 寫的描述已填入欄位。',
-        });
-      }
-    });
-  };
 
   async function onSubmit(values: FormValues) {
     if (!user) {
@@ -256,8 +208,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
         await updateDoc(productRef, dataToUpdate);
         
         toast({
-            title: '更新成功！',
-            description: '您的產品已成功更新。',
+            title: t('listing_form.edit_success'),
         });
         
         router.push(`/products/${product.id}`);
@@ -265,7 +216,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
     } catch (error: any) {
         console.error("Error updating listing:", error);
         toast({
-            title: '更新失敗',
+            title: t('listing_form.edit_fail'),
             description: error.message || '發生未知錯誤，請稍後再試。',
             variant: 'destructive'
         });
@@ -278,8 +229,8 @@ export function EditListingForm({ product }: EditListingFormProps) {
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <div className="space-y-2">
-          <FormLabel>產品圖片 (第一張為封面)</FormLabel>
-          <FormDescription>最多上傳 {MAX_IMAGES} 張圖片。每張圖片不能超過 4MB。</FormDescription>
+          <FormLabel>{t('listing_form.images.label')}</FormLabel>
+          <FormDescription>{t('listing_form.images.description').replace('{max_images}', String(MAX_IMAGES))}</FormDescription>
            <div className="grid grid-cols-3 gap-2">
                 {images.map((image, index) => (
                     <div key={index} className="relative aspect-square w-full">
@@ -307,7 +258,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
                         <div className="w-full h-full border-2 border-dashed rounded-lg flex items-center justify-center relative bg-muted/50">
                             <div className="text-center text-muted-foreground p-2">
                                 <Plus className="mx-auto h-8 w-8" />
-                                <p className="text-[10px] leading-tight mt-1">新增圖片</p>
+                                <p className="text-[10px] leading-tight mt-1">{t('listing_form.images.add')}</p>
                             </div>
                             <Input
                                 type="file"
@@ -328,9 +279,9 @@ export function EditListingForm({ product }: EditListingFormProps) {
           name="productName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>產品名稱</FormLabel>
+              <FormLabel>{t('listing_form.name.label')}</FormLabel>
               <FormControl>
-                <Input placeholder="例如：復古皮質沙發" {...field} />
+                <Input placeholder={t('listing_form.name.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -342,11 +293,11 @@ export function EditListingForm({ product }: EditListingFormProps) {
           name="productCategory"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>產品類別</FormLabel>
+              <FormLabel>{t('listing_form.category.label')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="選擇一個類別" />
+                    <SelectValue placeholder={t('listing_form.category.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -374,9 +325,9 @@ export function EditListingForm({ product }: EditListingFormProps) {
           name="price"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>價格</FormLabel>
+              <FormLabel>{t('listing_form.price.label')}</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="例如：1500" {...field} />
+                <Input type="number" placeholder={t('listing_form.price.placeholder')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -388,11 +339,11 @@ export function EditListingForm({ product }: EditListingFormProps) {
           name="condition"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>新舊程度</FormLabel>
+              <FormLabel>{t('listing_form.condition.label')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="選擇新舊程度" />
+                    <SelectValue placeholder={t('listing_form.condition.placeholder')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -414,7 +365,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
           render={() => (
             <FormItem>
               <div className="mb-4">
-                <FormLabel className="text-base">交收方式</FormLabel>
+                <FormLabel className="text-base">{t('listing_form.shipping.label')}</FormLabel>
               </div>
               {shippingMethodOptions.map((item) => (
                 <FormField
@@ -458,7 +409,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
         
         <FormItem>
           <div className="flex items-center justify-between">
-            <FormLabel>產品描述</FormLabel>
+            <FormLabel>{t('listing_form.description.label')}</FormLabel>
             <Button
               type="button"
               variant="outline"
@@ -466,7 +417,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
               disabled
             >
               <Wand2 className="mr-2 h-4 w-4" />
-              AI 生成描述 (稍後推出)
+              {t('listing_form.ai_button')}
             </Button>
           </div>
           <FormField
@@ -476,7 +427,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
              <>
               <FormControl>
                 <Textarea
-                  placeholder="描述您的產品..."
+                  placeholder={t('listing_form.description.placeholder')}
                   className="min-h-[150px]"
                   {...field}
                 />
@@ -489,7 +440,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
 
         <Button type="submit" size="lg" className="w-full rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" disabled={isSubmitting}>
            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-          儲存變更
+          {t('listing_form.submit_button.edit')}
         </Button>
       </form>
     </Form>

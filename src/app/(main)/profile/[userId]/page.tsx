@@ -36,6 +36,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from '@/hooks/use-translation';
 
 function ProductGridSkeleton() {
     return (
@@ -100,22 +101,7 @@ function ProductGrid({
     )
 }
 
-const tabItems = [
-    { value: 'products', icon: Ticket, label: '產品' },
-    { value: 'reviews', icon: MessageSquare, label: '評價' },
-    { value: 'about', icon: User, label: '關於我' },
-];
-
-const ownProfileTabItems = [
-    { value: 'products', icon: Ticket, label: '產品' },
-    { value: 'favorites', icon: Heart, label: '最愛' },
-    { value: 'reviews', icon: MessageSquare, label: '評價' },
-    { value: 'about', icon: User, label: '關於我' },
-];
-
-// Dedicated component to manage the indicator's state and animation.
-// This is more robust as its effect is directly tied to the presence of the tabsListRef.
-function TabIndicator({ tabsListRef, activeTab }: { tabsListRef: React.RefObject<HTMLDivElement>, activeTab: string }) {
+const TabIndicator = ({ tabsListRef, activeTab }: { tabsListRef: React.RefObject<HTMLDivElement>, activeTab: string }) => {
     const [indicatorStyle, setIndicatorStyle] = useState({
       left: '0px',
       width: '0px',
@@ -137,12 +123,8 @@ function TabIndicator({ tabsListRef, activeTab }: { tabsListRef: React.RefObject
 
 
     useEffect(() => {
-      // Run the update on mount and whenever the active tab or the ref changes.
-      // A small timeout helps ensure the DOM has painted.
       const timeoutId = setTimeout(updateIndicator, 100);
-      
       window.addEventListener('resize', updateIndicator);
-      
       return () => {
         clearTimeout(timeoutId);
         window.removeEventListener('resize', updateIndicator);
@@ -164,6 +146,7 @@ export default function UserProfilePage() {
   const router = useRouter();
   const userId = params.userId as string;
   const { toast } = useToast();
+  const { t } = useTranslation();
   
   const [profileUser, setProfileUser] = useState<FullUser | null>(null);
   const [userProducts, setUserProducts] = useState<Product[]>([]);
@@ -184,24 +167,25 @@ export default function UserProfilePage() {
   
   const isOwnProfile = currentUser?.uid === userId;
   
-  const currentTabItems = useMemo(() => {
-    return isOwnProfile ? ownProfileTabItems : tabItems;
-  }, [isOwnProfile]);
+  const tabItems = useMemo(() => [
+    { value: 'products', icon: Ticket, label: t('profile.tabs.products') },
+    ...(isOwnProfile ? [{ value: 'favorites', icon: Heart, label: t('profile.tabs.favorites') }] : []),
+    { value: 'reviews', icon: MessageSquare, label: t('profile.tabs.reviews') },
+    { value: 'about', icon: User, label: t('profile.tabs.about') },
+  ], [isOwnProfile, t]);
 
   const [activeTab, setActiveTab] = useState('products');
   const tabsListRef = useRef<HTMLDivElement>(null);
 
-
-  // Effect to set active tab from URL param (if any) once, on mount.
   useEffect(() => {
     if (typeof window !== 'undefined') {
         const searchParams = new URLSearchParams(window.location.search);
         const tab = searchParams.get('tab');
-        if (tab && currentTabItems.some(t => t.value === tab)) {
+        if (tab && tabItems.some(t => t.value === tab)) {
             setActiveTab(tab);
         }
     }
-  }, [currentTabItems]);
+  }, [tabItems]);
 
 
   useEffect(() => {
@@ -310,8 +294,6 @@ export default function UserProfilePage() {
     }
   }, []);
 
-
-  // Fetch user's own products
   useEffect(() => {
     if (!userId) return;
     
@@ -342,7 +324,6 @@ export default function UserProfilePage() {
     return () => unsubscribeProducts();
   }, [userId]);
   
-  // Fetch data based on active tab
   useEffect(() => {
     if (!userId) return;
     let unsubscribe: (() => void) | undefined;
@@ -371,7 +352,6 @@ export default function UserProfilePage() {
     );
   }, [userProducts, searchTerm]);
 
-  // --- Derived data for 'About' tab ---
   const soldCount = useMemo(() => {
     return userProducts.filter(p => p.status === 'sold').length;
   }, [userProducts]);
@@ -383,15 +363,14 @@ export default function UserProfilePage() {
   const getCreditRating = (rating?: number, reviewCount?: number): { label: string; icon: React.ElementType; color: string } => {
     const safeRating = rating || 0;
     const safeReviewCount = reviewCount || 0;
-    if (safeReviewCount === 0) return { label: '新用戶', icon: ShieldCheck, color: 'text-gray-500' };
-    if (safeRating >= 4.8 && safeReviewCount >= 20) return { label: '頂級賣家', icon: Trophy, color: 'text-amber-400' };
-    if (safeRating >= 4.5 && safeReviewCount >= 5) return { label: '優秀', icon: BadgeCheck, color: 'text-blue-500' };
-    if (safeRating >= 4.0) return { label: '良好', icon: BadgeCheck, color: 'text-green-500' };
-    return { label: '普通', icon: ShieldCheck, color: 'text-gray-500' };
+    if (safeReviewCount === 0) return { label: t('profile.about.rating.new'), icon: ShieldCheck, color: 'text-gray-500' };
+    if (safeRating >= 4.8 && safeReviewCount >= 20) return { label: t('profile.about.rating.top'), icon: Trophy, color: 'text-amber-400' };
+    if (safeRating >= 4.5 && safeReviewCount >= 5) return { label: t('profile.about.rating.excellent'), icon: BadgeCheck, color: 'text-blue-500' };
+    if (safeRating >= 4.0) return { label: t('profile.about.rating.good'), icon: BadgeCheck, color: 'text-green-500' };
+    return { label: t('profile.about.rating.fair'), icon: ShieldCheck, color: 'text-gray-500' };
   };
   const creditRating = getCreditRating(profileUser?.averageRating, profileUser?.reviewCount);
 
-  // --- Management Mode Handlers ---
   const handleToggleSelection = (productId: string) => {
     setSelectedProducts(prev => {
         const newSet = new Set(prev);
@@ -437,7 +416,6 @@ export default function UserProfilePage() {
                 toast({ title: `已成功刪除 ${productIds.length} 件產品` });
             }
             
-            // Exit management mode and clear selection
             setIsManaging(false);
             setSelectedProducts(new Set());
 
@@ -467,49 +445,6 @@ export default function UserProfilePage() {
     }
   };
 
-
-  const handleBackfillSearchData = () => {
-    if (!currentUser || !isOwnProfile) return;
-
-    startTransition(async () => {
-        toast({ title: "開始更新產品數據...", description: "這可能需要幾秒鐘，請稍候。" });
-        const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('sellerId', '==', currentUser.uid));
-        
-        try {
-            const querySnapshot = await getDocs(q);
-            if (querySnapshot.empty) {
-                toast({ title: "沒有需要更新的產品" });
-                return;
-            }
-
-            const batch = writeBatch(db);
-            let updatedCount = 0;
-
-            querySnapshot.forEach(productDoc => {
-                const productData = productDoc.data() as Product;
-                // Only update if the field is missing
-                if (productData.name && !productData.name_lowercase) {
-                    batch.update(productDoc.ref, { name_lowercase: productData.name.toLowerCase() });
-                    updatedCount++;
-                }
-            });
-
-            if (updatedCount > 0) {
-                await batch.commit();
-                toast({ title: "更新成功！", description: `已成功為 ${updatedCount} 件產品啟用搜尋功能。`, className: "bg-green-100 dark:bg-green-800" });
-            } else {
-                toast({ title: "無需更新", description: "您所有的產品都已經支援搜尋功能了。" });
-            }
-
-        } catch (error: any) {
-            console.error("Error backfilling product data:", error);
-            toast({ title: "更新失敗", description: error.message, variant: 'destructive' });
-        }
-    });
-  };
-
-
   if (loadingProfile) {
     return (
         <div className="flex min-h-screen items-center justify-center">
@@ -533,7 +468,7 @@ export default function UserProfilePage() {
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/10 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
         <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">
-            {selectedProducts.size === filteredUserProducts.length ? '取消全選' : '全選'}
+            {selectedProducts.size === filteredUserProducts.length ? t('profile.management.unselect_all') : t('profile.management.select_all')}
         </Button>
         <div className="flex items-center gap-2">
             <Button
@@ -543,7 +478,7 @@ export default function UserProfilePage() {
                 disabled={isProcessing || selectedProducts.size === 0}
             >
                 {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
-                已售出 ({selectedProducts.size})
+                {t('profile.management.sold').replace('{count}', String(selectedProducts.size))}
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -553,23 +488,23 @@ export default function UserProfilePage() {
                         disabled={isProcessing || selectedProducts.size === 0}
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        刪除 ({selectedProducts.size})
+                        {t('profile.management.delete').replace('{count}', String(selectedProducts.size))}
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle>
+                        <AlertDialogTitle>{t('profile.delete_dialog.title')}</AlertDialogTitle>
                         <AlertDialogDescription>
-                            此操作無法復原，將會永久刪除您選取的 ${selectedProducts.size} 件產品。
+                            {t('profile.delete_dialog.description').replace('{count}', String(selectedProducts.size))}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={() => handleBulkAction('delete')}
                             className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
                         >
-                            確認刪除
+                            {t('profile.delete_dialog.confirm')}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
@@ -581,7 +516,7 @@ export default function UserProfilePage() {
   
   return (
     <>
-      <Header title={isOwnProfile ? "我的" : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
+      <Header title={isOwnProfile ? t('header.title.me') : (profileUser.displayName || '用戶檔案')} showBackButton={!isOwnProfile} showSettingsButton={isOwnProfile} />
       <div className={cn("container mx-auto px-4 md:px-6 py-4", isManaging && 'pb-24')}>
         
         <div className="flex justify-between items-start mb-4">
@@ -637,7 +572,7 @@ export default function UserProfilePage() {
             <div className="relative rounded-full bg-muted/50 p-2 backdrop-blur-sm shadow-inner">
                 <TabsList className="relative inline-flex h-auto p-0 bg-transparent" ref={tabsListRef}>
                     <TabIndicator tabsListRef={tabsListRef} activeTab={activeTab} />
-                    {currentTabItems.map((item) => (
+                    {tabItems.map((item) => (
                         <TabsTrigger
                             key={item.value}
                             value={item.value}
@@ -657,21 +592,21 @@ export default function UserProfilePage() {
                     <div className="relative flex-1">
                         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                         <Input 
-                            placeholder="搵下我有啲咩產品先" 
+                            placeholder={t('profile.search_placeholder')} 
                             className="pl-10 rounded-full h-9 text-sm" 
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
                     <Button variant="ghost" className="rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedProducts(new Set()); }}>
-                        {isManaging ? '取消' : '管理'}
+                        {isManaging ? t('profile.cancel_management') : t('profile.manage')}
                     </Button>
                 </div>
             )}
              <ProductGrid 
                 products={filteredUserProducts} 
                 loading={loadingUserProducts} 
-                emptyMessage={searchTerm ? `找不到關於「${searchTerm}」的產品` : (isOwnProfile ? "您尚未刊登任何商品" : "此用戶尚未刊登任何商品")}
+                emptyMessage={searchTerm ? t('profile.empty.products.search').replace('{searchTerm}', searchTerm) : (isOwnProfile ? t('profile.empty.products.own') : t('profile.empty.products.other'))}
                 isManaging={isManaging}
                 selectedProducts={selectedProducts}
                 onToggleSelect={handleToggleSelection}
@@ -683,7 +618,7 @@ export default function UserProfilePage() {
                  <ProductGrid 
                     products={favoriteProducts} 
                     loading={loadingFavorites} 
-                    emptyMessage="您尚未收藏任何商品"
+                    emptyMessage={t('profile.empty.favorites')}
                 />
               </TabsContent>
           )}
@@ -697,7 +632,7 @@ export default function UserProfilePage() {
                 </div>
              ) : reviews.length === 0 ? (
                  <div className="text-center text-muted-foreground py-16">
-                    <p>{isOwnProfile ? "您尚未收到任何評價" : "此用戶尚未收到任何評價"}</p>
+                    <p>{isOwnProfile ? t('profile.empty.reviews.own') : t('profile.empty.reviews.other')}</p>
                 </div>
              ) : (
                 <div className="space-y-4 max-w-2xl mx-auto">
@@ -759,17 +694,17 @@ export default function UserProfilePage() {
                        <div className="grid grid-cols-3 gap-4 text-center">
                           <div className="space-y-1">
                              <creditRating.icon className={cn("mx-auto h-7 w-7", creditRating.color)} />
-                             <p className="text-xs text-muted-foreground">信用評級</p>
+                             <p className="text-xs text-muted-foreground">{t('profile.about.credit_rating')}</p>
                              <p className="font-semibold text-sm">{creditRating.label}</p>
                           </div>
                           <div className="space-y-1">
                              <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
-                             <p className="text-xs text-muted-foreground">所在城市</p>
+                             <p className="text-xs text-muted-foreground">{t('profile.about.city')}</p>
                              <p className="font-semibold text-sm">{profileUser.city || '未設定'}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
-                             <p className="text-xs text-muted-foreground">加入日期</p>
+                             <p className="text-xs text-muted-foreground">{t('profile.about.join_date')}</p>
                              <p className="font-semibold text-sm">{getFormattedDate(profileUser.createdAt)}</p>
                           </div>
                        </div>
@@ -777,19 +712,19 @@ export default function UserProfilePage() {
                        <div className="grid grid-cols-2 gap-4 text-center">
                            <div className="space-y-1">
                              <PackageCheck className="mx-auto h-7 w-7 text-muted-foreground" />
-                             <p className="text-xs text-muted-foreground">成功售出</p>
+                             <p className="text-xs text-muted-foreground">{t('profile.about.items_sold')}</p>
                              <p className="font-semibold text-sm">{loadingUserProducts ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${soldCount} 件`}</p>
                           </div>
                            <div className="space-y-1">
                              <ShoppingBag className="mx-auto h-7 w-7 text-muted-foreground" />
-                             <p className="text-xs text-muted-foreground">給出好評</p>
+                             <p className="text-xs text-muted-foreground">{t('profile.about.reviews_given')}</p>
                              <p className="font-semibold text-sm">{loadingReviewsAsBuyer ? <Loader2 className="h-5 w-5 mx-auto animate-spin" /> : `${reviewsGivenCount} 次`}</p>
                           </div>
                        </div>
                         <Separator />
                         <div className="space-y-2 text-center">
-                            <p className="text-xs text-muted-foreground">個人簡介</p>
-                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? '您沒有留下任何關於我的資訊。' : '此用戶沒有留下任何關於我的資訊。')}</p>
+                            <p className="text-xs text-muted-foreground">{t('profile.about.bio')}</p>
+                            <p className="text-sm whitespace-pre-wrap text-muted-foreground">{profileUser.aboutMe || (isOwnProfile ? t('profile.about.bio.empty.own') : t('profile.about.bio.empty.other'))}</p>
                         </div>
                     </CardContent>
                 </Card>
