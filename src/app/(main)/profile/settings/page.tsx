@@ -195,14 +195,14 @@ export default function SettingsPage() {
   return (
     <>
       <Header title="設定" showBackButton />
-      <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-8">
+      <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>個人檔案</CardTitle>
-            <CardDescription>更新您的公開個人資料。這將會顯示在您的個人主頁和商品頁面上。</CardDescription>
+            <CardTitle className="text-lg">個人檔案</CardTitle>
+            <CardDescription className="text-sm">更新您的公開個人資料。這將會顯示在您的個人主頁和商品頁面上。</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleProfileUpdate} className="space-y-6">
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
                 <div className="flex items-center gap-4">
                      <div className="relative group flex-shrink-0">
                          <input
@@ -212,12 +212,12 @@ export default function SettingsPage() {
                             className="hidden"
                             accept="image/png, image/jpeg"
                           />
-                         <Avatar className="h-20 w-20 cursor-pointer" onClick={handleAvatarClick}>
+                         <Avatar className="h-16 w-16 cursor-pointer" onClick={handleAvatarClick}>
                             <AvatarImage src={newAvatar || user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
                             <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
                         </Avatar>
                          <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer" onClick={handleAvatarClick}>
-                            <Camera className="h-8 w-8 text-white" />
+                            <Camera className="h-6 w-6 text-white" />
                         </div>
                     </div>
                     <div className="flex-1 space-y-4">
@@ -251,7 +251,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                     <Label htmlFor="city">我的城市</Label>
                     <div className="flex items-center gap-2">
                         <Select onValueChange={setCity} value={city} disabled={isSaveDisabled}>
@@ -291,7 +291,7 @@ export default function SettingsPage() {
                     </div>
                 </div>
 
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <Label htmlFor="aboutMe">關於我</Label>
                 <Textarea
                   id="aboutMe"
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                   onChange={(e) => setAboutMe(e.target.value)}
                   placeholder="告訴大家一些關於您的事..."
                   disabled={isSaveDisabled}
-                  className="min-h-[120px]"
+                  className="min-h-[100px]"
                 />
               </div>
               <Button type="submit" disabled={isSaveDisabled} className="w-full sm:w-auto rounded-full bg-gradient-to-r from-blue-500 to-sky-500 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
@@ -312,8 +312,8 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>通知</CardTitle>
-                <CardDescription>管理您的推播通知設定。</CardDescription>
+                <CardTitle className="text-lg">通知</CardTitle>
+                <CardDescription className="text-sm">管理您的推播通知設定。</CardDescription>
             </CardHeader>
             <CardContent>
                  <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
@@ -338,8 +338,8 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>佈景主題</CardTitle>
-                <CardDescription>選擇您喜歡的應用程式外觀。</CardDescription>
+                <CardTitle className="text-lg">佈景主題</CardTitle>
+                <CardDescription className="text-sm">選擇您喜歡的應用程式外觀。</CardDescription>
             </CardHeader>
             <CardContent>
                 <ThemeToggle />
@@ -348,16 +348,16 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
-                <CardTitle>關於我們</CardTitle>
+                <CardTitle className="text-lg">關於我們</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="divide-y divide-border">
                     <AlertDialog>
                         <AlertDialogTrigger asChild>
-                            <button className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                            <button className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                                 <div className="flex items-center gap-4">
                                     <Info className="h-5 w-5 text-muted-foreground" />
-                                    <span>免責聲明</span>
+                                    <span className="text-sm">免責聲明</span>
                                 </div>
                                 <ChevronRight className="h-5 w-5 text-muted-foreground" />
                             </button>
@@ -384,28 +384,28 @@ export default function SettingsPage() {
 
          <Card>
             <CardHeader>
-                <CardTitle>技術支援</CardTitle>
+                <CardTitle className="text-lg">技術支援</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
                 <div className="divide-y divide-border">
-                     <Link href="https://wa.me/85212345678" target="_blank" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                     <Link href="https://wa.me/85212345678" target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                             <MessageCircle className="h-5 w-5 text-green-500" />
-                            <span>WhatsApp</span>
+                            <span className="text-sm">WhatsApp</span>
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </Link>
-                    <Link href="https://signal.me/#p/+85212345678" target="_blank" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <Link href="https://signal.me/#p/+85212345678" target="_blank" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                             <Phone className="h-5 w-5 text-blue-500" />
-                            <span>Signal</span>
+                            <span className="text-sm">Signal</span>
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </Link>
-                    <Link href="mailto:support@example.com" className="flex w-full items-center justify-between p-4 hover:bg-muted/50 transition-colors">
+                    <Link href="mailto:support@example.com" className="flex w-full items-center justify-between p-3 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-4">
                             <Mail className="h-5 w-5 text-muted-foreground" />
-                            <span>Email</span>
+                            <span className="text-sm">Email</span>
                         </div>
                         <ChevronRight className="h-5 w-5 text-muted-foreground" />
                     </Link>
@@ -414,7 +414,7 @@ export default function SettingsPage() {
         </Card>
 
 
-        <div className="flex justify-center">
+        <div className="flex justify-center pt-4">
             <AlertDialog>
                 <AlertDialogTrigger asChild>
                     <Button className="w-full max-w-xs rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">登出</Button>
@@ -441,8 +441,8 @@ export default function SettingsPage() {
         
         <Card className="border-destructive">
             <CardHeader>
-                <CardTitle className="text-destructive">危險區域</CardTitle>
-                <CardDescription>以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
+                <CardTitle className="text-destructive text-lg">危險區域</CardTitle>
+                <CardDescription className="text-sm">以下操作將會永久改變您的帳戶狀態，請謹慎操作。</CardDescription>
             </CardHeader>
             <CardContent>
                 <AlertDialog>
@@ -487,10 +487,12 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
         
-        <div className="text-center text-xs text-muted-foreground mt-8">
+        <div className="text-center text-xs text-muted-foreground pt-4">
             App Version: {packageInfo.version || 'N/A'}
         </div>
       </div>
     </>
   );
 }
+
+    
