@@ -373,7 +373,7 @@ export default function SettingsPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>免責聲明</AlertDialogTitle>
                                 <AlertDialogDescription className="max-h-[60vh] overflow-y-auto">
-                                    此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有显示的商品、價格、用戶資料和交易均為模擬數據，並非真實。
+                                    此應用程式 (HotSell) 僅作為技術展示和個人專案用途。所有顯示的商品、價格、用戶資料和交易均為模擬數據，並非真實。
                                     <br /><br />
                                     請勿在此應用程式上分享任何真實的個人敏感資訊或進行任何真實的金融交易。開發者對因使用此應用程式而導致的任何形式的損失或損害概不負責。
                                     <br /><br />
@@ -494,3 +494,5 @@ export default function SettingsPage() {
     </>
   );
 }
+
+    
