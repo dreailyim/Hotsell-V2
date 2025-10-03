@@ -7,10 +7,12 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { Flame } from 'lucide-react';
+import { useTranslation } from '@/hooks/use-translation';
 
 export default function ListPage() {
     const { user, loading } = useAuth();
     const router = useRouter();
+    const { t } = useTranslation();
 
     useEffect(() => {
         if (!loading && !user) {
@@ -23,7 +25,7 @@ export default function ListPage() {
             <div className="flex min-h-screen items-center justify-center">
                 <div className="flex flex-col items-center justify-center gap-4">
                     <Flame className="h-16 w-16 text-primary animate-burn" />
-                    <p className="text-muted-foreground animate-pulse">載入中...</p>
+                    <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
                 </div>
             </div>
         )
@@ -31,7 +33,7 @@ export default function ListPage() {
 
     return (
         <>
-            <Header title="刊登物品" showUserAvatar />
+            <Header title={t('header.title.list')} showUserAvatar />
             <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-8">
                 <ListingForm />
             </div>

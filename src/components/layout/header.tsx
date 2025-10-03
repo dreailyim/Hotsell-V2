@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
+import { useTranslation } from '@/hooks/use-translation';
 
 type HeaderProps = {
   showSearch?: boolean;
@@ -23,6 +24,7 @@ function Search() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { t } = useTranslation();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
 
   // Update search term if URL changes
@@ -56,7 +58,7 @@ function Search() {
       <div className="relative w-full max-w-xs">
         <SearchIcon className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
-          placeholder="搵下有咩啱..."
+          placeholder={t('header.search_placeholder')}
           className="w-full rounded-full pl-10 pr-10 h-8 text-sm"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
