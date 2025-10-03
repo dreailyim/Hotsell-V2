@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Flame, PlusCircle, MessageCircle, User } from 'lucide-react';
@@ -15,13 +15,13 @@ export function BottomNav() {
   const totalUnreadCount = useUnreadCount();
   const { t } = useTranslation();
 
-  const navItems = [
+  const navItems = useMemo(() => [
     { href: '/', icon: Home, label: t('nav.home') },
     { href: '/hot', icon: Flame, label: t('nav.hot') },
     { href: '/list', icon: PlusCircle, label: t('nav.list') },
     { href: '/messages', icon: MessageCircle, label: t('nav.messages') },
     { href: '/profile', icon: User, label: t('nav.me') },
-  ];
+  ], [t]);
 
   const [indicatorStyle, setIndicatorStyle] = useState({
     left: '0px',
