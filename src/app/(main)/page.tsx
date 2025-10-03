@@ -159,9 +159,9 @@ function HomePageContent() {
   const renderSearchResults = () => (
      <main className="container mx-auto px-4 md:px-6 py-4">
        <div className="flex justify-between items-center mb-4">
-         <h2 className="text-xl font-bold">搜尋結果</h2>
+         <h2 className="text-xl font-bold">{t('home.search_results')}</h2>
          <Button variant="link" asChild>
-            <Link href="/">清除搜尋</Link>
+            <Link href="/">{t('home.clear_search')}</Link>
          </Button>
        </div>
         {loadingProducts ? (
@@ -177,8 +177,8 @@ function HomePageContent() {
         ) : (
           <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
             <Search className="h-16 w-16 text-muted-foreground/50" />
-            <p className="font-semibold text-lg">找不到「{searchTerm}」的相關商品</p>
-            <p>試試其他關鍵字吧！</p>
+            <p className="font-semibold text-lg">{t('home.no_results_for').replace('{searchTerm}', searchTerm || '')}</p>
+            <p>{t('home.try_other_keywords')}</p>
           </div>
         )}
       </main>

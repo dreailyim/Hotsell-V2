@@ -33,6 +33,10 @@ export const en = {
   'home.banner.electronics.description': 'Cameras, phones, laptops, and more!',
   'home.banner.home_goods.title': 'Home Goods Clearance',
   'home.banner.home_goods.description': 'Add warmth to your home.',
+  'home.search_results': 'Search Results',
+  'home.clear_search': 'Clear Search',
+  'home.no_results_for': 'No results for "{searchTerm}"',
+  'home.try_other_keywords': 'Try other keywords!',
 
   // Hot Page
   'hot.no_products_title': 'No Hot Items Yet',
