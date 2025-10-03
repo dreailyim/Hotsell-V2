@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import "./globals.css";
 import Script from "next/script";
 import { FcmRegistrar } from "@/components/fcm-registrar";
+import { ThemeProvider } from 'next-themes';
 
 export const metadata = {
   title: "HotSell",

@@ -1,7 +1,7 @@
 'use client';
 
 import { AuthProvider } from '@/hooks/use-auth';
-import { ThemeProvider } from '@/components/theme-provider';
+import { ThemeProvider } from 'next-themes';
 import { LanguageProvider } from '@/providers/language-provider';
 import { ReactNode } from 'react';
 

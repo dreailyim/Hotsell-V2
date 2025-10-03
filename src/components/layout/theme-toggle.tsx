@@ -5,15 +5,17 @@ import { Moon, Sun, Laptop } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from '@/hooks/use-translation';
 
 const themeOptions = [
-  { theme: 'light', label: '淺色', icon: Sun },
-  { theme: 'dark', label: '深色', icon: Moon },
-  { theme: 'system', label: '系統', icon: Laptop },
+  { theme: 'light', labelKey: 'settings.theme.light', icon: Sun },
+  { theme: 'dark', labelKey: 'settings.theme.dark', icon: Moon },
+  { theme: 'system', labelKey: 'settings.theme.system', icon: Laptop },
 ] as const;
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <div className="grid grid-cols-3 gap-4">
@@ -36,7 +38,7 @@ export function ThemeToggle() {
                "text-sm",
                 theme === option.theme ? 'font-semibold text-primary' : 'text-muted-foreground'
            )}>
-            {option.label}
+            {t(option.labelKey)}
           </span>
         </div>
       ))}
