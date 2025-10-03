@@ -18,15 +18,12 @@ import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Flame } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useTranslation } from '@/hooks/use-translation';
-import { LanguageSwitcher } from '@/components/language-switcher';
 
 export default function RegisterPage() {
   const { user, loading: authLoading, signUp } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const { t } = useTranslation();
 
   useEffect(() => {
     // If the user is already logged in, redirect to the home page.
@@ -39,13 +36,13 @@ export default function RegisterPage() {
   const getFriendlyErrorMessage = (error: FirebaseError): string => {
       switch (error.code) {
           case 'auth/email-already-in-use':
-              return t('register.error.email_in_use');
+              return '此電郵地址已被註冊。';
           case 'auth/weak-password':
-              return t('register.error.weak_password');
+              return '密碼強度不足，請設定至少6位數的密碼。';
           case 'auth/invalid-email':
-              return t('register.error.invalid_email');
+              return '電郵地址格式不正確。';
           default:
-              return t('login.error.unknown').replace('{error_code}', error.code);
+              return `發生未知錯誤: ${error.code}`;
       }
   };
 
@@ -60,8 +57,8 @@ export default function RegisterPage() {
 
     if (password !== confirmPassword) {
         toast({
-            title: t('register.fail_title'),
-            description: t('register.error.password_mismatch'),
+            title: '註冊失敗',
+            description: '兩次輸入的密碼不一致。',
             variant: 'destructive',
         });
         setLoading(false);
@@ -70,18 +67,18 @@ export default function RegisterPage() {
 
     try {
       await signUp(email, password, displayName);
-      toast({ title: t('register.success_title'), description: t('register.success_desc') });
+      toast({ title: '註冊成功！', description: '驗證郵件已寄出，請檢查您的收件箱。' });
       router.push('/login');
     } catch (error) {
       if (error instanceof FirebaseError) {
         toast({
-          title: t('register.fail_title'),
+          title: '註冊失敗',
           description: getFriendlyErrorMessage(error),
           variant: 'destructive',
         });
       } else {
         toast({
-          title: t('login.unknown_error_title'),
+          title: '發生未知錯誤',
           description: String(error),
           variant: 'destructive',
         });
@@ -96,7 +93,7 @@ export default function RegisterPage() {
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-4">
                 <Flame className="h-16 w-16 text-primary animate-burn" />
-                <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
+                <p className="text-muted-foreground animate-pulse">載入中...</p>
             </div>
         </div>
     )
@@ -111,40 +108,39 @@ export default function RegisterPage() {
         </div>
         <Card>
           <CardHeader>
-            <CardTitle>{t('register.title')}</CardTitle>
-            <CardDescription>{t('register.description')}</CardDescription>
+            <CardTitle>註冊</CardTitle>
+            <CardDescription>建立一個新帳戶。</CardDescription>
           </CardHeader>
             <form onSubmit={handleSignUp}>
             <CardContent className="space-y-4">
                 <div className="space-y-2">
-                <Label htmlFor="signup-displayName">{t('register.display_name_label')}</Label>
-                <Input id="signup-displayName" name="displayName" type="text" placeholder={t('register.display_name_placeholder')} required />
+                <Label htmlFor="signup-displayName">顯示名稱</Label>
+                <Input id="signup-displayName" name="displayName" type="text" placeholder="您的名稱" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-email">{t('login.email_label')}</Label>
+                <Label htmlFor="signup-email">電子郵件</Label>
                 <Input id="signup-email" name="email" type="email" placeholder="m@example.com" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-password">{t('login.password_label')}</Label>
+                <Label htmlFor="signup-password">密碼</Label>
                 <Input id="signup-password" name="password" type="password" required />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="signup-confirm-password">{t('register.confirm_password_label')}</Label>
+                <Label htmlFor="signup-confirm-password">確認密碼</Label>
                 <Input id="signup-confirm-password" name="confirm-password" type="password" required />
               </div>
             </CardContent>
             <CardFooter className="flex-col gap-4">
               <Button className="w-full rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity" type="submit" disabled={loading}>
                   {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {t('register.register_button')}
+                註冊
               </Button>
             </CardFooter>
           </form>
         </Card>
         <div className="text-center text-sm">
-            {t('register.has_account')} <Link href="/login" className="underline">{t('register.login_now')}</Link>
+            已經有帳戶？ <Link href="/login" className="underline">立即登入</Link>
         </div>
-        <LanguageSwitcher />
       </div>
     </div>
   );

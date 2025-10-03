@@ -9,7 +9,6 @@ import { Header } from '@/components/layout/header';
 import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Flame } from 'lucide-react';
-import { useTranslation } from '@/hooks/use-translation';
 
 function ProductGridSkeleton() {
     return (
@@ -32,7 +31,6 @@ export default function HotPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchHotProducts = async () => {
@@ -57,17 +55,17 @@ export default function HotPage() {
         setProducts(productsData);
       } catch (err) {
         console.error("Error fetching hot products: ", err);
-        setError(t('hot.error'));
+        setError("無法載入熱賣商品，請稍後再試。");
       } finally {
         setLoading(false);
       }
     };
     fetchHotProducts();
-  }, [t]);
+  }, []);
 
   return (
     <>
-      <Header title={t('header.title.hot')} showUserAvatar />
+      <Header title="熱賣商品" showUserAvatar />
       <main className="container mx-auto px-4 md:px-6 py-6">
         {loading ? (
           <ProductGridSkeleton />
@@ -78,8 +76,8 @@ export default function HotPage() {
         ) : products.length === 0 ? (
           <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
              <Flame className="h-16 w-16 text-muted-foreground/50" />
-             <p className="font-semibold text-lg">{t('hot.no_products_title')}</p>
-             <p>{t('hot.no_products_description')}</p>
+             <p className="font-semibold text-lg">暫時沒有熱賣商品</p>
+             <p>快去發掘和收藏您喜歡的商品吧！</p>
           </div>
         ) : (
           <div className="columns-2 md:columns-3 lg:columns-4 gap-2 md:gap-4 lg:gap-6">

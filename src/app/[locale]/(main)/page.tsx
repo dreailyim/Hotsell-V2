@@ -22,15 +22,14 @@ import { useSearchParams } from 'next/navigation';
 import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { useTranslation } from '@/hooks/use-translation';
 
 // Define the type for a banner
 type Banner = {
   id: string;
   src: string;
   alt: string;
-  titleKey: 'home.banner.fashion.title' | 'home.banner.electronics.title' | 'home.banner.home_goods.title';
-  descriptionKey: 'home.banner.fashion.description' | 'home.banner.electronics.description' | 'home.banner.home_goods.description';
+  title: string;
+  description: string;
   href: string;
   dataAiHint: string;
   createdAt: Timestamp;
@@ -56,7 +55,6 @@ function ProductGridSkeleton() {
 function HomePageContent() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('q');
-  const { t } = useTranslation();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -77,9 +75,9 @@ function HomePageContent() {
           console.log("Banners collection is empty. Seeding initial data...");
           const batch = writeBatch(db);
           const defaultBanners = [
-              { src: "https://picsum.photos/seed/ad2/1200/400", alt: "New fashion arrivals", titleKey: "home.banner.fashion.title", descriptionKey: "home.banner.fashion.description", dataAiHint: "fashion clothes", href: "/" },
-              { src: "https://picsum.photos/seed/ad1/1200/400", alt: "Special promotion on electronics", titleKey: "home.banner.electronics.title", descriptionKey: "home.banner.electronics.description", dataAiHint: "electronics sale", href: "/hot" },
-              { src: "https://picsum.photos/seed/ad3/1200/400", alt: "Home goods clearance", titleKey: "home.banner.home_goods.title", descriptionKey: "home.banner.home_goods.description", dataAiHint: "home decor", href: "/" },
+              { src: "https://picsum.photos/seed/ad1/1200/400", alt: "Special promotion on electronics", title: "電子產品特賣", description: "相機、手機、筆電，應有尽有！", dataAiHint: "electronics sale", href: "/hot" },
+              { src: "https://picsum.photos/seed/ad2/1200/400", alt: "New fashion arrivals", title: "時尚新品到著", description: "換季大減價，立即選購！", dataAiHint: "fashion clothes", href: "/" },
+              { src: "https://picsum.photos/seed/ad3/1200/400", alt: "Home goods clearance", title: "家居好物清貨", description: "為您的家增添一份溫馨。", dataAiHint: "home decor", href: "/" },
           ];
 
           defaultBanners.forEach(banner => {
@@ -159,9 +157,9 @@ function HomePageContent() {
   const renderSearchResults = () => (
      <main className="container mx-auto px-4 md:px-6 py-4">
        <div className="flex justify-between items-center mb-4">
-         <h2 className="text-xl font-bold">{t('home.search_results')}</h2>
+         <h2 className="text-xl font-bold">搜尋結果</h2>
          <Button variant="link" asChild>
-            <Link href="/">{t('home.clear_search')}</Link>
+            <Link href="/">清除搜尋</Link>
          </Button>
        </div>
         {loadingProducts ? (
@@ -177,8 +175,8 @@ function HomePageContent() {
         ) : (
           <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
             <Search className="h-16 w-16 text-muted-foreground/50" />
-            <p className="font-semibold text-lg">{t('home.no_results_for').replace('{searchTerm}', searchTerm || '')}</p>
-            <p>{t('home.try_other_keywords')}</p>
+            <p className="font-semibold text-lg">找不到「{searchTerm}」的相關商品</p>
+            <p>試試其他關鍵字吧！</p>
           </div>
         )}
       </main>
@@ -211,8 +209,8 @@ function HomePageContent() {
                                       data-ai-hint={banner.dataAiHint}
                                   />
                                   <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white p-4 text-center">
-                                      <h2 className="text-xl md:text-3xl font-bold">{t(banner.titleKey)}</h2>
-                                      <p className="text-sm md:text-lg mt-2">{t(banner.descriptionKey)}</p>
+                                      <h2 className="text-xl md:text-3xl font-bold">{banner.title}</h2>
+                                      <p className="text-sm md:text-lg mt-2">{banner.description}</p>
                                   </div>
                               </CardContent>
                           </Card>
@@ -231,7 +229,7 @@ function HomePageContent() {
         )}
       </div>
        <main className="container mx-auto px-4 md:px-6 py-3">
-        <h2 className="text-xl font-bold mb-4">{t('home.latest_products')}</h2>
+        <h2 className="text-xl font-bold mb-4">最新上架</h2>
         {loadingProducts ? (
           <ProductGridSkeleton />
         ) : (

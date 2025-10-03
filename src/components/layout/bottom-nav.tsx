@@ -1,25 +1,27 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Home, Flame, PlusCircle, MessageCircle, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useUnreadCount } from '@/hooks/use-unread-count';
-
-const navItems = [
-  { href: '/', icon: Home, label: '主頁' },
-  { href: '/hot', icon: Flame, label: '熱賣' },
-  { href: '/list', icon: PlusCircle, label: '刊登' },
-  { href: '/messages', icon: MessageCircle, label: '訊息' },
-  { href: '/profile', icon: User, label: '我的' },
-];
+import { useTranslation } from '@/hooks/use-translation';
 
 export function BottomNav() {
   const pathname = usePathname();
   const scrollDirection = useScrollDirection();
   const totalUnreadCount = useUnreadCount();
+  const { t, language } = useTranslation();
+
+  const navItems = useMemo(() => [
+    { href: '/', icon: Home, label: t('nav.home') },
+    { href: '/hot', icon: Flame, label: t('nav.hot') },
+    { href: '/list', icon: PlusCircle, label: t('nav.list') },
+    { href: '/messages', icon: MessageCircle, label: t('nav.messages') },
+    { href: '/profile', icon: User, label: t('nav.me') },
+  ], [t]);
 
   const [indicatorStyle, setIndicatorStyle] = useState({
     left: '0px',
@@ -46,7 +48,7 @@ export function BottomNav() {
         opacity: 1,
       });
     }
-  }, [pathname]);
+  }, [pathname, navItems]);
 
   return (
     <nav
@@ -85,7 +87,7 @@ export function BottomNav() {
                 </span>
               )}
               <item.icon className="h-5 w-5" />
-              <span className="text-xs">{item.label}</span>
+              <span className={cn('text-xs', language === 'en' && 'text-[10px]')}>{item.label}</span>
             </Link>
           );
         })}

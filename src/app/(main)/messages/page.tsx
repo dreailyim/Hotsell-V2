@@ -10,7 +10,7 @@ import type { Conversation, FullUser, SystemNotification } from '@/lib/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
-import { zhHK } from 'date-fns/locale';
+import { enUS, zhHK } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { db } from '@/lib/firebase/client-app';
 import { collection, query, where, onSnapshot, Timestamp, doc, getDoc, orderBy, updateDoc, writeBatch, arrayUnion, increment, getDocs } from 'firebase/firestore';
@@ -31,6 +31,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import { useToast } from '@/hooks/use-toast';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 // --- Skeletons ---
@@ -133,6 +134,7 @@ export default function MessagesPage() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  const { t, language } = useTranslation();
 
   // --- States for Private Messages ---
   const [conversations, setConversations] = useState<EnrichedConversation[]>([]);
@@ -304,13 +306,12 @@ export default function MessagesPage() {
             setIsManaging(false);
 
             toast({
-                title: "操作成功",
-                description: `已成功隱藏 ${conversationIdsToHide.length} 個對話。`,
+                title: t('messages.delete_success').replace('{count}', String(conversationIdsToHide.length)),
             });
         } catch (error: any) {
              toast({
-                title: "操作失敗",
-                description: error.message || '隱藏對話時發生未知錯誤。',
+                title: t('messages.delete_fail'),
+                description: error.message,
                 variant: "destructive",
             });
         }
@@ -372,7 +373,7 @@ export default function MessagesPage() {
     if (!timestamp) return '';
     try {
       const date = timestamp.seconds ? new Timestamp(timestamp.seconds, timestamp.nanoseconds).toDate() : new Date(timestamp);
-      return formatDistanceToNow(date, { addSuffix: true, locale: zhHK });
+      return formatDistanceToNow(date, { addSuffix: true, locale: language === 'en' ? enUS : zhHK });
     } catch (error) {
       console.error("Error formatting date:", error, "with value:", timestamp);
       return '剛剛';
@@ -393,7 +394,7 @@ export default function MessagesPage() {
       return (
         <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
           <MessageCircle className="h-16 w-16 text-muted-foreground/50" />
-          <p className="font-semibold text-lg">您還沒有任何訊息</p><p>當您開始與賣家對話時，訊息會出現在這裡。</p>
+          <p className="font-semibold text-lg">{t('messages.empty.private.title')}</p><p>{t('messages.empty.private.description')}</p>
         </div>
       );
     }
@@ -401,8 +402,8 @@ export default function MessagesPage() {
       return (
         <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
             <Search className="h-16 w-16 text-muted-foreground/50" />
-            <p className="font-semibold text-lg">找不到「{searchTerm}」的相關訊息</p>
-            <p>請嘗試其他關鍵字。</p>
+            <p className="font-semibold text-lg">{t('messages.empty.search.title').replace('{searchTerm}', searchTerm)}</p>
+            <p>{t('messages.empty.search.description')}</p>
         </div>
       )
     }
@@ -470,7 +471,7 @@ export default function MessagesPage() {
     if (notifications.length === 0) {
       return (
         <div className="text-center text-muted-foreground py-16 flex flex-col items-center gap-4">
-          <Bell className="h-16 w-16 text-muted-foreground/50" /><p className="font-semibold text-lg">這裡沒有任何通知</p><p>當有新動態時，您會在這裡收到通知。</p>
+          <Bell className="h-16 w-16 text-muted-foreground/50" /><p className="font-semibold text-lg">{t('messages.empty.system.title')}</p><p>{t('messages.empty.system.description')}</p>
         </div>
       );
     }
@@ -485,7 +486,7 @@ export default function MessagesPage() {
               disabled={systemNotificationsUnreadCount === 0}
               className="text-muted-foreground disabled:text-muted-foreground/50 disabled:no-underline"
             >
-              全部標記為已讀
+              {t('messages.mark_all_as_read')}
             </Button>
         </div>
         <div className="h-px w-full bg-gradient-to-r from-transparent via-border to-transparent" />
@@ -525,14 +526,14 @@ export default function MessagesPage() {
   const ManagementFooter = () => (
     <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t border-white/20 z-50 md:hidden">
       <div className="container mx-auto px-4 h-20 flex items-center justify-between">
-        <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">{selectedConversations.size === filteredConversations.length ? '取消全選' : '全選'}</Button>
+        <Button variant="ghost" onClick={handleSelectAll} className="rounded-full">{selectedConversations.size === filteredConversations.length ? t('messages.unselect_all') : t('messages.select_all')}</Button>
         <AlertDialog>
           <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={selectedConversations.size === 0 || isDeleting} className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"><Trash2 className="mr-2 h-4 w-4" />刪除 ({selectedConversations.size})</Button>
+            <Button variant="destructive" disabled={selectedConversations.size === 0 || isDeleting} className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"><Trash2 className="mr-2 h-4 w-4" />{t('messages.delete_button').replace('{count}', String(selectedConversations.size))}</Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader><AlertDialogTitle>確定要刪除嗎？</AlertDialogTitle><AlertDialogDescription>您將不會再看到這個對話。如果對方也刪除，對話將會被永久移除。</AlertDialogDescription></AlertDialogHeader>
-            <AlertDialogFooter><AlertDialogCancel>取消</AlertDialogCancel><AlertDialogAction onClick={handleDeleteSelected} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">確認刪除</AlertDialogAction></AlertDialogFooter>
+            <AlertDialogHeader><AlertDialogTitle>{t('messages.delete_dialog.title')}</AlertDialogTitle><AlertDialogDescription>{t('messages.delete_dialog.description')}</AlertDialogDescription></AlertDialogHeader>
+            <AlertDialogFooter><AlertDialogCancel>{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={handleDeleteSelected} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">{t('messages.delete_dialog.confirm')}</AlertDialogAction></AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
       </div>
@@ -541,19 +542,19 @@ export default function MessagesPage() {
 
   return (
     <>
-      <Header title="訊息" showUserAvatar />
+      <Header title={t('header.title.messages')} showUserAvatar />
       <div className={cn("container mx-auto px-0 md:px-6 pt-4 pb-8", isManaging && "pb-24")}>
         <div className="flex items-center gap-2 mb-4 px-4 md:px-0">
             <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="搜尋訊息..."
+                  placeholder={t('messages.search_placeholder')}
                   className="rounded-full pl-9 bg-muted border-none h-9 text-sm"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
             </div>
-            <Button variant="ghost" className="text-foreground text-sm rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedConversations(new Set()); }}>{isManaging ? '取消' : '管理'}</Button>
+            <Button variant="ghost" className="text-foreground text-sm rounded-full" onClick={() => { setIsManaging(!isManaging); setSelectedConversations(new Set()); }}>{isManaging ? t('messages.cancel_management') : t('messages.manage')}</Button>
         </div>
 
         <Tabs defaultValue="private" onValueChange={setActiveTab} className="w-full">
@@ -564,7 +565,7 @@ export default function MessagesPage() {
                         <TabsTrigger 
                             value="private" 
                             className="relative z-10 h-10 w-28 text-xs data-[state=active]:bg-transparent data-[state=active]:shadow-md data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black rounded-full flex items-center justify-center gap-1 transition-all">
-                            <MessageCircle className="h-5 w-5" /> 私人訊息
+                            <MessageCircle className="h-5 w-5" /> {t('messages.tabs.private')}
                             {privateMessagesUnreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] ring-2 ring-background">
                                     {privateMessagesUnreadCount > 9 ? '9+' : privateMessagesUnreadCount}
@@ -574,7 +575,7 @@ export default function MessagesPage() {
                         <TabsTrigger 
                             value="system" 
                             className="relative z-10 h-10 w-28 text-xs data-[state=active]:bg-transparent data-[state=active]:shadow-md data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black rounded-full flex items-center justify-center gap-1 transition-all">
-                           <Bell className="h-5 w-5" /> 通知消息
+                           <Bell className="h-5 w-5" /> {t('messages.tabs.system')}
                            {systemNotificationsUnreadCount > 0 && (
                                 <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-white text-[10px] ring-2 ring-background">
                                     {systemNotificationsUnreadCount > 9 ? '9+' : systemNotificationsUnreadCount}
