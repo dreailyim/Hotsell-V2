@@ -206,5 +206,3 @@ export const en = {
   'product_page.mark_as_sold': 'Sold',
   'product_page.chat': 'Chat',
 };
-
-    

@@ -208,5 +208,3 @@ export const zh = {
   'product_page.mark_as_sold': '售出',
   'product_page.chat': '傾傾',
 };
-
-    
