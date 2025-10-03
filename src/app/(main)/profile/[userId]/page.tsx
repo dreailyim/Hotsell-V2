@@ -146,7 +146,7 @@ export default function UserProfilePage() {
   const router = useRouter();
   const userId = params.userId as string;
   const { toast } = useToast();
-  const { t } = useTranslation();
+  const { t, language } = useTranslation();
   
   const [profileUser, setProfileUser] = useState<FullUser | null>(null);
   const [userProducts, setUserProducts] = useState<Product[]>([]);
@@ -576,10 +576,10 @@ export default function UserProfilePage() {
                         <TabsTrigger
                             key={item.value}
                             value={item.value}
-                            className="relative z-10 h-14 px-2 flex flex-col items-center justify-center gap-1 rounded-full text-xs font-medium data-[state=active]:bg-transparent data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black"
+                            className="relative z-10 h-14 w-14 flex flex-col items-center justify-center gap-1 rounded-full text-xs font-medium data-[state=active]:bg-transparent data-[state=active]:text-primary-foreground dark:data-[state=active]:text-black"
                         >
                             <item.icon className="h-5 w-5" />
-                            <span>{item.label}</span>
+                            <span className={cn('text-xs', language === 'en' && 'text-[10px]')}>{item.label}</span>
                         </TabsTrigger>
                     ))}
                 </TabsList>
