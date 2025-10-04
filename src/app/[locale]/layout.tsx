@@ -1,12 +1,16 @@
-import { ReactNode } from 'react';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { ReactNode } from "react";
 import { Providers } from "@/app/providers";
 import { Toaster } from "@/components/ui/toaster";
 import "@/app/globals.css";
 import Script from "next/script";
 import { FcmRegistrar } from "@/components/fcm-registrar";
-import { ThemeProvider } from 'next-themes';
+import { I18nProviderClient } from "@/i18n/client";
 
-export const metadata = {
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+export const metadata: Metadata = {
   title: "HotSell",
   description: "A secondhand marketplace app.",
   manifest: "/manifest.webmanifest",
@@ -14,13 +18,13 @@ export const metadata = {
 
 export default function RootLayout({
   children,
-  params,
+  params: { locale },
 }: Readonly<{
   children: ReactNode;
   params: { locale: string };
 }>) {
   return (
-    <html lang={params.locale || 'zh'} suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <script
           async
@@ -28,12 +32,14 @@ export default function RootLayout({
           crossOrigin="anonymous"
         ></script>
       </head>
-      <body className="font-body antialiased" suppressHydrationWarning>
+      <body className={`${inter.variable} font-body antialiased`} suppressHydrationWarning>
+        <I18nProviderClient locale={locale}>
           <Providers>
             <FcmRegistrar />
             {children}
             <Toaster />
           </Providers>
+        </I18nProviderClient>
       </body>
     </html>
   );
