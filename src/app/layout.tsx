@@ -32,7 +32,7 @@ export default function RootLayout({
         ></script>
       </head>
       <body className={cn(inter.variable, "font-body antialiased")} suppressHydrationWarning>
-          <Providers locale="zh">
+          <Providers>
             <FcmRegistrar />
             {children}
             <Toaster />

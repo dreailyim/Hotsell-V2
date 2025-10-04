@@ -5,6 +5,6 @@ import { en } from './en';
 import { zh } from './zh';
 
 export const { useI18n, useScopedI18n, I18nProviderClient, useChangeLocale, useCurrentLocale } = createI18nClient({
-  en,
-  zh,
+  en: () => import('./en'),
+  zh: () => import('./zh'),
 });
