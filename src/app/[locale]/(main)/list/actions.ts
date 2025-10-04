@@ -1,34 +1,43 @@
-'use server';
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ReactNode } from 'react';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/toaster';
+import './globals.css';
+import Script from 'next/script';
+import { FcmRegistrar } from '@/components/fcm-registrar';
+import { cn } from '@/lib/utils';
+import { I18nProviderClient } from '@/i18n/client';
 
-import { generateProductDescription } from '@/ai/flows/generate-product-description';
-import type { GenerateProductDescriptionOutput } from '@/ai/flows/generate-product-description';
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
-type GenerateDescriptionActionInput = {
-  productName: string;
-  productCategory: string;
-  productImage: string;
-  productDetails: string;
+export const metadata: Metadata = {
+  title: 'HotSell',
+  description: 'A secondhand marketplace app.',
+  manifest: '/manifest.webmanifest',
 };
 
-type ActionResult = {
-  data?: GenerateProductDescriptionOutput;
-  error?: string;
-};
-
-export async function generateDescriptionAction(
-  input: GenerateDescriptionActionInput
-): Promise<ActionResult> {
-  try {
-    const result = await generateProductDescription({
-        productName: input.productName,
-        productCategory: input.productCategory,
-        productImage: input.productImage,
-        productDetails: input.productDetails,
-    });
-    return { data: result };
-  } catch (error) {
-    console.error('Error generating description:', error);
-    // Return a user-friendly error message
-    return { error: '無法生成描述，請稍後再試。' };
-  }
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: ReactNode;
+}>) {
+  return (
+    <html lang="zh" suppressHydrationWarning>
+      <head>
+        <script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6189242189989239"
+          crossOrigin="anonymous"
+        ></script>
+      </head>
+      <body className={cn(inter.variable, "font-body antialiased")} suppressHydrationWarning>
+          <Providers locale="zh">
+            <FcmRegistrar />
+            {children}
+            <Toaster />
+          </Providers>
+      </body>
+    </html>
+  );
 }

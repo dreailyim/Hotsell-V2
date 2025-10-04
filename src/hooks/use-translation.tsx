@@ -1,4 +1,12 @@
-// This file is intentionally left blank as a placeholder.
-// The internationalization logic has been removed to simplify the application structure.
-// We can re-introduce a new i18n solution here in the future if needed.
-export {};
+'use client';
+
+import { useContext } from 'react';
+import { LanguageContext, LanguageContextType } from '@/providers/language-provider';
+
+export const useTranslation = (): LanguageContextType => {
+  const context = useContext(LanguageContext);
+  if (context === undefined) {
+    throw new Error('useTranslation must be used within a LanguageProvider');
+  }
+  return context;
+};

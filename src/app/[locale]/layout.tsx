@@ -1,30 +1,29 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import { ReactNode } from "react";
-import { Providers } from "@/app/providers";
-import { Toaster } from "@/components/ui/toaster";
-import "@/app/globals.css";
-import Script from "next/script";
-import { FcmRegistrar } from "@/components/fcm-registrar";
-import { I18nProviderClient } from "@/i18n/client";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import { ReactNode } from 'react';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/toaster';
+import './globals.css';
+import Script from 'next/script';
+import { FcmRegistrar } from '@/components/fcm-registrar';
+import { cn } from '@/lib/utils';
+import { I18nProviderClient } from '@/i18n/client';
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 
 export const metadata: Metadata = {
-  title: "HotSell",
-  description: "A secondhand marketplace app.",
-  manifest: "/manifest.webmanifest",
+  title: 'HotSell',
+  description: 'A secondhand marketplace app.',
+  manifest: '/manifest.webmanifest',
 };
 
 export default function RootLayout({
   children,
-  params: { locale },
 }: Readonly<{
   children: ReactNode;
-  params: { locale: string };
 }>) {
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang="zh" suppressHydrationWarning>
       <head>
         <script
           async
@@ -32,14 +31,12 @@ export default function RootLayout({
           crossOrigin="anonymous"
         ></script>
       </head>
-      <body className={`${inter.variable} font-body antialiased`} suppressHydrationWarning>
-        <I18nProviderClient locale={locale}>
-          <Providers>
+      <body className={cn(inter.variable, "font-body antialiased")} suppressHydrationWarning>
+          <Providers locale="zh">
             <FcmRegistrar />
             {children}
             <Toaster />
           </Providers>
-        </I18nProviderClient>
       </body>
     </html>
   );
