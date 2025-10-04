@@ -198,7 +198,7 @@ export const en = {
 
   // Settings Page
   'settings.language.title': 'Language',
-  'settings.language.description': 'Choose the language of the application interface.',
+  'settings.language.description': 'Choose the language for the application interface.',
   'settings.profile.title': 'Profile',
   'settings.profile.description': 'Update your public profile. This will be displayed on your profile and product pages.',
   'settings.profile.display_name': 'Display Name',

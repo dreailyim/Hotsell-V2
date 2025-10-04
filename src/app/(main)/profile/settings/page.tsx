@@ -41,7 +41,6 @@ function LanguageSelect() {
 
   return (
     <div className="space-y-1.5">
-      <Label htmlFor="language-select">{t('settings.language.title')}</Label>
        <Select onValueChange={(value: 'en' | 'zh') => setLanguage(value)} value={language}>
           <SelectTrigger id="language-select">
               <SelectValue placeholder={t('settings.language.title')} />
@@ -368,9 +367,17 @@ export default function SettingsPage() {
                 <CardTitle className="text-lg">{t('settings.theme.title')}</CardTitle>
                 <CardDescription className="text-sm">{t('settings.theme.description')}</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent>
                 <ThemeToggle />
-                <Separator />
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-lg">{t('settings.language.title')}</CardTitle>
+                <CardDescription className="text-sm">{t('settings.language.description')}</CardDescription>
+            </CardHeader>
+            <CardContent>
                 <LanguageSelect />
             </CardContent>
         </Card>
