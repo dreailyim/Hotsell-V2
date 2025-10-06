@@ -29,6 +29,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
@@ -777,38 +778,38 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                   </button>
               </div>
             </Carousel>
-             <DialogContent className="bg-black/80 border-none w-screen h-screen max-w-full max-h-screen p-0 flex items-center justify-center">
-              <DialogTitle className="sr-only">{product.name} - Image</DialogTitle>
-              {fullscreenImage && (
-                <>
-                   <div className="relative w-full h-full">
-                     <Image
-                        src={fullscreenImage.src}
-                        alt={`${product.name} - Fullscreen ${fullscreenImage.index + 1}`}
-                        fill
-                        className="object-contain"
-                      />
-                   </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      className="absolute top-4 right-4 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" 
-                      onClick={() => setFullscreenImage(null)}
-                    >
-                        <X className="h-6 w-6"/>
-                    </Button>
-                    {productImages.length > 1 && (
-                      <>
-                        <Button variant="ghost" size="icon" className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('prev')}>
-                            <ChevronLeft className="h-6 w-6" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('next')}>
-                            <ChevronRight className="h-6 w-6" />
-                        </Button>
-                      </>
-                    )}
-                </>
-              )}
+             <DialogContent className="bg-black/80 border-none w-screen h-screen max-w-full max-h-screen p-0 flex items-center justify-center" onOpenAutoFocus={(e) => e.preventDefault()}>
+                <DialogTitle className="sr-only">{product.name} - Image</DialogTitle>
+                {fullscreenImage && (
+                  <>
+                    <div className="relative w-full h-full">
+                        <Image
+                          src={fullscreenImage.src}
+                          alt={`${product.name} - Fullscreen ${fullscreenImage.index + 1}`}
+                          fill
+                          className="object-contain"
+                        />
+                    </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute top-4 right-4 h-12 w-12 rounded-full text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" 
+                        onClick={() => setFullscreenImage(null)}
+                      >
+                          <X className="h-6 w-6"/>
+                      </Button>
+                      {productImages.length > 1 && (
+                        <>
+                          <Button variant="ghost" size="icon" className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('prev')}>
+                              <ChevronLeft className="h-6 w-6" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('next')}>
+                              <ChevronRight className="h-6 w-6" />
+                          </Button>
+                        </>
+                      )}
+                  </>
+                )}
             </DialogContent>
           </Dialog>
         </div>
