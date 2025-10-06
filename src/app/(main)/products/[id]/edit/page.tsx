@@ -11,6 +11,7 @@ import { EditListingForm } from '@/components/edit-listing-form';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/hooks/use-translation';
 import { Flame } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 function EditPageSkeleton() {
     return (
@@ -38,6 +39,7 @@ export default function EditProductPage() {
   const router = useRouter();
   const productId = params.id as string;
   const { t } = useTranslation();
+  const { toast } = useToast();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,7 +81,7 @@ export default function EditProductPage() {
     if (user || !authLoading) {
         fetchProduct();
     }
-  }, [productId, user, authLoading, router]);
+  }, [productId, user, authLoading, router, toast]);
 
   if (loading || authLoading) {
     return (
