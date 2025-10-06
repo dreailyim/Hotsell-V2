@@ -286,31 +286,31 @@ export default function SettingsPage() {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectGroup>
-                                    <SelectLabel>香港島</SelectLabel>
-                                    <SelectItem value="中西區">中西區</SelectItem>
-                                    <SelectItem value="灣仔區">灣仔區</SelectItem>
-                                    <SelectItem value="東區">東區</SelectItem>
-                                    <SelectItem value="南區">南區</SelectItem>
+                                    <SelectLabel>{t('district.group.hong_kong_island')}</SelectLabel>
+                                    <SelectItem value="central_western">{t('district.central_western')}</SelectItem>
+                                    <SelectItem value="wan_chai">{t('district.wan_chai')}</SelectItem>
+                                    <SelectItem value="eastern">{t('district.eastern')}</SelectItem>
+                                    <SelectItem value="southern">{t('district.southern')}</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>九龍</SelectLabel>
-                                    <SelectItem value="油尖旺區">油尖旺區</SelectItem>
-                                    <SelectItem value="深水埗區">深水埗區</SelectItem>
-                                    <SelectItem value="九龍城區">九龍城區</SelectItem>
-                                    <SelectItem value="黃大仙區">黃大仙區</SelectItem>
-                                    <SelectItem value="觀塘區">觀塘區</SelectItem>
+                                    <SelectLabel>{t('district.group.kowloon')}</SelectLabel>
+                                    <SelectItem value="yau_tsim_mong">{t('district.yau_tsim_mong')}</SelectItem>
+                                    <SelectItem value="sham_shui_po">{t('district.sham_shui_po')}</SelectItem>
+                                    <SelectItem value="kowloon_city">{t('district.kowloon_city')}</SelectItem>
+                                    <SelectItem value="wong_tai_sin">{t('district.wong_tai_sin')}</SelectItem>
+                                    <SelectItem value="kwun_tong">{t('district.kwun_tong')}</SelectItem>
                                 </SelectGroup>
                                 <SelectGroup>
-                                    <SelectLabel>新界</SelectLabel>
-                                    <SelectItem value="葵青區">葵青區</SelectItem>
-                                    <SelectItem value="荃灣區">荃灣區</SelectItem>
-                                    <SelectItem value="屯門區">屯門區</SelectItem>
-                                    <SelectItem value="元朗區">元朗區</SelectItem>
-                                    <SelectItem value="北區">北區</SelectItem>
-                                    <SelectItem value="大埔區">大埔區</SelectItem>
-                                    <SelectItem value="沙田區">沙田區</SelectItem>
-                                    <SelectItem value="西貢區">西貢區</SelectItem>
-                                    <SelectItem value="離島區">離島區</SelectItem>
+                                    <SelectLabel>{t('district.group.new_territories')}</SelectLabel>
+                                    <SelectItem value="kwai_tsing">{t('district.kwai_tsing')}</SelectItem>
+                                    <SelectItem value="tsuen_wan">{t('district.tsuen_wan')}</SelectItem>
+                                    <SelectItem value="tuen_mun">{t('district.tuen_mun')}</SelectItem>
+                                    <SelectItem value="yuen_long">{t('district.yuen_long')}</SelectItem>
+                                    <SelectItem value="north">{t('district.north')}</SelectItem>
+                                    <SelectItem value="tai_po">{t('district.tai_po')}</SelectItem>
+                                    <SelectItem value="sha_tin">{t('district.sha_tin')}</SelectItem>
+                                    <SelectItem value="sai_kung">{t('district.sai_kung')}</SelectItem>
+                                    <SelectItem value="islands">{t('district.islands')}</SelectItem>
                                 </SelectGroup>
                             </SelectContent>
                         </Select>

@@ -23,6 +23,7 @@ import { Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuth } from '@/hooks/use-auth';
 
 // Define the type for a banner
 type Banner = {
@@ -57,6 +58,7 @@ function HomePageContent() {
   const searchParams = useSearchParams();
   const searchTerm = searchParams.get('q');
   const { t } = useTranslation();
+  const { user } = useAuth();
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -249,7 +251,7 @@ function HomePageContent() {
 
   return (
     <>
-      <Header showSearch showUserAvatar />
+      <Header showSearch showUserAvatar={!!user} />
       {searchTerm ? renderSearchResults() : renderDefaultView()}
     </>
   );

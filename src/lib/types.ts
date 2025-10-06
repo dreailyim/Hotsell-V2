@@ -18,7 +18,7 @@ export type Product = {
   favoritedBy: string[];
   category: string;
   description: string;
-  condition: '全新' | '幾乎全新' | '較少使用' | '狀況良好' | '狀況尚可';
+  condition: 'new' | 'like_new' | 'lightly_used' | 'good' | 'fair';
   shippingMethods: ShippingMethod[];
   pickupLocation?: string;
   status?: 'reserved' | 'sold';

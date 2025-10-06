@@ -3,25 +3,38 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Flame, PlusCircle, MessageCircle, User } from 'lucide-react';
+import { Home, Flame, PlusCircle, MessageCircle, User, LogIn } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { useUnreadCount } from '@/hooks/use-unread-count';
 import { useTranslation } from '@/hooks/use-translation';
+import type { FullUser } from '@/lib/types';
 
-export function BottomNav() {
+
+export function BottomNav({ user }: { user: FullUser | null }) {
   const pathname = usePathname();
   const scrollDirection = useScrollDirection();
   const totalUnreadCount = useUnreadCount();
   const { t, language } = useTranslation();
 
-  const navItems = useMemo(() => [
-    { href: '/', icon: Home, label: t('nav.home') },
-    { href: '/hot', icon: Flame, label: t('nav.hot') },
-    { href: '/list', icon: PlusCircle, label: t('nav.list') },
-    { href: '/messages', icon: MessageCircle, label: t('nav.messages') },
-    { href: '/profile', icon: User, label: t('nav.me') },
-  ], [t]);
+  const navItems = useMemo(() => {
+    if (user) {
+        return [
+            { href: '/', icon: Home, label: t('nav.home') },
+            { href: '/hot', icon: Flame, label: t('nav.hot') },
+            { href: '/list', icon: PlusCircle, label: t('nav.list') },
+            { href: '/messages', icon: MessageCircle, label: t('nav.messages') },
+            { href: '/profile', icon: User, label: t('nav.me') },
+        ];
+    }
+    // Visitor mode
+    return [
+        { href: '/', icon: Home, label: t('nav.home') },
+        { href: '/hot', icon: Flame, label: t('nav.hot') },
+        { href: '/login', icon: LogIn, label: t('login.title') },
+    ];
+  }, [user, t]);
+
 
   const [indicatorStyle, setIndicatorStyle] = useState({
     left: '0px',
@@ -47,6 +60,8 @@ export function BottomNav() {
         width: `${offsetWidth}px`,
         opacity: 1,
       });
+    } else {
+      setIndicatorStyle(prevStyle => ({ ...prevStyle, opacity: 0 }));
     }
   }, [pathname, navItems]);
 

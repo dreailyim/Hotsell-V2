@@ -552,16 +552,31 @@ export default function ChatPage() {
       }
       
        const renderReviewStatusText = () => {
+        let text = '';
         if (hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-green-600 mt-1">{t('chat.review_status.both_reviewed')}</p>;
+          text = t('chat.review_status.both_reviewed');
+        } else if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
+          text = t('chat.review_status.waiting_for_other');
+        } else if (!hasCurrentUserReviewed && hasOtherUserReviewed) {
+          text = t('chat.review_status.other_has_reviewed');
+        } else {
+          text = t('chat.review_status.prompt_to_review');
         }
-        if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
-          return <p className="text-xs text-muted-foreground mt-1 animate-pulse">{t('chat.review_status.waiting_for_other')}</p>;
-        }
-        if (!hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-blue-500 mt-1 animate-pulse">{t('chat.review_status.other_has_reviewed')}</p>;
-        }
-        return <p className="text-xs text-muted-foreground mt-1">{t('chat.review_status.prompt_to_review')}</p>;
+         const textClass = cn('text-xs mt-1', {
+            'text-green-600': hasCurrentUserReviewed && hasOtherUserReviewed,
+            'text-muted-foreground animate-pulse': hasCurrentUserReviewed && !hasOtherUserReviewed,
+            'text-blue-500 animate-pulse': !hasCurrentUserReviewed && hasOtherUserReviewed,
+            'text-muted-foreground': !hasCurrentUserReviewed && !hasOtherUserReviewed,
+        });
+
+        return (
+          <div className="relative flex overflow-x-hidden">
+            <p className={cn(textClass, "animate-marquee whitespace-nowrap")}>
+                <span className="mx-4">{text}</span>
+                <span className="mx-4">{text}</span>
+            </p>
+          </div>
+        )
       };
 
 

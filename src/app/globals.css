@@ -67,6 +67,10 @@
   .animate-zoom-in {
     animation: zoom-in-fade-in 0.4s ease-out;
   }
+  
+  .animate-marquee {
+    animation: marquee 5s linear infinite;
+  }
 }
 
 @layer components {

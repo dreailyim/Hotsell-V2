@@ -10,6 +10,7 @@ import { ProductCard } from '@/components/product-card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Flame } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { useAuth } from '@/hooks/use-auth';
 
 function ProductGridSkeleton() {
     return (
@@ -33,6 +34,7 @@ export default function HotPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation();
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchHotProducts = async () => {
@@ -67,7 +69,7 @@ export default function HotPage() {
 
   return (
     <>
-      <Header title={t('header.title.hot')} showUserAvatar />
+      <Header title={t('header.title.hot')} showUserAvatar={!!user} />
       <main className="container mx-auto px-4 md:px-6 py-6">
         {loading ? (
           <ProductGridSkeleton />

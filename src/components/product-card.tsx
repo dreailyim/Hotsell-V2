@@ -20,14 +20,32 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot, increment, Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 type ProductCardProps = {
   product: Product;
 };
 
+// This map helps to handle both old (Chinese) and new (English) condition values from the database.
+const conditionMap: { [key: string]: Product['condition'] } = {
+  '全新': 'new',
+  '幾乎全新': 'like_new',
+  '較少使用': 'lightly_used',
+  '狀況良好': 'good',
+  '狀況尚可': 'fair',
+  // English values map to themselves
+  'new': 'new',
+  'like_new': 'like_new',
+  'lightly_used': 'lightly_used',
+  'good': 'good',
+  'fair': 'fair',
+};
+
+
 export function ProductCard({ product: initialProduct }: ProductCardProps) {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -173,6 +191,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
   const safeSellerName = seller?.displayName || liveProduct.sellerName || '匿名賣家';
   const sellerAvatar = seller?.photoURL || liveProduct.sellerAvatar;
   const isDiscounted = typeof originalPrice === 'number' && typeof price === 'number' && price < originalPrice;
+  const conditionKey = (condition && conditionMap[condition as keyof typeof conditionMap]) || condition;
 
 
   return (
@@ -243,7 +262,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
                       <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
                           ${(price || 0).toLocaleString()}
                       </p>
-                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
+                       {conditionKey && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{t(`condition.${conditionKey}` as any)}</div>}
                   </div>
                   {isDiscounted && originalPrice && (
                       <p className="text-[10px] text-muted-foreground line-through">

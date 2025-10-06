@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Settings, Search as SearchIcon, X, Flame } from 'lucide-react';
+import { ArrowLeft, Settings, Search as SearchIcon, X, Flame, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
@@ -96,6 +96,40 @@ export function Header({
       router.back();
     }
   };
+  
+  const renderRightContent = () => {
+    if (showSettingsButton && user) {
+       return (
+        <Link href="/profile/settings">
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+            <Settings className="h-5 w-5" />
+          </Button>
+        </Link>
+      )
+    }
+    if (showUserAvatar && user) {
+      return (
+        <Link href="/profile">
+          <Avatar className="h-7 w-7 cursor-pointer">
+            <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
+            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+          </Avatar>
+        </Link>
+      )
+    }
+    // For visitors
+    if (!user && (title === '主頁' || title === 'Home' || title === '熱賣商品' || title === 'Hot Items')) {
+       return (
+         <Link href="/login">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
+                <LogIn className="h-5 w-5" />
+            </Button>
+         </Link>
+       )
+    }
+
+    return null;
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full bg-background/30 backdrop-blur-sm">
@@ -125,21 +159,7 @@ export function Header({
 
         {/* Right Section */}
         <div className="flex items-center justify-end" style={{ width: '60px' }}>
-          {showSettingsButton && (
-            <Link href="/profile/settings">
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </Link>
-          )}
-          {showUserAvatar && user && (
-             <Link href="/profile/settings">
-              <Avatar className="h-7 w-7 cursor-pointer">
-                <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
-                <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
-            </Link>
-          )}
+          {renderRightContent()}
         </div>
       </div>
     </header>
