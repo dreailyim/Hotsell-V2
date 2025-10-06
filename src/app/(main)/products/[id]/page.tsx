@@ -702,7 +702,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     <div className="min-h-screen">
         <Header showBackButton={true} showUserAvatar />
         <div className="relative">
-          <Dialog>
+          <Dialog open={!!fullscreenImage} onOpenChange={(open) => !open && setFullscreenImage(null)}>
             <Carousel
               className="w-full"
               opts={{
@@ -935,5 +935,3 @@ function ProductPageSkeleton({ scrollDirection }: { scrollDirection: 'up' | 'dow
     </div>
   );
 }
-
-    
