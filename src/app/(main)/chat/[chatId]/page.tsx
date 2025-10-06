@@ -553,15 +553,15 @@ export default function ChatPage() {
       
        const renderReviewStatusText = () => {
         if (hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-green-600 mt-1">{t('chat.review_status.both_reviewed')}</p>;
+          return <p className="text-xs text-green-600 mt-1 whitespace-nowrap overflow-x-auto">{t('chat.review_status.both_reviewed')}</p>;
         }
         if (hasCurrentUserReviewed && !hasOtherUserReviewed) {
-          return <p className="text-xs text-muted-foreground mt-1 animate-pulse">{t('chat.review_status.waiting_for_other')}</p>;
+          return <p className="text-xs text-muted-foreground mt-1 animate-pulse whitespace-nowrap overflow-x-auto">{t('chat.review_status.waiting_for_other')}</p>;
         }
         if (!hasCurrentUserReviewed && hasOtherUserReviewed) {
-          return <p className="text-xs text-blue-500 mt-1 animate-pulse">{t('chat.review_status.other_has_reviewed')}</p>;
+          return <p className="text-xs text-blue-500 mt-1 animate-pulse whitespace-nowrap overflow-x-auto">{t('chat.review_status.other_has_reviewed')}</p>;
         }
-        return <p className="text-xs text-muted-foreground mt-1">{t('chat.review_status.prompt_to_review')}</p>;
+        return <p className="text-xs text-muted-foreground mt-1 whitespace-nowrap overflow-x-auto">{t('chat.review_status.prompt_to_review')}</p>;
       };
 
 
