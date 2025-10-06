@@ -1,12 +1,12 @@
 'use client';
 
 import { AuthProvider } from '@/hooks/use-auth';
-import { ThemeProvider } from 'next-themes';
 import { LanguageProvider } from '@/providers/language-provider';
+import { ThemeProvider } from 'next-themes';
 import { ReactNode } from 'react';
 
 export function Providers({
-  children
+  children,
 }: {
   children: ReactNode;
 }) {

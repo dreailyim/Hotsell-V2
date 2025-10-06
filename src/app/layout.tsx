@@ -1,15 +1,20 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import { ReactNode } from 'react';
-import { Providers } from "./providers";
-import { Toaster } from "@/components/ui/toaster";
-import "./globals.css";
-import Script from "next/script";
-import { FcmRegistrar } from "@/components/fcm-registrar";
-import { ThemeProvider } from 'next-themes';
+import { Providers } from './providers';
+import { Toaster } from '@/components/ui/toaster';
+import './globals.css';
+import Script from 'next/script';
+import { FcmRegistrar } from '@/components/fcm-registrar';
+import { cn } from '@/lib/utils';
+import { I18nProviderClient } from '@/i18n/client';
 
-export const metadata = {
-  title: "HotSell",
-  description: "A secondhand marketplace app.",
-  manifest: "/manifest.webmanifest",
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+
+export const metadata: Metadata = {
+  title: 'HotSell',
+  description: 'A secondhand marketplace app.',
+  manifest: '/manifest.webmanifest',
 };
 
 export default function RootLayout({
@@ -26,7 +31,7 @@ export default function RootLayout({
           crossOrigin="anonymous"
         ></script>
       </head>
-      <body className="font-body antialiased" suppressHydrationWarning>
+      <body className={cn(inter.variable, "font-body antialiased")} suppressHydrationWarning>
           <Providers>
             <FcmRegistrar />
             {children}

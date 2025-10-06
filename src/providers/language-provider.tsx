@@ -17,28 +17,39 @@ export interface LanguageContextType {
 
 export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const getInitialLanguage = (): Language => {
+const getStoredLanguage = (): Language | null => {
   if (typeof window !== 'undefined') {
-    const storedLang = localStorage.getItem('app-language') as Language;
-    if (storedLang && ['en', 'zh'].includes(storedLang)) {
-      return storedLang;
-    }
+    return localStorage.getItem('app-language') as Language;
+  }
+  return null;
+};
+
+const getBrowserLanguage = (): Language => {
+   if (typeof window !== 'undefined') {
     const browserLang = navigator.language.toLowerCase();
     return browserLang.includes('zh') ? 'zh' : 'en';
   }
-  return 'zh'; // Default for server-side
-};
+  return 'zh';
+}
+
 
 export const LanguageProvider = ({ children }: { children: ReactNode }) => {
-  const [language, setLanguage] = useState<Language>(getInitialLanguage);
+  // Always default to 'zh' on initial render to match the server.
+  const [language, setLanguage] = useState<Language>('zh');
 
+  // After the component has mounted, check for the actual client-side language.
   useEffect(() => {
-    const storedLang = localStorage.getItem('app-language') as Language;
-    if (storedLang) {
+    const storedLang = getStoredLanguage();
+    if (storedLang && ['en', 'zh'].includes(storedLang)) {
       setLanguage(storedLang);
+      document.documentElement.lang = storedLang;
+    } else {
+      const browserLang = getBrowserLanguage();
+      setLanguage(browserLang);
+      document.documentElement.lang = browserLang;
     }
-    // Empty dependency array ensures this runs only once on mount
-  }, []);
+  }, []); // Empty dependency array ensures this runs only once on mount.
+
 
   const handleSetLanguage = (newLanguage: Language) => {
     setLanguage(newLanguage);
@@ -47,12 +58,6 @@ export const LanguageProvider = ({ children }: { children: ReactNode }) => {
       document.documentElement.lang = newLanguage;
     }
   };
-
-  useEffect(() => {
-     if (typeof window !== 'undefined') {
-        document.documentElement.lang = language;
-     }
-  }, [language]);
 
   // The `t` function is now memoized and will only be a new function instance
   // when the `language` state changes. This is crucial for hooks that depend on `t`.

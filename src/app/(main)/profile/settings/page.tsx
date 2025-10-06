@@ -34,37 +34,26 @@ import Link from 'next/link';
 import React from 'react';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
 
-function LanguageSwitcher() {
+function LanguageSelect() {
   const { language, setLanguage, t } = useTranslation();
 
   return (
-      <Card>
-          <CardHeader>
-              <CardTitle className="text-lg flex items-center gap-2"><Languages className="h-5 w-5" /> {t('settings.language.title')}</CardTitle>
-              <CardDescription className="text-sm">{t('settings.language.description')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-              <div className="flex gap-2 rounded-lg bg-muted p-1">
-                  <Button
-                      onClick={() => setLanguage('zh')}
-                      className={cn("flex-1 justify-center", language === 'zh' ? 'bg-background text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}
-                      variant="ghost"
-                  >
-                      繁體中文
-                  </Button>
-                  <Button
-                      onClick={() => setLanguage('en')}
-                      className={cn("flex-1 justify-center", language === 'en' ? 'bg-background text-foreground shadow-sm' : 'bg-transparent text-muted-foreground')}
-                      variant="ghost"
-                  >
-                      English
-                  </Button>
-              </div>
-          </CardContent>
-      </Card>
-  )
+    <div className="space-y-1.5">
+       <Select onValueChange={(value: 'en' | 'zh') => setLanguage(value)} value={language}>
+          <SelectTrigger id="language-select">
+              <SelectValue placeholder={t('settings.language.title')} />
+          </SelectTrigger>
+          <SelectContent>
+              <SelectItem value="zh">繁體中文</SelectItem>
+              <SelectItem value="en">English</SelectItem>
+          </SelectContent>
+      </Select>
+    </div>
+  );
 }
+
 
 export default function SettingsPage() {
   const { user, signOut, loading: authLoading, updateAuthProfile, deleteAccount } = useAuth();
@@ -233,8 +222,6 @@ export default function SettingsPage() {
       <Header title={t('header.title.settings')} showBackButton />
       <div className="container mx-auto max-w-2xl px-4 md:px-6 py-8 space-y-6">
         
-        <LanguageSwitcher />
-
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">{t('settings.profile.title')}</CardTitle>
@@ -387,6 +374,16 @@ export default function SettingsPage() {
 
         <Card>
             <CardHeader>
+                <CardTitle className="text-lg">{t('settings.language.title')}</CardTitle>
+                <CardDescription className="text-sm">{t('settings.language.description')}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <LanguageSelect />
+            </CardContent>
+        </Card>
+
+        <Card>
+            <CardHeader>
                 <CardTitle className="text-lg">{t('settings.about.title')}</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
@@ -405,7 +402,7 @@ export default function SettingsPage() {
                             <AlertDialogHeader>
                                 <AlertDialogTitle>{t('settings.about.disclaimer')}</AlertDialogTitle>
                                 <AlertDialogDescription className="max-h-[60vh] overflow-y-auto">
-                                    {t('settings.about.disclaimer.content').split('\n\n').map((paragraph, index) => (
+                                    {t('settings.about.disclaimer.content').split('\\n\\n').map((paragraph, index) => (
                                         <React.Fragment key={index}>
                                             {paragraph}
                                             <br /><br />
