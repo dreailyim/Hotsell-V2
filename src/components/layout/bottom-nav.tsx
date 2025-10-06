@@ -61,7 +61,7 @@ export function BottomNav({ user }: { user: FullUser | null }) {
         opacity: 1,
       });
     } else {
-      setIndicatorStyle({ ...indicatorStyle, opacity: 0 });
+      setIndicatorStyle(prevStyle => ({ ...prevStyle, opacity: 0 }));
     }
   }, [pathname, navItems]);
 
