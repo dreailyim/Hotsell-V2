@@ -44,6 +44,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
+        // Require email verification to be considered logged in
+        if (!firebaseUser.emailVerified) {
+          setUser(null);
+          setLoading(false);
+          // Optional: You might want to sign out the user here if they somehow
+          // bypass the registration flow logic.
+          // firebaseSignOut(auth);
+          return;
+        }
+
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         // Set up a real-time listener for the user document
         const firestoreUnsubscribe = onSnapshot(userDocRef, (docSnap) => {
@@ -72,7 +82,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             };
             setUser(fullUser);
           } else {
-            // If user doc doesn't exist, create it
+            // This case should ideally not happen for a verified user,
+            // but as a fallback, create the document.
             const newUser: FullUser = {
               uid: firebaseUser.uid,
               email: firebaseUser.email,
@@ -140,10 +151,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         averageRating: 0,
         reviewCount: 0,
     });
+    
+    // **CRITICAL FIX**: Sign out the user immediately after registration
+    await firebaseSignOut(auth);
   };
 
   const signIn = async (email: string, password: string) => {
-    await signInWithEmailAndPassword(auth, email, password);
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    if (!userCredential.user.emailVerified) {
+        // Sign the user out and throw an error to be caught in the UI
+        await firebaseSignOut(auth);
+        const error = new Error("Please verify your email before logging in.");
+        error.name = 'auth/email-not-verified';
+        throw error;
+    }
   };
   
   const signInWithGoogle = async () => {
@@ -209,7 +230,3 @@ export const useAuth = () => {
   }
   return context;
 };
-
-    
-
-    

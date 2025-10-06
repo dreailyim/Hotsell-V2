@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -70,8 +71,8 @@ export default function RegisterPage() {
 
     try {
       await signUp(email, password, displayName);
-      toast({ title: t('register.success_title'), description: t('register.success_desc') });
-      router.push('/login');
+      // Redirect to login page with a query param to show a success message
+      router.push('/login?verify_email=true');
     } catch (error) {
       if (error instanceof FirebaseError) {
         toast({

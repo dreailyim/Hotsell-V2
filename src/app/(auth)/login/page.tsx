@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -25,13 +26,13 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
-import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Flame } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
 import { cn } from '@/lib/utils';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 
 export default function LoginPage() {
@@ -40,7 +41,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [resetEmail, setResetEmail] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { t } = useTranslation();
+  
+  const showVerificationMessage = searchParams.get('verify_email') === 'true';
 
   useEffect(() => {
     // If the user is already logged in, redirect to the home page.
@@ -50,19 +54,23 @@ export default function LoginPage() {
   }, [user, authLoading, router]);
 
 
-  const getFriendlyErrorMessage = (error: FirebaseError): string => {
-      switch (error.code) {
+  const getFriendlyErrorMessage = (error: any): string => {
+      switch (error.name) {
           case 'auth/user-not-found':
+          case 'FirebaseError: Firebase: Error (auth/user-not-found).':
               return t('login.error.user_not_found');
           case 'auth/wrong-password':
           case 'auth/invalid-credential':
+          case 'FirebaseError: Firebase: Error (auth/invalid-credential).':
               return t('login.error.wrong_password');
           case 'auth/email-already-in-use':
               return t('login.error.email_in_use');
           case 'auth/weak-password':
               return t('login.error.weak_password');
+          case 'auth/email-not-verified':
+                return t('login.error.email_not_verified');
           default:
-              return t('login.error.unknown').replace('{error_code}', error.code);
+              return t('login.error.unknown').replace('{error_code}', error.code || error.name);
       }
   };
 
@@ -80,20 +88,12 @@ export default function LoginPage() {
       await signIn(email, password);
       toast({ title: t('login.success_title'), description: t('login.success_desc') });
       // The useEffect hook will handle the redirect
-    } catch (error) {
-      if (error instanceof FirebaseError) {
+    } catch (error: any) {
         toast({
           title: t('login.fail_title'),
           description: getFriendlyErrorMessage(error),
           variant: 'destructive',
         });
-      } else {
-        toast({
-          title: t('login.unknown_error_title'),
-          description: String(error),
-          variant: 'destructive',
-        });
-      }
     } finally {
       setLoading(false);
     }
@@ -111,20 +111,12 @@ export default function LoginPage() {
             title: t('login.reset_password.success_title'),
             description: t('login.reset_password.success_desc')
         });
-    } catch (error) {
-        if (error instanceof FirebaseError) {
-            toast({
-                title: t('login.reset_password.fail_title'),
-                description: getFriendlyErrorMessage(error),
-                variant: 'destructive'
-            });
-        } else {
-             toast({
-              title: t('login.unknown_error_title'),
-              description: String(error),
-              variant: 'destructive',
-            });
-        }
+    } catch (error: any) {
+        toast({
+            title: t('login.reset_password.fail_title'),
+            description: getFriendlyErrorMessage(error),
+            variant: 'destructive'
+        });
     } finally {
         setLoading(false);
     }
@@ -148,6 +140,16 @@ export default function LoginPage() {
             <Flame className="h-12 w-12 text-primary animate-burn" />
             <h1 className="text-2xl font-bold tracking-tight text-primary">HotSell</h1>
         </div>
+
+        {showVerificationMessage && (
+            <Alert className="border-green-500 text-green-700 bg-green-50">
+                <AlertTitle className="font-bold">{t('register.success_title')}</AlertTitle>
+                <AlertDescription>
+                    {t('register.success_desc_verification_required')}
+                </AlertDescription>
+            </Alert>
+        )}
+
         <Card>
           <CardHeader>
             <CardTitle>{t('login.title')}</CardTitle>
