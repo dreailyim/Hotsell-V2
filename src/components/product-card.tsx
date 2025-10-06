@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { doc, updateDoc, arrayUnion, arrayRemove, onSnapshot, increment, Timestamp } from 'firebase/firestore';
 import { db, auth } from '@/lib/firebase/client-app';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '@/hooks/use-translation';
 
 
 type ProductCardProps = {
@@ -28,6 +29,7 @@ type ProductCardProps = {
 
 export function ProductCard({ product: initialProduct }: ProductCardProps) {
   const { user, loading: authLoading } = useAuth();
+  const { t } = useTranslation();
   const { toast } = useToast();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -243,7 +245,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
                       <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
                           ${(price || 0).toLocaleString()}
                       </p>
-                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{condition}</div>}
+                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{t(`condition.${condition}`)}</div>}
                   </div>
                   {isDiscounted && originalPrice && (
                       <p className="text-[10px] text-muted-foreground line-through">

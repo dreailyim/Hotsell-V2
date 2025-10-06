@@ -120,7 +120,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
       productName: product.name,
       productCategory: product.category,
       price: product.price,
-      condition: product.condition as any, // Cast to any to allow strings from db
+      condition: product.condition,
       shippingMethods: product.shippingMethods || [],
       pickupLocation: product.pickupLocation || '',
       productDescription: product.description,
