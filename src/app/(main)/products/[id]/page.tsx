@@ -29,7 +29,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
   Dialog,
@@ -790,15 +789,20 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                         className="object-contain"
                       />
                    </div>
-                   <Button variant="ghost" size="icon" className="absolute top-4 right-4 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white" onClick={() => setFullscreenImage(null)}>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="absolute top-4 right-4 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" 
+                      onClick={() => setFullscreenImage(null)}
+                    >
                         <X className="h-6 w-6"/>
                     </Button>
                     {productImages.length > 1 && (
                       <>
-                        <Button variant="ghost" size="icon" className="absolute left-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white" onClick={() => handleFullscreenNav('prev')}>
+                        <Button variant="ghost" size="icon" className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('prev')}>
                             <ChevronLeft className="h-6 w-6" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="absolute right-4 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white" onClick={() => handleFullscreenNav('next')}>
+                        <Button variant="ghost" size="icon" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('next')}>
                             <ChevronRight className="h-6 w-6" />
                         </Button>
                       </>
