@@ -109,7 +109,7 @@ export function Header({
     }
     if (showUserAvatar && user) {
       return (
-        <Link href="/profile">
+        <Link href="/profile/settings">
           <Avatar className="h-7 w-7 cursor-pointer">
             <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
             <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
