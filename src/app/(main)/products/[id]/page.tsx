@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -33,6 +34,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
 import {
@@ -777,6 +779,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
               </div>
             </Carousel>
              <DialogContent className="bg-black/80 border-none w-screen h-screen max-w-full max-h-screen p-0 flex items-center justify-center">
+              <DialogTitle className="sr-only">{product.name} - Image</DialogTitle>
               {fullscreenImage && (
                 <>
                    <div className="relative w-full h-full">
