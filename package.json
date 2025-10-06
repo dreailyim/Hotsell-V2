@@ -11,6 +11,7 @@
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
     "check": "npm run typecheck && npm run lint",
+    "clean": "rm -rf .next",
     "deploy:firestore": "firebase deploy --only firestore",
     "deploy:functions": "firebase deploy --only functions"
   },
