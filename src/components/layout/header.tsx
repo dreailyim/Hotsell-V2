@@ -109,7 +109,7 @@ export function Header({
     }
     if (showUserAvatar && user) {
       return (
-        <Link href="/profile">
+        <Link href="/profile/settings">
           <Avatar className="h-7 w-7 cursor-pointer">
             <AvatarImage src={user.photoURL || undefined} alt={user.displayName || '用戶頭像'} />
             <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
@@ -118,7 +118,7 @@ export function Header({
       )
     }
     // For visitors
-    if (!user && (title === '主頁' || title === 'Home' || title === '熱賣商品' || title === 'Hot Items')) {
+    if (!user && showUserAvatar) {
        return (
          <Link href="/login">
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full">

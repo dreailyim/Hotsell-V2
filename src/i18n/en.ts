@@ -43,6 +43,7 @@ export const en = {
   'login.error.email_in_use': 'This email address is already registered.',
   'login.error.weak_password': 'Password is too weak, please set a password of at least 6 characters.',
   'login.error.unknown': 'Unknown error occurred: {error_code}',
+  'login.error.email_not_verified': 'Please verify your email before logging in. A new verification email has been sent.',
   'login.reset_password.title': 'Reset Your Password',
   'login.reset_password.description': 'Please enter your account email address, and we will send you a password reset link.',
   'login.reset_password.email_label': 'Email',
@@ -63,7 +64,7 @@ export const en = {
   'register.login_now': 'Login now',
   'register.fail_title': 'Registration Failed',
   'register.success_title': 'Registration Successful!',
-  'register.success_desc': 'A verification email has been sent, please check your inbox.',
+  'register.success_desc_verification_required': 'A verification email has been sent to your inbox. Please verify your email before logging in.',
   'register.error.password_mismatch': 'The two passwords do not match.',
   'register.error.email_in_use': 'This email address is already registered.',
   'register.error.weak_password': 'Password is too weak, please set a password of at least 6 characters.',
@@ -328,6 +329,7 @@ export const en = {
   'district.sha_tin': 'Sha Tin',
   'district.sai_kung': 'Sai Kung',
   'district.islands': 'Islands',
+  'district.not_set': 'Not Set',
 
   // Categories
   'category.women_fashion': 'Women\'s Fashion',

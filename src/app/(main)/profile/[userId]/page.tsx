@@ -700,7 +700,7 @@ export default function UserProfilePage() {
                           <div className="space-y-1">
                              <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">{t('profile.about.city')}</p>
-                             <p className="font-semibold text-sm">{profileUser.city || '未設定'}</p>
+                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city}` as any) : t('district.not_set')}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />

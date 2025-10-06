@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
@@ -31,6 +32,12 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
+import {
   Heart,
   Share2 as Share,
   MessageCircle,
@@ -51,6 +58,9 @@ import {
   BadgeCheck,
   ShieldCheck,
   Flame,
+  ChevronLeft,
+  ChevronRight,
+  X,
 } from 'lucide-react';
 import {
   Carousel,
@@ -139,6 +149,8 @@ export default function ProductPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [isFavorited, setIsFavorited] = useState(false);
+  const [fullscreenImage, setFullscreenImage] = useState<{ src: string, index: number } | null>(null);
+
 
   // Effect to set initial favorited state from product data when it loads or user changes
   useEffect(() => {
@@ -671,83 +683,135 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     </div>
   );
 
+  const handleFullscreenNav = (direction: 'next' | 'prev') => {
+    if (!fullscreenImage) return;
+    const { index } = fullscreenImage;
+    const totalImages = productImages.length;
+    let nextIndex;
+
+    if (direction === 'next') {
+      nextIndex = (index + 1) % totalImages;
+    } else {
+      nextIndex = (index - 1 + totalImages) % totalImages;
+    }
+    
+    setFullscreenImage({ src: productImages[nextIndex], index: nextIndex });
+  };
+
   return (
     <div className="min-h-screen">
         <Header showBackButton={true} showUserAvatar />
         <div className="relative">
-          <Carousel
-            className="w-full"
-            opts={{
-              loop: productImages.length > 1,
-            }}
-          >
-            <CarouselContent>
-              {productImages.map((image, index) => (
-                <CarouselItem key={index}>
-                  <div className="relative aspect-square w-full">
-                    <Image
-                      src={image || 'https://picsum.photos/600/400'}
-                      alt={`${product.name || '商品圖片'} ${index + 1}`}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {productImages.length > 1 && (
-              <>
-                <CarouselPrevious className="absolute left-4" />
-                <CarouselNext className="absolute right-4" />
-              </>
-            )}
-             <div className="absolute top-2 left-2 flex gap-2">
-                {isDiscounted && (
-                  <Badge className={cn('text-xs px-2 py-0.5 font-semibold', 'bg-destructive text-destructive-foreground')}>
-                      {t('product_page.special_price')}
-                  </Badge>
-                )}
-                {product.status && (
-                  <Badge
-                    className={cn(
-                      'text-xs px-2 py-0.5 font-semibold',
-                      product.status === 'sold' && 'bg-destructive text-destructive-foreground',
-                      product.status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground'
-                    )}
+          <Dialog open={!!fullscreenImage} onOpenChange={(open) => !open && setFullscreenImage(null)}>
+            <Carousel
+              className="w-full"
+              opts={{
+                loop: productImages.length > 1,
+              }}
+            >
+              <CarouselContent>
+                {productImages.map((image, index) => (
+                  <CarouselItem key={index}>
+                     <DialogTrigger asChild>
+                      <div className="relative aspect-square w-full cursor-zoom-in" onClick={() => setFullscreenImage({ src: image, index })}>
+                        <Image
+                          src={image || 'https://picsum.photos/600/400'}
+                          alt={`${product.name || '商品圖片'} ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </DialogTrigger>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              {productImages.length > 1 && (
+                <>
+                  <CarouselPrevious className="absolute left-4" />
+                  <CarouselNext className="absolute right-4" />
+                </>
+              )}
+               <div className="absolute top-2 left-2 flex gap-2">
+                  {isDiscounted && (
+                    <Badge className={cn('text-xs px-2 py-0.5 font-semibold', 'bg-destructive text-destructive-foreground')}>
+                        {t('product_page.special_price')}
+                    </Badge>
+                  )}
+                  {product.status && (
+                    <Badge
+                      className={cn(
+                        'text-xs px-2 py-0.5 font-semibold',
+                        product.status === 'sold' && 'bg-destructive text-destructive-foreground',
+                        product.status === 'reserved' && 'bg-gradient-to-br from-blue-500 to-cyan-400 text-primary-foreground'
+                      )}
+                    >
+                      {product.status === 'sold' ? t('product_page.sold') : t('product_page.reserved')}
+                    </Badge>
+                  )}
+              </div>
+              <div className="absolute top-2 right-2 flex items-center gap-2">
+                  <button
+                      onClick={handleShare}
+                      className={cn(
+                          "flex items-center justify-center rounded-full bg-black/40 text-white transition-colors h-7 w-7",
+                          "hover:bg-black/60",
+                          "active:scale-95"
+                      )}
+                      aria-label={t('product_page.share')}
                   >
-                    {product.status === 'sold' ? t('product_page.sold') : t('product_page.reserved')}
-                  </Badge>
+                      <Share className="h-4 w-4" />
+                  </button>
+                  <button
+                      onClick={handleFavoriteToggle}
+                      disabled={isPending || authLoading}
+                      className={cn(
+                          "flex items-center justify-center gap-1 rounded-full bg-black/40 text-white text-xs font-bold transition-colors h-7 px-2",
+                          "hover:bg-black/60",
+                          isFavorited && "text-red-500",
+                          (isPending || authLoading) && "animate-pulse",
+                          "active:scale-95"
+                      )}
+                      aria-label={isFavorited ? t('product_page.unfavorite') : t('product_page.favorite')}
+                  >
+                      <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
+                      <span>{product.favorites || 0}</span>
+                  </button>
+              </div>
+            </Carousel>
+             <DialogContent className="bg-black/80 border-none w-screen h-screen max-w-full max-h-screen p-0 flex items-center justify-center" onOpenAutoFocus={(e) => e.preventDefault()}>
+                <DialogTitle className="sr-only">{product.name} - Image</DialogTitle>
+                {fullscreenImage && (
+                  <>
+                    <div className="relative w-full h-full">
+                        <Image
+                          src={fullscreenImage.src}
+                          alt={`${product.name} - Fullscreen ${fullscreenImage.index + 1}`}
+                          fill
+                          className="object-contain"
+                        />
+                    </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="absolute top-4 right-4 h-12 w-12 rounded-full text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" 
+                        onClick={() => setFullscreenImage(null)}
+                      >
+                          <X className="h-6 w-6"/>
+                      </Button>
+                      {productImages.length > 1 && (
+                        <>
+                          <Button variant="ghost" size="icon" className="absolute left-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('prev')}>
+                              <ChevronLeft className="h-6 w-6" />
+                          </Button>
+                          <Button variant="ghost" size="icon" className="absolute right-4 top-1/2 -translate-y-1/2 h-12 w-12 rounded-full bg-black/50 text-white hover:bg-black/70 hover:text-white glass-morphism border-white/20 hover:border-white/40" onClick={() => handleFullscreenNav('next')}>
+                              <ChevronRight className="h-6 w-6" />
+                          </Button>
+                        </>
+                      )}
+                  </>
                 )}
-            </div>
-            <div className="absolute top-2 right-2 flex items-center gap-2">
-                <button
-                    onClick={handleShare}
-                    className={cn(
-                        "flex items-center justify-center rounded-full bg-black/40 text-white transition-colors h-7 w-7",
-                        "hover:bg-black/60",
-                        "active:scale-95"
-                    )}
-                    aria-label={t('product_page.share')}
-                >
-                    <Share className="h-4 w-4" />
-                </button>
-                <button
-                    onClick={handleFavoriteToggle}
-                    disabled={isPending || authLoading}
-                    className={cn(
-                        "flex items-center justify-center gap-1 rounded-full bg-black/40 text-white text-xs font-bold transition-colors h-7 px-2",
-                        "hover:bg-black/60",
-                        isFavorited && "text-red-500",
-                        (isPending || authLoading) && "animate-pulse",
-                        "active:scale-95"
-                    )}
-                    aria-label={isFavorited ? t('product_page.unfavorite') : t('product_page.favorite')}
-                >
-                    <Heart className={cn("h-4 w-4", isFavorited && "fill-current")} />
-                    <span>{product.favorites || 0}</span>
-                </button>
-            </div>
-          </Carousel>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="container mx-auto px-4 md:px-6 py-4 pb-48">
@@ -773,7 +837,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
                       <Package className="h-4 w-4 text-muted-foreground" />
                       <div>
                           <p className="text-muted-foreground text-xs">{t('product_page.condition')}</p>
-                          <p className="font-medium">{product.condition}</p>
+                          <p className="font-medium">{t(`condition.${product.condition}` as any)}</p>
                       </div>
                   </div>
                   <div className="flex items-center gap-2">

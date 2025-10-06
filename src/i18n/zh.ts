@@ -43,6 +43,7 @@ export const zh = {
   'login.error.email_in_use': '此電郵地址已被註冊。',
   'login.error.weak_password': '密碼強度不足，請設定至少6位數的密碼。',
   'login.error.unknown': '發生未知錯誤: {error_code}',
+  'login.error.email_not_verified': '請先驗證您的電郵地址才能登入。已重新寄送驗證郵件至您的信箱。',
   'login.reset_password.title': '重設您的密碼',
   'login.reset_password.description': '請輸入您的帳戶電郵地址，我們將會寄送密碼重設連結給您。',
   'login.reset_password.email_label': '電郵',
@@ -63,7 +64,7 @@ export const zh = {
   'register.login_now': '立即登入',
   'register.fail_title': '註冊失敗',
   'register.success_title': '註冊成功！',
-  'register.success_desc': '驗證郵件已寄出，請檢查您的收件箱。',
+  'register.success_desc_verification_required': '驗證郵件已寄出至您的收件箱，請先進行驗證再登入。',
   'register.error.password_mismatch': '兩次輸入的密碼不一致。',
   'register.error.email_in_use': '此電郵地址已被註冊。',
   'register.error.weak_password': '密碼強度不足，請設定至少6位數的密碼。',
@@ -327,6 +328,7 @@ export const zh = {
   'district.sha_tin': '沙田區',
   'district.sai_kung': '西貢區',
   'district.islands': '離島區',
+  'district.not_set': '未設定',
 
   // Categories
   'category.women_fashion': '女裝',
