@@ -329,6 +329,7 @@ export const en = {
   'district.sha_tin': 'Sha Tin',
   'district.sai_kung': 'Sai Kung',
   'district.islands': 'Islands',
+  'district.not_set': 'Not Set',
 
   // Categories
   'category.women_fashion': 'Women\'s Fashion',

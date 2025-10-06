@@ -328,6 +328,7 @@ export const zh = {
   'district.sha_tin': '沙田區',
   'district.sai_kung': '西貢區',
   'district.islands': '離島區',
+  'district.not_set': '未設定',
 
   // Categories
   'category.women_fashion': '女裝',
