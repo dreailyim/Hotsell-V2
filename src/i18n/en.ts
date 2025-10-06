@@ -328,4 +328,25 @@ export const en = {
   'district.sha_tin': 'Sha Tin',
   'district.sai_kung': 'Sai Kung',
   'district.islands': 'Islands',
+
+  // Categories
+  'category.women_fashion': 'Women\'s Fashion',
+  'category.men_fashion': 'Men\'s Fashion',
+  'category.beauty_health': 'Beauty & Health',
+  'category.handbags_accessories': 'Handbags & Accessories',
+  'category.electronics': 'Electronics',
+  'category.games': 'Games',
+  'category.home_living': 'Home & Living',
+  'category.pet_supplies': 'Pet Supplies',
+  'category.hobbies_collectibles': 'Hobbies & Collectibles',
+  'category.books_stationery': 'Books & Stationery',
+  'category.baby_kids': 'Baby & Kids',
+  'category.other': 'Other',
+
+  // Conditions
+  'condition.new': 'New',
+  'condition.like_new': 'Like New',
+  'condition.lightly_used': 'Lightly Used',
+  'condition.good': 'Good',
+  'condition.fair': 'Fair',
 };

@@ -327,4 +327,25 @@ export const zh = {
   'district.sha_tin': '沙田區',
   'district.sai_kung': '西貢區',
   'district.islands': '離島區',
+
+  // Categories
+  'category.women_fashion': '女裝',
+  'category.men_fashion': '男裝',
+  'category.beauty_health': '美妝保健',
+  'category.handbags_accessories': '手袋及配飾',
+  'category.electronics': '電子產品',
+  'category.games': '遊戲',
+  'category.home_living': '家居生活',
+  'category.pet_supplies': '寵物用品',
+  'category.hobbies_collectibles': '愛好及收藏品',
+  'category.books_stationery': '書籍及文具',
+  'category.baby_kids': '嬰兒及兒童用品',
+  'category.other': '其他',
+
+  // Conditions
+  'condition.new': '全新',
+  'condition.like_new': '幾乎全新',
+  'condition.lightly_used': '較少使用',
+  'condition.good': '狀況良好',
+  'condition.fair': '狀況尚可',
 };

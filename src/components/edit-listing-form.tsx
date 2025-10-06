@@ -46,7 +46,7 @@ const formSchema = z.object({
   productName: z.string().min(2, { message: '產品名稱至少需要2個字' }),
   productCategory: z.string({ required_error: '請選擇一個產品類別' }),
   price: z.coerce.number().min(0, { message: '價格不能為負數' }),
-  condition: z.enum(['全新', '幾乎全新', '較少使用', '狀況良好', '狀況尚可'], {
+  condition: z.enum(['new', 'like_new', 'lightly_used', 'good', 'fair'], {
     required_error: '請選擇新舊程度',
   }),
   shippingMethods: z.array(z.string()).refine(value => value.some(item => item), {
@@ -120,7 +120,7 @@ export function EditListingForm({ product }: EditListingFormProps) {
       productName: product.name,
       productCategory: product.category,
       price: product.price,
-      condition: product.condition,
+      condition: product.condition as any, // Cast to any to allow strings from db
       shippingMethods: product.shippingMethods || [],
       pickupLocation: product.pickupLocation || '',
       productDescription: product.description,
@@ -301,18 +301,18 @@ export function EditListingForm({ product }: EditListingFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                   <SelectItem value="女裝">女裝</SelectItem>
-                  <SelectItem value="男裝">男裝</SelectItem>
-                  <SelectItem value="美妝保健">美妝保健</SelectItem>
-                  <SelectItem value="手袋及配飾">手袋及配飾</SelectItem>
-                  <SelectItem value="電子產品">電子產品</SelectItem>
-                  <SelectItem value="遊戲">遊戲</SelectItem>
-                  <SelectItem value="家居生活">家居生活</SelectItem>
-                  <SelectItem value="寵物用品">寵物用品</SelectItem>
-                  <SelectItem value="愛好及收藏品">愛好及收藏品</SelectItem>
-                  <SelectItem value="書籍及文具">書籍及文具</SelectItem>
-                  <SelectItem value="嬰兒及兒童用品">嬰兒及兒童用品</SelectItem>
-                  <SelectItem value="其他">其他</SelectItem>
+                  <SelectItem value="women_fashion">{t('category.women_fashion')}</SelectItem>
+                  <SelectItem value="men_fashion">{t('category.men_fashion')}</SelectItem>
+                  <SelectItem value="beauty_health">{t('category.beauty_health')}</SelectItem>
+                  <SelectItem value="handbags_accessories">{t('category.handbags_accessories')}</SelectItem>
+                  <SelectItem value="electronics">{t('category.electronics')}</SelectItem>
+                  <SelectItem value="games">{t('category.games')}</SelectItem>
+                  <SelectItem value="home_living">{t('category.home_living')}</SelectItem>
+                  <SelectItem value="pet_supplies">{t('category.pet_supplies')}</SelectItem>
+                  <SelectItem value="hobbies_collectibles">{t('category.hobbies_collectibles')}</SelectItem>
+                  <SelectItem value="books_stationery">{t('category.books_stationery')}</SelectItem>
+                  <SelectItem value="baby_kids">{t('category.baby_kids')}</SelectItem>
+                  <SelectItem value="other">{t('category.other')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -347,11 +347,11 @@ export function EditListingForm({ product }: EditListingFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="全新">全新</SelectItem>
-                  <SelectItem value="幾乎全新">幾乎全新</SelectItem>
-                  <SelectItem value="較少使用">較少使用</SelectItem>
-                  <SelectItem value="狀況良好">狀況良好</SelectItem>
-                  <SelectItem value="狀況尚可">狀況尚可</SelectItem>
+                  <SelectItem value="new">{t('condition.new')}</SelectItem>
+                  <SelectItem value="like_new">{t('condition.like_new')}</SelectItem>
+                  <SelectItem value="lightly_used">{t('condition.lightly_used')}</SelectItem>
+                  <SelectItem value="good">{t('condition.good')}</SelectItem>
+                  <SelectItem value="fair">{t('condition.fair')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
