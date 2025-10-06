@@ -245,7 +245,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
                       <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
                           ${(price || 0).toLocaleString()}
                       </p>
-                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{t(`condition.${condition}`)}</div>}
+                       {condition && <div className="text-[10px] border border-muted-foreground/50 rounded-full px-1.5 py-0.5 text-muted-foreground flex-shrink-0">{t(`condition.${condition}` as any)}</div>}
                   </div>
                   {isDiscounted && originalPrice && (
                       <p className="text-[10px] text-muted-foreground line-through">
