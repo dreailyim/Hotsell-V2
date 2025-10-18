@@ -98,7 +98,7 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
                       {mtrLines.map(lineKey => (
                         <SelectGroup key={lineKey}>
                           <SelectLabel>{t(`mtr_lines.${lineKey}` as any)}</SelectLabel>
-                          {Object.keys(t(`mtr_stations.${lineKey}` as any, { returnObjects: true })).map(stationKey => (
+                           {Object.keys(t(`mtr_stations.${lineKey}` as any, { returnObjects: true })).map(stationKey => (
                             <SelectItem key={stationKey} value={t(`mtr_stations.${lineKey}.${stationKey}` as any)}>
                               {t(`mtr_stations.${lineKey}.${stationKey}` as any)}
                             </SelectItem>
