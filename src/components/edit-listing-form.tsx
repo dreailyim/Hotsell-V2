@@ -55,6 +55,7 @@ const formSchema = z.object({
     message: "您必須至少選擇一種交收方式。",
   }),
   pickupLocation: z.string().optional(),
+  productDescription: z.string().optional(),
 }).refine(data => {
     if (data.shippingMethods.includes('面交')) {
       return data.pickupLocation && data.pickupLocation.trim().length > 0;
@@ -89,7 +90,7 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
           <FormItem>
             <FormLabel>{t('listing_form.location.label')}</FormLabel>
              <div className="flex items-center gap-2">
-                <Select onValueChange={(value) => field.onChange(value)}>
+                <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value}>
                     <SelectTrigger className="w-full sm:w-[180px]">
                         <SelectValue placeholder={t('listing_form.location.mtr_placeholder')} />
                     </SelectTrigger>
