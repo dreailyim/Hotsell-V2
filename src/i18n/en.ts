@@ -265,7 +265,8 @@ export const en = {
   'listing_form.shipping.delivery_included': 'Courier (shipping included)',
   'listing_form.shipping.delivery_cod': 'Courier (cash on delivery)',
   'listing_form.location.label': 'Meet-up Location',
-  'listing_form.location.placeholder': 'e.g., Mong Kok MTR Station',
+  'listing_form.location.mtr_placeholder': 'Select MTR Station',
+  'listing_form.location.details_placeholder': 'e.g., Exit B',
   'listing_form.ai_button': 'AI Generate (Coming Soon)',
   'listing_form.description.label': 'Product Description',
   'listing_form.description.placeholder': 'e.g., Describe the condition, dimensions, year of purchase, etc.',
@@ -307,30 +308,6 @@ export const en = {
   'product_page.mark_as_sold': 'Sold',
   'product_page.chat': 'Chat',
 
-  // Districts
-  'district.group.hong_kong_island': 'Hong Kong Island',
-  'district.central_western': 'Central and Western',
-  'district.wan_chai': 'Wan Chai',
-  'district.eastern': 'Eastern',
-  'district.southern': 'Southern',
-  'district.group.kowloon': 'Kowloon',
-  'district.yau_tsim_mong': 'Yau Tsim Mong',
-  'district.sham_shui_po': 'Sham Shui Po',
-  'district.kowloon_city': 'Kowloon City',
-  'district.wong_tai_sin': 'Wong Tai Sin',
-  'district.kwun_tong': 'Kwun Tong',
-  'district.group.new_territories': 'New Territories',
-  'district.kwai_tsing': 'Kwai Tsing',
-  'district.tsuen_wan': 'Tsuen Wan',
-  'district.tuen_mun': 'Tuen Mun',
-  'district.yuen_long': 'Yuen Long',
-  'district.north': 'North',
-  'district.tai_po': 'Tai Po',
-  'district.sha_tin': 'Sha Tin',
-  'district.sai_kung': 'Sai Kung',
-  'district.islands': 'Islands',
-  'district.not_set': 'Not Set',
-
   // Categories
   'category.women_fashion': 'Women\'s Fashion',
   'category.men_fashion': 'Men\'s Fashion',
@@ -351,4 +328,70 @@ export const en = {
   'condition.lightly_used': 'Lightly Used',
   'condition.good': 'Good',
   'condition.fair': 'Fair',
+  
+  // MTR Lines and Stations
+  'mtr_lines': {
+    'tsuen_wan_line': 'Tsuen Wan Line',
+    'kwun_tong_line': 'Kwun Tong Line',
+    'island_line': 'Island Line',
+    'south_island_line': 'South Island Line',
+    'tung_chung_line': 'Tung Chung Line',
+    'tseung_kwan_o_line': 'Tseung Kwan O Line',
+    'east_rail_line': 'East Rail Line',
+    'trm_line': 'Tuen Ma Line',
+    'airport_express': 'Airport Express',
+    'disneyland_resort_line': 'Disneyland Resort Line'
+  },
+  'mtr_stations': {
+    'tsuen_wan_line': {
+      'central': 'Central', 'admiralty': 'Admiralty', 'tsim_sha_tsui': 'Tsim Sha Tsui', 'jordan': 'Jordan',
+      'yau_ma_tei': 'Yau Ma Tei', 'mong_kok': 'Mong Kok', 'prince_edward': 'Prince Edward', 'sham_shui_po': 'Sham Shui Po',
+      'cheung_sha_wan': 'Cheung Sha Wan', 'lai_chi_kok': 'Lai Chi Kok', 'mei_foo': 'Mei Foo', 'lai_king': 'Lai King',
+      'kwai_fong': 'Kwai Fong', 'kwai_hing': 'Kwai Hing', 'tai_wo_hau': 'Tai Wo Hau', 'tsuen_wan': 'Tsuen Wan'
+    },
+    'kwun_tong_line': {
+      'whampoa': 'Whampoa', 'ho_man_tin': 'Ho Man Tin', 'yau_ma_tei': 'Yau Ma Tei', 'mong_kok': 'Mong Kok',
+      'prince_edward': 'Prince Edward', 'shek_kip_mei': 'Shek Kip Mei', 'kowloon_tong': 'Kowloon Tong', 'lok_fu': 'Lok Fu',
+      'wong_tai_sin': 'Wong Tai Sin', 'diamond_hill': 'Diamond Hill', 'choi_hung': 'Choi Hung', 'kowloon_bay': 'Kowloon Bay',
+      'ngau_tau_kok': 'Ngau Tau Kok', 'kwun_tong': 'Kwun Tong', 'lam_tin': 'Lam Tin', 'yau_tong': 'Yau Tong', 'tiu_keng_leng': 'Tiu Keng Leng'
+    },
+    'island_line': {
+      'kennedy_town': 'Kennedy Town', 'hku': 'HKU', 'sai_ying_pun': 'Sai Ying Pun', 'sheung_wan': 'Sheung Wan',
+      'central': 'Central', 'admiralty': 'Admiralty', 'wan_chai': 'Wan Chai', 'causeway_bay': 'Causeway Bay', 'tin_hau': 'Tin Hau',
+      'fortress_hill': 'Fortress Hill', 'north_point': 'North Point', 'quarry_bay': 'Quarry Bay', 'tai_koo': 'Tai Koo',
+      'sai_wan_ho': 'Sai Wan Ho', 'shau_kei_wan': 'Shau Kei Wan', 'heng_fa_chuen': 'Heng Fa Chuen', 'chai_wan': 'Chai Wan'
+    },
+    'south_island_line': {
+      'admiralty': 'Admiralty', 'ocean_park': 'Ocean Park', 'wong_chuk_hang': 'Wong Chuk Hang', 'lei_tung': 'Lei Tung', 'south_horizons': 'South Horizons'
+    },
+    'tung_chung_line': {
+      'hong_kong': 'Hong Kong', 'kowloon': 'Kowloon', 'olympic': 'Olympic', 'nam_cheong': 'Nam Cheong',
+      'lai_king': 'Lai King', 'sunny_bay': 'Sunny Bay', 'tung_chung': 'Tung Chung'
+    },
+    'tseung_kwan_o_line': {
+      'north_point': 'North Point', 'quarry_bay': 'Quarry Bay', 'yau_tong': 'Yau Tong', 'tiu_keng_leng': 'Tiu Keng Leng',
+      'tseung_kwan_o': 'Tseung Kwan O', 'hang_hau': 'Hang Hau', 'po_lam': 'Po Lam', 'lohas_park': 'LOHAS Park'
+    },
+    'east_rail_line': {
+      'admiralty': 'Admiralty', 'exhibition_centre': 'Exhibition Centre', 'hung_hom': 'Hung Hom', 'mong_kok_east': 'Mong Kok East',
+      'kowloon_tong': 'Kowloon Tong', 'tai_wai': 'Tai Wai', 'sha_tin': 'Sha Tin', 'fo_tan': 'Fo Tan', 'racecourse': 'Racecourse',
+      'university': 'University', 'tai_po_market': 'Tai Po Market', 'tai_wo': 'Tai Wo', 'fanling': 'Fanling',
+      'sheung_shui': 'Sheung Shui', 'lo_wu': 'Lo Wu', 'lok_ma_chau': 'Lok Ma Chau'
+    },
+    'trm_line': {
+      'tuen_mun': 'Tuen Mun', 'siu_hong': 'Siu Hong', 'tin_shui_wai': 'Tin Shui Wai', 'long_ping': 'Long Ping',
+      'yuen_long': 'Yuen Long', 'kam_sheung_road': 'Kam Sheung Road', 'tsuen_wan_west': 'Tsuen Wan West', 'mei_foo': 'Mei Foo',
+      'nam_cheong': 'Nam Cheong', 'austin': 'Austin', 'east_tsim_sha_tsui': 'East Tsim Sha Tsui', 'hung_hom': 'Hung Hom',
+      'ho_man_tin': 'Ho Man Tin', 'to_kwa_wan': 'To Kwa Wan', 'sung_wong_toi': 'Sung Wong Toi', 'kai_tak': 'Kai Tak',
+      'diamond_hill': 'Diamond Hill', 'hin_keng': 'Hin Keng', 'tai_wai': 'Tai Wai', 'che_kung_temple': 'Che Kung Temple',
+      'sha_tin_wai': 'Sha Tin Wai', 'city_one': 'City One', 'shek_mun': 'Shek Mun', 'tai_shui_hang': 'Tai Shui Hang',
+      'heng_on': 'Heng On', 'ma_on_shan': 'Ma On Shan', 'wu_kai_sha': 'Wu Kai Sha'
+    },
+    'airport_express': {
+      'hong_kong': 'Hong Kong', 'kowloon': 'Kowloon', 'tsing_yi': 'Tsing Yi', 'airport': 'Airport', 'asiaworld_expo': 'AsiaWorld-Expo'
+    },
+    'disneyland_resort_line': {
+      'sunny_bay': 'Sunny Bay', 'disneyland_resort': 'Disneyland Resort'
+    }
+  }
 };

@@ -264,7 +264,8 @@ export const zh = {
   'listing_form.shipping.delivery_included': '速遞包郵',
   'listing_form.shipping.delivery_cod': '速遞到付',
   'listing_form.location.label': '交收地點',
-  'listing_form.location.placeholder': '例如：旺角地鐵站',
+  'listing_form.location.mtr_placeholder': '選擇港鐵站',
+  'listing_form.location.details_placeholder': '例如：B出口',
   'listing_form.ai_button': 'AI 生成描述 (稍後推出)',
   'listing_form.description.label': '產品描述',
   'listing_form.description.placeholder': '例如：詳細說明產品的狀況、尺寸、購買年份等...',
@@ -306,30 +307,6 @@ export const zh = {
   'product_page.mark_as_sold': '售出',
   'product_page.chat': '傾傾',
 
-  // Districts
-  'district.group.hong_kong_island': '香港島',
-  'district.central_western': '中西區',
-  'district.wan_chai': '灣仔區',
-  'district.eastern': '東區',
-  'district.southern': '南區',
-  'district.group.kowloon': '九龍',
-  'district.yau_tsim_mong': '油尖旺區',
-  'district.sham_shui_po': '深水埗區',
-  'district.kowloon_city': '九龍城區',
-  'district.wong_tai_sin': '黃大仙區',
-  'district.kwun_tong': '觀塘區',
-  'district.group.new_territories': '新界',
-  'district.kwai_tsing': '葵青區',
-  'district.tsuen_wan': '荃灣區',
-  'district.tuen_mun': '屯門區',
-  'district.yuen_long': '元朗區',
-  'district.north': '北區',
-  'district.tai_po': '大埔區',
-  'district.sha_tin': '沙田區',
-  'district.sai_kung': '西貢區',
-  'district.islands': '離島區',
-  'district.not_set': '未設定',
-
   // Categories
   'category.women_fashion': '女裝',
   'category.men_fashion': '男裝',
@@ -350,4 +327,70 @@ export const zh = {
   'condition.lightly_used': '較少使用',
   'condition.good': '狀況良好',
   'condition.fair': '狀況尚可',
+
+  // MTR Lines and Stations
+  'mtr_lines': {
+    'tsuen_wan_line': '荃灣綫',
+    'kwun_tong_line': '觀塘綫',
+    'island_line': '港島綫',
+    'south_island_line': '南港島綫',
+    'tung_chung_line': '東涌綫',
+    'tseung_kwan_o_line': '將軍澳綫',
+    'east_rail_line': '東鐵綫',
+    'trm_line': '屯馬綫',
+    'airport_express': '機場快綫',
+    'disneyland_resort_line': '迪士尼綫'
+  },
+  'mtr_stations': {
+    'tsuen_wan_line': {
+      'central': '中環', 'admiralty': '金鐘', 'tsim_sha_tsui': '尖沙咀', 'jordan': '佐敦',
+      'yau_ma_tei': '油麻地', 'mong_kok': '旺角', 'prince_edward': '太子', 'sham_shui_po': '深水埗',
+      'cheung_sha_wan': '長沙灣', 'lai_chi_kok': '茘枝角', 'mei_foo': '美孚', 'lai_king': '茘景',
+      'kwai_fong': '葵芳', 'kwai_hing': '葵興', 'tai_wo_hau': '大窩口', 'tsuen_wan': '荃灣'
+    },
+    'kwun_tong_line': {
+      'whampoa': '黃埔', 'ho_man_tin': '何文田', 'yau_ma_tei': '油麻地', 'mong_kok': '旺角',
+      'prince_edward': '太子', 'shek_kip_mei': '石硤尾', 'kowloon_tong': '九龍塘', 'lok_fu': '樂富',
+      'wong_tai_sin': '黃大仙', 'diamond_hill': '鑽石山', 'choi_hung': '彩虹', 'kowloon_bay': '九龍灣',
+      'ngau_tau_kok': '牛頭角', 'kwun_tong': '觀塘', 'lam_tin': '藍田', 'yau_tong': '油塘', 'tiu_keng_leng': '調景嶺'
+    },
+    'island_line': {
+      'kennedy_town': '堅尼地城', 'hku': '香港大學', 'sai_ying_pun': '西營盤', 'sheung_wan': '上環',
+      'central': '中環', 'admiralty': '金鐘', 'wan_chai': '灣仔', 'causeway_bay': '銅鑼灣', 'tin_hau': '天后',
+      'fortress_hill': '炮台山', 'north_point': '北角', 'quarry_bay': '鰂魚涌', 'tai_koo': '太古',
+      'sai_wan_ho': '西灣河', 'shau_kei_wan': '筲箕灣', 'heng_fa_chuen': '杏花邨', 'chai_wan': '柴灣'
+    },
+    'south_island_line': {
+      'admiralty': '金鐘', 'ocean_park': '海洋公園', 'wong_chuk_hang': '黃竹坑', 'lei_tung': '利東', 'south_horizons': '海怡半島'
+    },
+    'tung_chung_line': {
+      'hong_kong': '香港', 'kowloon': '九龍', 'olympic': '奧運', 'nam_cheong': '南昌',
+      'lai_king': '茘景', 'sunny_bay': '欣澳', 'tung_chung': '東涌'
+    },
+    'tseung_kwan_o_line': {
+      'north_point': '北角', 'quarry_bay': '鰂魚涌', 'yau_tong': '油塘', 'tiu_keng_leng': '調景嶺',
+      'tseung_kwan_o': '將軍澳', 'hang_hau': '坑口', 'po_lam': '寶琳', 'lohas_park': '康城'
+    },
+    'east_rail_line': {
+      'admiralty': '金鐘', 'exhibition_centre': '會展', 'hung_hom': '紅磡', 'mong_kok_east': '旺角東',
+      'kowloon_tong': '九龍塘', 'tai_wai': '大圍', 'sha_tin': '沙田', 'fo_tan': '火炭', 'racecourse': '馬場',
+      'university': '大學', 'tai_po_market': '大埔墟', 'tai_wo': '太和', 'fanling': '粉嶺',
+      'sheung_shui': '上水', 'lo_wu': '羅湖', 'lok_ma_chau': '落馬洲'
+    },
+    'trm_line': {
+      'tuen_mun': '屯門', 'siu_hong': '兆康', 'tin_shui_wai': '天水圍', 'long_ping': '朗屏',
+      'yuen_long': '元朗', 'kam_sheung_road': '錦上路', 'tsuen_wan_west': '荃灣西', 'mei_foo': '美孚',
+      'nam_cheong': '南昌', 'austin': '柯士甸', 'east_tsim_sha_tsui': '尖東', 'hung_hom': '紅磡',
+      'ho_man_tin': '何文田', 'to_kwa_wan': '土瓜灣', 'sung_wong_toi': '宋皇臺', 'kai_tak': '啟德',
+      'diamond_hill': '鑽石山', 'hin_keng': '顯徑', 'tai_wai': '大圍', 'che_kung_temple': '車公廟',
+      'sha_tin_wai': '沙田圍', 'city_one': '第一城', 'shek_mun': '石門', 'tai_shui_hang': '大水坑',
+      'heng_on': '恆安', 'ma_on_shan': '馬鞍山', 'wu_kai_sha': '烏溪沙'
+    },
+    'airport_express': {
+      'hong_kong': '香港', 'kowloon': '九龍', 'tsing_yi': '青衣', 'airport': '機場', 'asiaworld_expo': '博覽館'
+    },
+    'disneyland_resort_line': {
+      'sunny_bay': '欣澳', 'disneyland_resort': '迪士尼'
+    }
+  }
 };

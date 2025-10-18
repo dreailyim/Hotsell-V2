@@ -55,7 +55,6 @@ const formSchema = z.object({
     message: "您必須至少選擇一種交收方式。",
   }),
   pickupLocation: z.string().optional(),
-  productDescription: z.string().min(10, { message: '產品描述至少需要10個字' }),
 }).refine(data => {
     if (data.shippingMethods.includes('面交')) {
       return data.pickupLocation && data.pickupLocation.trim().length > 0;
@@ -75,6 +74,12 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
     name: 'shippingMethods',
   });
 
+  const mtrLines = [
+    'tsuen_wan_line', 'kwun_tong_line', 'island_line', 'south_island_line', 
+    'tung_chung_line', 'tseung_kwan_o_line', 'east_rail_line', 'trm_line', 
+    'airport_express', 'disneyland_resort_line'
+  ];
+
   return (
     shippingMethods?.includes('面交') && (
       <FormField
@@ -84,42 +89,25 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
           <FormItem>
             <FormLabel>{t('listing_form.location.label')}</FormLabel>
              <div className="flex items-center gap-2">
-                <Select onValueChange={(value) => setValue('pickupLocation', value, { shouldValidate: true })}>
-                    <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder={t('settings.profile.city.placeholder')} />
+                <Select onValueChange={(value) => field.onChange(value)}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                        <SelectValue placeholder={t('listing_form.location.mtr_placeholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectGroup>
-                            <SelectLabel>{t('district.group.hong_kong_island')}</SelectLabel>
-                            <SelectItem value={t('district.central_western')}>{t('district.central_western')}</SelectItem>
-                            <SelectItem value={t('district.wan_chai')}>{t('district.wan_chai')}</SelectItem>
-                            <SelectItem value={t('district.eastern')}>{t('district.eastern')}</SelectItem>
-                            <SelectItem value={t('district.southern')}>{t('district.southern')}</SelectItem>
+                      {mtrLines.map(lineKey => (
+                        <SelectGroup key={lineKey}>
+                          <SelectLabel>{t(`mtr_lines.${lineKey}` as any)}</SelectLabel>
+                          {Object.keys(t(`mtr_stations.${lineKey}` as any, { returnObjects: true })).map(stationKey => (
+                            <SelectItem key={stationKey} value={t(`mtr_stations.${lineKey}.${stationKey}` as any)}>
+                              {t(`mtr_stations.${lineKey}.${stationKey}` as any)}
+                            </SelectItem>
+                          ))}
                         </SelectGroup>
-                        <SelectGroup>
-                            <SelectLabel>{t('district.group.kowloon')}</SelectLabel>
-                            <SelectItem value={t('district.yau_tsim_mong')}>{t('district.yau_tsim_mong')}</SelectItem>
-                            <SelectItem value={t('district.sham_shui_po')}>{t('district.sham_shui_po')}</SelectItem>
-                            <SelectItem value={t('district.kowloon_city')}>{t('district.kowloon_city')}</SelectItem>
-                            <SelectItem value={t('district.wong_tai_sin')}>{t('district.wong_tai_sin')}</SelectItem>
-                            <SelectItem value={t('district.kwun_tong')}>{t('district.kwun_tong')}</SelectItem>
-                        </SelectGroup>
-                        <SelectGroup>
-                            <SelectLabel>{t('district.group.new_territories')}</SelectLabel>
-                            <SelectItem value={t('district.kwai_tsing')}>{t('district.kwai_tsing')}</SelectItem>
-                            <SelectItem value={t('district.tsuen_wan')}>{t('district.tsuen_wan')}</SelectItem>
-                            <SelectItem value={t('district.tuen_mun')}>{t('district.tuen_mun')}</SelectItem>
-                            <SelectItem value={t('district.yuen_long')}>{t('district.yuen_long')}</SelectItem>
-                            <SelectItem value={t('district.north')}>{t('district.north')}</SelectItem>
-                            <SelectItem value={t('district.tai_po')}>{t('district.tai_po')}</SelectItem>
-                            <SelectItem value={t('district.sha_tin')}>{t('district.sha_tin')}</SelectItem>
-                            <SelectItem value={t('district.sai_kung')}>{t('district.sai_kung')}</SelectItem>
-                            <SelectItem value={t('district.islands')}>{t('district.islands')}</SelectItem>
-                        </SelectGroup>
+                      ))}
                     </SelectContent>
                 </Select>
                 <FormControl>
-                  <Input placeholder={t('listing_form.location.placeholder')} {...field} />
+                  <Input placeholder={t('listing_form.location.details_placeholder')} {...field} />
                 </FormControl>
             </div>
             <FormMessage />
