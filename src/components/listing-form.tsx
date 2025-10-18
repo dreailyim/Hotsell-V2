@@ -23,6 +23,8 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectGroup,
+  SelectLabel,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -66,7 +68,7 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-const ShippingMethodWatcher = ({ control }: { control: any }) => {
+const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: any }) => {
   const { t } = useTranslation();
   const shippingMethods = useWatch({
     control,
@@ -81,9 +83,45 @@ const ShippingMethodWatcher = ({ control }: { control: any }) => {
         render={({ field }) => (
           <FormItem>
             <FormLabel>{t('listing_form.location.label')}</FormLabel>
-            <FormControl>
-              <Input placeholder={t('listing_form.location.placeholder')} {...field} />
-            </FormControl>
+            <div className="flex items-center gap-2">
+                <Select onValueChange={(value) => setValue('pickupLocation', value, { shouldValidate: true })}>
+                    <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder={t('settings.profile.city.placeholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectGroup>
+                            <SelectLabel>{t('district.group.hong_kong_island')}</SelectLabel>
+                            <SelectItem value={t('district.central_western')}>{t('district.central_western')}</SelectItem>
+                            <SelectItem value={t('district.wan_chai')}>{t('district.wan_chai')}</SelectItem>
+                            <SelectItem value={t('district.eastern')}>{t('district.eastern')}</SelectItem>
+                            <SelectItem value={t('district.southern')}>{t('district.southern')}</SelectItem>
+                        </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>{t('district.group.kowloon')}</SelectLabel>
+                            <SelectItem value={t('district.yau_tsim_mong')}>{t('district.yau_tsim_mong')}</SelectItem>
+                            <SelectItem value={t('district.sham_shui_po')}>{t('district.sham_shui_po')}</SelectItem>
+                            <SelectItem value={t('district.kowloon_city')}>{t('district.kowloon_city')}</SelectItem>
+                            <SelectItem value={t('district.wong_tai_sin')}>{t('district.wong_tai_sin')}</SelectItem>
+                            <SelectItem value={t('district.kwun_tong')}>{t('district.kwun_tong')}</SelectItem>
+                        </SelectGroup>
+                        <SelectGroup>
+                            <SelectLabel>{t('district.group.new_territories')}</SelectLabel>
+                            <SelectItem value={t('district.kwai_tsing')}>{t('district.kwai_tsing')}</SelectItem>
+                            <SelectItem value={t('district.tsuen_wan')}>{t('district.tsuen_wan')}</SelectItem>
+                            <SelectItem value={t('district.tuen_mun')}>{t('district.tuen_mun')}</SelectItem>
+                            <SelectItem value={t('district.yuen_long')}>{t('district.yuen_long')}</SelectItem>
+                            <SelectItem value={t('district.north')}>{t('district.north')}</SelectItem>
+                            <SelectItem value={t('district.tai_po')}>{t('district.tai_po')}</SelectItem>
+                            <SelectItem value={t('district.sha_tin')}>{t('district.sha_tin')}</SelectItem>
+                            <SelectItem value={t('district.sai_kung')}>{t('district.sai_kung')}</SelectItem>
+                            <SelectItem value={t('district.islands')}>{t('district.islands')}</SelectItem>
+                        </SelectGroup>
+                    </SelectContent>
+                </Select>
+                <FormControl>
+                  <Input placeholder={t('listing_form.location.placeholder')} {...field} />
+                </FormControl>
+            </div>
             <FormMessage />
           </FormItem>
         )}
@@ -438,7 +476,7 @@ export function ListingForm() {
           )}
         />
         
-        <ShippingMethodWatcher control={form.control} />
+        <ShippingMethodWatcher control={form.control} setValue={form.setValue} />
         
         <FormItem>
           <div className="flex items-center justify-between">

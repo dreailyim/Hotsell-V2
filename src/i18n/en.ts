@@ -266,8 +266,6 @@ export const en = {
   'listing_form.shipping.delivery_cod': 'Courier (cash on delivery)',
   'listing_form.location.label': 'Meet-up Location',
   'listing_form.location.placeholder': 'e.g., Mong Kok MTR Station',
-  'listing_form.description.label': 'Product Description',
-  'listing_form.description.placeholder': 'Describe your product...',
   'listing_form.ai_button': 'AI Generate (Coming Soon)',
   'listing_form.submit_button.create': 'List Item',
   'listing_form.submit_button.edit': 'Save Changes',
