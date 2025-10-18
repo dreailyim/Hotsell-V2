@@ -55,6 +55,7 @@ const formSchema = z.object({
     message: "您必須至少選擇一種交收方式。",
   }),
   pickupLocation: z.string().optional(),
+  productDescription: z.string().optional(),
 }).refine(data => {
     if (data.shippingMethods.includes('面交')) {
       return data.pickupLocation && data.pickupLocation.trim().length > 0;
@@ -74,11 +75,11 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
     name: 'shippingMethods',
   });
 
-  const mtrLines = [
-    'tsuen_wan_line', 'kwun_tong_line', 'island_line', 'south_island_line', 
-    'tung_chung_line', 'tseung_kwan_o_line', 'east_rail_line', 'trm_line', 
-    'airport_express', 'disneyland_resort_line'
-  ];
+  const hkDistricts = {
+    hong_kong_island: ['central_western', 'wan_chai', 'eastern', 'southern'],
+    kowloon: ['yau_tsim_mong', 'sham_shui_po', 'kowloon_city', 'wong_tai_sin', 'kwun_tong'],
+    new_territories: ['kwai_tsing', 'tsuen_wan', 'tuen_mun', 'yuen_long', 'north', 'tai_po', 'sha_tin', 'sai_kung', 'islands'],
+  };
 
   return (
     shippingMethods?.includes('面交') && (
@@ -91,19 +92,17 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
             <div className="flex flex-col sm:flex-row items-center gap-2">
                 <Select onValueChange={(value) => field.onChange(value)}>
                     <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t('listing_form.location.mtr_placeholder')} />
+                        <SelectValue placeholder={t('settings.profile.city.placeholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      {mtrLines.map(lineKey => (
-                        <SelectGroup key={lineKey}>
-                          <SelectLabel>{t(`mtr_lines.${lineKey}` as any)}</SelectLabel>
-                          {Object.keys(t(`mtr_stations.${lineKey}` as any, { returnObjects: true })).map(stationKey => (
-                            <SelectItem key={stationKey} value={t(`mtr_stations.${lineKey}.${stationKey}` as any)}>
-                              {t(`mtr_stations.${lineKey}.${stationKey}` as any)}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      ))}
+                        {Object.entries(hkDistricts).map(([groupKey, districtKeys]) => (
+                            <SelectGroup key={groupKey}>
+                                <SelectLabel>{t(`district.group.${groupKey as keyof typeof hkDistricts}`)}</SelectLabel>
+                                {districtKeys.map(districtKey => (
+                                    <SelectItem key={districtKey} value={districtKey}>{t(`district.${districtKey}`)}</SelectItem>
+                                ))}
+                            </SelectGroup>
+                        ))}
                     </SelectContent>
                 </Select>
                 <FormControl>
