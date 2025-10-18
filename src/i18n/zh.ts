@@ -266,6 +266,8 @@ export const zh = {
   'listing_form.location.label': '交收地點',
   'listing_form.location.placeholder': '例如：旺角地鐵站',
   'listing_form.ai_button': 'AI 生成描述 (稍後推出)',
+  'listing_form.description.label': '產品描述',
+  'listing_form.description.placeholder': '例如：詳細說明產品的狀況、尺寸、購買年份等...',
   'listing_form.submit_button.create': '刊登物品',
   'listing_form.submit_button.edit': '儲存變更',
   'listing_form.create_success': '刊登成功！',

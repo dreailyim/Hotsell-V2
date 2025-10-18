@@ -267,6 +267,8 @@ export const en = {
   'listing_form.location.label': 'Meet-up Location',
   'listing_form.location.placeholder': 'e.g., Mong Kok MTR Station',
   'listing_form.ai_button': 'AI Generate (Coming Soon)',
+  'listing_form.description.label': 'Product Description',
+  'listing_form.description.placeholder': 'e.g., Describe the condition, dimensions, year of purchase, etc.',
   'listing_form.submit_button.create': 'List Item',
   'listing_form.submit_button.edit': 'Save Changes',
   'listing_form.create_success': 'Listed successfully!',
