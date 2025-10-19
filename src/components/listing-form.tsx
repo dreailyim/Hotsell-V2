@@ -75,16 +75,16 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
   });
 
   const mtrLines = {
-      tsuen_wan_line: ['central', 'admiralty', 'tsim_sha_tsui', 'jordan', 'yau_ma_tei', 'mong_kok', 'prince_edward', 'sham_shui_po', 'cheung_sha_wan', 'lai_chi_kok', 'mei_foo', 'lai_king', 'kwai_fong', 'kwai_hing', 'tai_wo_hau', 'tsuen_wan'],
-      kwun_tong_line: ['whampoa', 'ho_man_tin', 'yau_ma_tei', 'mong_kok', 'prince_edward', 'shek_kip_mei', 'kowloon_tong', 'lok_fu', 'wong_tai_sin', 'diamond_hill', 'choi_hung', 'kowloon_bay', 'ngau_tau_kok', 'kwun_tong', 'lam_tin', 'yau_tong', 'tiu_keng_leng'],
-      island_line: ['kennedy_town', 'hku', 'sai_ying_pun', 'sheung_wan', 'central', 'admiralty', 'wan_chai', 'causeway_bay', 'tin_hau', 'fortress_hill', 'north_point', 'quarry_bay', 'tai_koo', 'sai_wan_ho', 'shau_kei_wan', 'heng_fa_chuen', 'chai_wan'],
-      south_island_line: ['admiralty', 'ocean_park', 'wong_chuk_hang', 'lei_tung', 'south_horizons'],
-      tseung_kwan_o_line: ['north_point', 'quarry_bay', 'yau_tong', 'tiu_keng_leng', 'tseung_kwan_o', 'hang_hau', 'po_lam', 'lohask_park'],
-      tung_chung_line: ['hong_kong', 'kowloon', 'olympic', 'nam_cheong', 'lai_king', 'tsing_yi', 'sunny_bay', 'tung_chung'],
-      disneyland_resort_line: ['sunny_bay', 'disneyland_resort'],
-      airport_express: ['hong_kong', 'kowloon', 'tsing_yi', 'airport', 'asiaworld_expo'],
-      tuen_ma_line: ['wu_kai_sha', 'ma_on_shan', 'heng_on', 'tai_shui_hang', 'shek_mun', 'city_one', 'sha_tin_wai', 'che_kung_temple', 'tai_wai', 'hin_keng', 'diamond_hill', 'kai_tak', 'sung_wong_toi', 'to_kwa_wan', 'ho_man_tin', 'hung_hom', 'east_tsim_sha_tsui', 'austin', 'nam_cheong', 'mei_foo', 'tsuen_wan_west', 'kam_sheung_road', 'yuen_long', 'long_ping', 'tin_shui_wai', 'siu_hong', 'tuen_mun'],
-      east_rail_line: ['admiralty', 'exhibition_centre', 'hung_hom', 'mong_kok_east', 'kowloon_tong', 'tai_wai', 'sha_tin', 'fo_tan', 'racecourse', 'university', 'tai_po_market', 'tai_wo', 'fanling', 'sheung_shui', 'lo_wu', 'lok_ma_chau'],
+    island_line: ['kennedy_town', 'hku', 'sai_ying_pun', 'sheung_wan', 'central', 'wan_chai', 'causeway_bay', 'tin_hau', 'fortress_hill', 'north_point', 'tai_koo', 'sai_wan_ho', 'shau_kei_wan', 'heng_fa_chuen', 'chai_wan'],
+    tsuen_wan_line: ['admiralty', 'tsim_sha_tsui', 'jordan', 'yau_ma_tei', 'mong_kok', 'prince_edward', 'sham_shui_po', 'cheung_sha_wan', 'lai_chi_kok', 'mei_foo', 'lai_king', 'kwai_fong', 'kwai_hing', 'tai_wo_hau', 'tsuen_wan'],
+    kwun_tong_line: ['whampoa', 'ho_man_tin', 'shek_kip_mei', 'kowloon_tong', 'lok_fu', 'wong_tai_sin', 'diamond_hill', 'choi_hung', 'kowloon_bay', 'ngau_tau_kok', 'kwun_tong', 'lam_tin', 'yau_tong', 'tiu_keng_leng'],
+    south_island_line: ['south_horizons', 'lei_tung', 'wong_chuk_hang', 'ocean_park'],
+    tseung_kwan_o_line: ['quarry_bay', 'tseung_kwan_o', 'hang_hau', 'po_lam', 'lohask_park'],
+    tung_chung_line: ['hong_kong', 'kowloon', 'olympic', 'nam_cheong', 'tsing_yi', 'sunny_bay', 'tung_chung'],
+    tuen_ma_line: ['wu_kai_sha', 'ma_on_shan', 'heng_on', 'tai_shui_hang', 'shek_mun', 'city_one', 'sha_tin_wai', 'che_kung_temple', 'tai_wai', 'hin_keng', 'kai_tak', 'sung_wong_toi', 'to_kwa_wan', 'hung_hom', 'east_tsim_sha_tsui', 'austin', 'tsuen_wan_west', 'kam_sheung_road', 'yuen_long', 'long_ping', 'tin_shui_wai', 'siu_hong', 'tuen_mun'],
+    east_rail_line: ['exhibition_centre', 'mong_kok_east', 'sha_tin', 'fo_tan', 'racecourse', 'university', 'tai_po_market', 'tai_wo', 'fanling', 'sheung_shui', 'lo_wu', 'lok_ma_chau'],
+    disneyland_resort_line: ['disneyland_resort'],
+    airport_express: ['airport', 'asiaworld_expo'],
   };
 
   return (
@@ -261,7 +261,7 @@ export function ListingForm() {
             condition: values.condition,
             shippingMethods: values.shippingMethods,
             pickupLocation: values.shippingMethods.includes('面交') ? values.pickupLocation : '',
-            description: values.productDescription,
+            description: form.getValues('productDescription'),
             images: imageUrls,
             image: imageUrls[0], // For legacy compatibility
             sellerId: user.uid,
