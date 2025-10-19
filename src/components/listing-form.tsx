@@ -55,7 +55,6 @@ const formSchema = z.object({
     message: "您必須至少選擇一種交收方式。",
   }),
   pickupLocation: z.string().optional(),
-  productDescription: z.string().optional(),
 }).refine(data => {
     if (data.shippingMethods.includes('面交')) {
       return data.pickupLocation && data.pickupLocation.trim().length > 0;
