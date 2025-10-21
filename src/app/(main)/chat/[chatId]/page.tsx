@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback, useTransition } from 'react';
@@ -745,11 +746,12 @@ export default function ChatPage() {
   const hasStickyHeader = conversation?.product;
   
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col h-screen bg-background">
       <Header title={otherUser?.displayName || t('header.title.chat')} showBackButton backHref="/messages" />
+      
       {hasStickyHeader && <ChatProductHeader />}
 
-      <main className="flex-1 overflow-y-auto p-4 space-y-4">
+      <main className="flex-1 overflow-y-auto p-4 space-y-4 pb-24">
         {error && (
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
@@ -808,7 +810,7 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </main>
 
-      <div className="sticky bottom-0 bg-background/50 backdrop-blur-sm border-t p-2 border-white/10">
+      <div className="fixed bottom-0 left-0 right-0 bg-background/50 backdrop-blur-sm border-t p-2 border-white/10">
         <form onSubmit={handleSubmit} className="container mx-auto flex items-center gap-2 px-4">
           <Button type="button" variant="ghost" size="icon" className="h-10 w-10 rounded-full" asChild>
             <Label htmlFor="file-upload">
