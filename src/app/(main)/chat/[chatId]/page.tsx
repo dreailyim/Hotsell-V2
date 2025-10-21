@@ -694,19 +694,33 @@ export default function ChatPage() {
     }
     
     const renderBidStatusText = () => {
-        const buyerName = otherUser?.displayName || t('chat.buyer');
-        if (bidStatus === 'pending') {
-            if (isSeller) {
-                return <p className="text-xs text-muted-foreground mt-1">{t('chat.bid_status.seller_pending').replace('{buyerName}', buyerName)} <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
-            }
-            if (bidderId === user.uid) {
-                return <p className="text-xs text-muted-foreground mt-1">{t('chat.bid_status.buyer_pending')} <span className='font-bold text-primary'>${bidPriceDisplay}</span></p>;
-            }
+      let text = '';
+      let textClass = 'text-xs text-muted-foreground mt-1';
+  
+      if (bidStatus === 'pending') {
+        if (isSeller) {
+          text = t('chat.bid_status.seller_pending').replace('{buyerName}', otherUser?.displayName || t('chat.buyer')) + ` $${bidPriceDisplay}`;
+          textClass = 'text-xs text-blue-500 mt-1 animate-pulse';
+        } else if (bidderId === user.uid) {
+          text = t('chat.bid_status.buyer_pending') + ` $${bidPriceDisplay}`;
+          textClass = 'text-xs text-blue-500 mt-1 animate-pulse';
         }
-        if (bidStatus === 'declined' && bidderId === user.uid) {
-             return <p className="text-xs text-destructive mt-1">{t('chat.bid_status.declined')} <span className='font-bold'>${bidPriceDisplay}</span></p>;
-        }
-        return null;
+      } else if (bidStatus === 'declined' && bidderId === user.uid) {
+        text = t('chat.bid_status.declined') + ` $${bidPriceDisplay}`;
+        textClass = 'text-xs text-destructive mt-1';
+      }
+  
+      if (!text) return null;
+
+      // Apply marquee effect for long texts or specific animated states
+      return (
+        <div className="relative flex overflow-x-hidden">
+          <p className={cn(textClass, "animate-marquee whitespace-nowrap")}>
+            <span className="mx-4">{text}</span>
+            <span className="mx-4">{text}</span>
+          </p>
+        </div>
+      );
     }
 
 
