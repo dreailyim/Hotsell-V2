@@ -815,7 +815,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
         </div>
 
         <div className="container mx-auto px-4 md:px-6 py-4 pb-48">
-          <p className="text-xs text-muted-foreground">{product.category}</p>
+          <p className="text-xs text-muted-foreground">{t(`category.${product.category}` as any)}</p>
           <h1 className="text-2xl font-bold mt-1">{product.name}</h1>
           <div className="flex items-baseline gap-4 mt-2">
               <p className={cn("text-3xl font-bold", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
