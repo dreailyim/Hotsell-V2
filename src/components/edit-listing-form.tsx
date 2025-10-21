@@ -123,12 +123,12 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
                               {Object.entries(mtrLines).map(([lineKey, stations]) => (
                                   <AccordionItem value={lineKey} key={lineKey}>
                                       <AccordionTrigger className="px-4 py-2 text-sm">
-                                          {t(`mtr_lines.${lineKey as keyof typeof mtrLines}`)}
+                                          {t(`mtr_lines.${lineKey as keyof typeof mtrLines}` as any)}
                                       </AccordionTrigger>
                                       <AccordionContent>
                                           <div className="flex flex-col space-y-1 pl-8 pr-4">
                                               {stations.map(stationKey => {
-                                                  const stationName = t(`mtr_stations.${stationKey}`);
+                                                  const stationName = t(`mtr_stations.${stationKey}` as any);
                                                   return (
                                                       <FormItem key={stationKey} className="flex flex-row items-start space-x-3 space-y-0 py-2">
                                                           <FormControl>
@@ -138,7 +138,7 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
                                                                       const currentValue = field.value || [];
                                                                       return checked
                                                                           ? field.onChange([...currentValue, stationName])
-                                                                          : field.onChange(currentValue.filter(value => value !== stationName));
+                                                                          : field.onChange(currentValue.filter((value: any) => value !== stationName));
                                                                   }}
                                                               />
                                                           </FormControl>
@@ -159,14 +159,14 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
                <div className="pt-2">
                 {field.value && field.value.length > 0 ? (
                   <div className="flex gap-1 flex-wrap">
-                    {field.value.map(location => (
+                    {field.value.map((location: any) => (
                       <Badge
                         variant="secondary"
                         key={location}
                         className="cursor-pointer"
                         onClick={() => {
                             const currentValue = field.value || [];
-                            field.onChange(currentValue.filter(value => value !== location));
+                            field.onChange(currentValue.filter((value: any) => value !== location));
                         }}
                       >
                         {location}

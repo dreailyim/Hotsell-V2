@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { useState, useTransition, useRef, useEffect, useCallback } from 'react';
@@ -294,9 +295,9 @@ export default function SettingsPage() {
                             <SelectContent>
                                 {Object.entries(hkDistricts).map(([groupKey, districtKeys]) => (
                                     <SelectGroup key={groupKey}>
-                                        <SelectLabel>{t(`district.group.${groupKey as keyof typeof hkDistricts}`)}</SelectLabel>
+                                        <SelectLabel>{t(`district.group.${groupKey as keyof typeof hkDistricts}` as any)}</SelectLabel>
                                         {districtKeys.map(districtKey => (
-                                            <SelectItem key={districtKey} value={districtKey}>{t(`district.${districtKey}`)}</SelectItem>
+                                            <SelectItem key={districtKey} value={districtKey}>{t(`district.${districtKey}` as any)}</SelectItem>
                                         ))}
                                     </SelectGroup>
                                 ))}
