@@ -60,6 +60,7 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  ShieldAlert,
 } from 'lucide-react';
 import {
   Carousel,
@@ -91,14 +92,16 @@ function BidDialog({
   const { toast } = useToast();
   const { t } = useTranslation();
 
-  const handleSubmit = () => {
+  const handleBidSubmit = () => {
     const priceNum = parseFloat(newBidPrice);
     if (isNaN(priceNum) || priceNum <= 0) {
       toast({ title: t('product_page.bid_dialog.invalid_price'), variant: "destructive" });
       return;
     }
+    // The actual onBid call is now inside the final confirmation dialog
+    // This function will be called from the AlertDialog's action
     onBid(priceNum);
-    setOpen(false); // Close dialog on submit
+    setOpen(false); // Close the price input dialog
   };
 
   return (
@@ -124,9 +127,40 @@ function BidDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleSubmit} disabled={disabled} className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity">
-            {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('product_page.bid_dialog.confirm')}
-          </AlertDialogAction>
+           {/* This now triggers the fraud warning dialog */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                  <Button
+                      className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                      disabled={disabled || !newBidPrice || parseFloat(newBidPrice) <= 0}
+                  >
+                      {t('product_page.bid_dialog.confirm')}
+                  </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>
+                     <div className="flex items-center gap-2">
+                        <ShieldAlert className="h-6 w-6 text-destructive" />
+                        {t('product_page.fraud_warning.title')}
+                      </div>
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-left whitespace-pre-wrap">
+                    {t('product_page.fraud_warning.description')}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                      className="bg-destructive hover:bg-destructive/90"
+                      onClick={handleBidSubmit}
+                      disabled={disabled}
+                  >
+                    {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('product_page.fraud_warning.confirm')}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
