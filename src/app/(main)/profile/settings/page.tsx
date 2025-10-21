@@ -217,6 +217,13 @@ export default function SettingsPage() {
     { href: "mailto:support@example.com", icon: <Mail className="h-5 w-5 text-muted-foreground" />, label: "Email" },
   ];
 
+  const hkDistricts = {
+    hong_kong_island: ['central_western', 'wan_chai', 'eastern', 'southern'],
+    kowloon: ['yau_tsim_mong', 'sham_shui_po', 'kowloon_city', 'wong_tai_sin', 'kwun_tong'],
+    new_territories: ['kwai_tsing', 'tsuen_wan', 'tuen_mun', 'yuen_long', 'north', 'tai_po', 'sha_tin', 'sai_kung', 'islands'],
+  };
+
+
   return (
     <>
       <Header title={t('header.title.settings')} showBackButton />
@@ -285,33 +292,14 @@ export default function SettingsPage() {
                                 <SelectValue placeholder={t('settings.profile.city.placeholder')} />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectGroup>
-                                    <SelectLabel>{t('district.group.hong_kong_island')}</SelectLabel>
-                                    <SelectItem value="central_western">{t('district.central_western')}</SelectItem>
-                                    <SelectItem value="wan_chai">{t('district.wan_chai')}</SelectItem>
-                                    <SelectItem value="eastern">{t('district.eastern')}</SelectItem>
-                                    <SelectItem value="southern">{t('district.southern')}</SelectItem>
-                                </SelectGroup>
-                                <SelectGroup>
-                                    <SelectLabel>{t('district.group.kowloon')}</SelectLabel>
-                                    <SelectItem value="yau_tsim_mong">{t('district.yau_tsim_mong')}</SelectItem>
-                                    <SelectItem value="sham_shui_po">{t('district.sham_shui_po')}</SelectItem>
-                                    <SelectItem value="kowloon_city">{t('district.kowloon_city')}</SelectItem>
-                                    <SelectItem value="wong_tai_sin">{t('district.wong_tai_sin')}</SelectItem>
-                                    <SelectItem value="kwun_tong">{t('district.kwun_tong')}</SelectItem>
-                                </SelectGroup>
-                                <SelectGroup>
-                                    <SelectLabel>{t('district.group.new_territories')}</SelectLabel>
-                                    <SelectItem value="kwai_tsing">{t('district.kwai_tsing')}</SelectItem>
-                                    <SelectItem value="tsuen_wan">{t('district.tsuen_wan')}</SelectItem>
-                                    <SelectItem value="tuen_mun">{t('district.tuen_mun')}</SelectItem>
-                                    <SelectItem value="yuen_long">{t('district.yuen_long')}</SelectItem>
-                                    <SelectItem value="north">{t('district.north')}</SelectItem>
-                                    <SelectItem value="tai_po">{t('district.tai_po')}</SelectItem>
-                                    <SelectItem value="sha_tin">{t('district.sha_tin')}</SelectItem>
-                                    <SelectItem value="sai_kung">{t('district.sai_kung')}</SelectItem>
-                                    <SelectItem value="islands">{t('district.islands')}</SelectItem>
-                                </SelectGroup>
+                                {Object.entries(hkDistricts).map(([groupKey, districtKeys]) => (
+                                    <SelectGroup key={groupKey}>
+                                        <SelectLabel>{t(`district.group.${groupKey as keyof typeof hkDistricts}`)}</SelectLabel>
+                                        {districtKeys.map(districtKey => (
+                                            <SelectItem key={districtKey} value={districtKey}>{t(`district.${districtKey}`)}</SelectItem>
+                                        ))}
+                                    </SelectGroup>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>

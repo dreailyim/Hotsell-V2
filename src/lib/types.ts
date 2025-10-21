@@ -20,7 +20,8 @@ export type Product = {
   description: string;
   condition: 'new' | 'like_new' | 'lightly_used' | 'good' | 'fair';
   shippingMethods: ShippingMethod[];
-  pickupLocation?: string;
+  pickupLocation?: string; // Legacy field for single location
+  pickupLocations?: string[]; // New field for multiple locations
   status?: 'reserved' | 'sold';
   createdAt: Timestamp | string; 
 };
@@ -142,3 +143,4 @@ export type SystemNotification = {
     
 
     
+

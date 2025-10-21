@@ -183,7 +183,7 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
     return null;
   }
   
-  const { id, name, price, image, images, favorites, status, condition, originalPrice } = liveProduct;
+  const { id, name, price, image, images, category, status, condition, originalPrice } = liveProduct;
   
   const safeImage = images?.[0] || image || 'https://picsum.photos/600/400';
   const safeName = name || '無標題商品';
@@ -256,7 +256,8 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
         </div>
         <CardContent className="p-3 flex-1 flex flex-col justify-between">
             <div>
-                <h3 className="font-semibold truncate text-sm">{safeName}</h3>
+                 <p className="text-xs text-muted-foreground">{t(`category.${category}` as any)}</p>
+                <h3 className="font-semibold truncate text-sm mt-1">{safeName}</h3>
                 <div className="mt-1">
                   <div className="flex justify-between items-center">
                       <p className={cn("text-base font-bold leading-tight", isDiscounted ? "text-[hsl(var(--sale-price))]" : "text-primary")}>
