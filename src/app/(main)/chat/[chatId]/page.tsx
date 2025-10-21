@@ -97,23 +97,21 @@ function BidDialog({
                           <AlertDialogTitle>
                              <div className="flex items-center gap-2">
                                 <ShieldAlert className="h-6 w-6 text-destructive" />
-                                注意交易安全
+                                {t('product_page.fraud_warning.title')}
                               </div>
                           </AlertDialogTitle>
                           <AlertDialogDescription className="text-left whitespace-pre-wrap">
-                            提防詐騙！請堅持使用平台內的聊天功能進行溝通，並盡量選擇公開場合進行面交。
-
-                            切勿點擊任何不明連結、或遵從對方指示下載任何應用程式，更不要隨意透露個人及信用卡資料。
+                            {t('product_page.fraud_warning.description')}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>取消</AlertDialogCancel>
+                          <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
                           <AlertDialogAction
                               className="bg-destructive hover:bg-destructive/90"
                               onClick={handleBidSubmit}
                               disabled={disabled}
                           >
-                            {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : '我已了解並繼續'}
+                            {disabled ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : t('product_page.fraud_warning.confirm')}
                           </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
