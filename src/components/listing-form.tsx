@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
-import { Upload, Wand2, Loader2, X, Plus } from 'lucide-react';
+import { Upload, Wand2, Loader2, X, Plus, ChevronsUpDown } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,10 @@ import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import type { ShippingMethod } from '@/lib/types';
 import { useTranslation } from '@/hooks/use-translation';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 
 const MAX_IMAGES = 5;
 
@@ -54,15 +58,15 @@ const formSchema = z.object({
   shippingMethods: z.array(z.string()).refine(value => value.some(item => item), {
     message: "您必須至少選擇一種交收方式。",
   }),
-  pickupLocation: z.string().optional(),
+  pickupLocations: z.array(z.string()).optional(),
 }).refine(data => {
     if (data.shippingMethods.includes('面交')) {
-      return data.pickupLocation && data.pickupLocation.trim().length > 0;
+      return data.pickupLocations && data.pickupLocations.length > 0;
     }
     return true;
 }, {
-    message: '請填寫交收地點',
-    path: ['pickupLocation'],
+    message: '請至少選擇一個交收地點',
+    path: ['pickupLocations'],
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -75,11 +79,11 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
   });
 
   const mtrLines = {
-    island_line: ['kennedy_town', 'hku', 'sai_ying_pun', 'sheung_wan', 'central', 'wan_chai', 'causeway_bay', 'tin_hau', 'fortress_hill', 'north_point', 'tai_koo', 'sai_wan_ho', 'shau_kei_wan', 'heng_fa_chuen', 'chai_wan'],
-    tsuen_wan_line: ['admiralty', 'tsim_sha_tsui', 'jordan', 'yau_ma_tei', 'mong_kok', 'prince_edward', 'sham_shui_po', 'cheung_sha_wan', 'lai_chi_kok', 'mei_foo', 'lai_king', 'kwai_fong', 'kwai_hing', 'tai_wo_hau', 'tsuen_wan'],
+    island_line: ['kennedy_town', 'hku', 'sai_ying_pun', 'sheung_wan', 'central', 'admiralty', 'wan_chai', 'causeway_bay', 'tin_hau', 'fortress_hill', 'north_point', 'quarry_bay', 'tai_koo', 'sai_wan_ho', 'shau_kei_wan', 'heng_fa_chuen', 'chai_wan'],
+    tsuen_wan_line: ['tsim_sha_tsui', 'jordan', 'yau_ma_tei', 'mong_kok', 'prince_edward', 'sham_shui_po', 'cheung_sha_wan', 'lai_chi_kok', 'mei_foo', 'lai_king', 'kwai_fong', 'kwai_hing', 'tai_wo_hau', 'tsuen_wan'],
     kwun_tong_line: ['whampoa', 'ho_man_tin', 'shek_kip_mei', 'kowloon_tong', 'lok_fu', 'wong_tai_sin', 'diamond_hill', 'choi_hung', 'kowloon_bay', 'ngau_tau_kok', 'kwun_tong', 'lam_tin', 'yau_tong', 'tiu_keng_leng'],
     south_island_line: ['south_horizons', 'lei_tung', 'wong_chuk_hang', 'ocean_park'],
-    tseung_kwan_o_line: ['quarry_bay', 'tseung_kwan_o', 'hang_hau', 'po_lam', 'lohask_park'],
+    tseung_kwan_o_line: ['tseung_kwan_o', 'hang_hau', 'po_lam', 'lohask_park'],
     tung_chung_line: ['hong_kong', 'kowloon', 'olympic', 'nam_cheong', 'tsing_yi', 'sunny_bay', 'tung_chung'],
     tuen_ma_line: ['wu_kai_sha', 'ma_on_shan', 'heng_on', 'tai_shui_hang', 'shek_mun', 'city_one', 'sha_tin_wai', 'che_kung_temple', 'tai_wai', 'hin_keng', 'kai_tak', 'sung_wong_toi', 'to_kwa_wan', 'hung_hom', 'east_tsim_sha_tsui', 'austin', 'tsuen_wan_west', 'kam_sheung_road', 'yuen_long', 'long_ping', 'tin_shui_wai', 'siu_hong', 'tuen_mun'],
     east_rail_line: ['exhibition_centre', 'mong_kok_east', 'sha_tin', 'fo_tan', 'racecourse', 'university', 'tai_po_market', 'tai_wo', 'fanling', 'sheung_shui', 'lo_wu', 'lok_ma_chau'],
@@ -91,32 +95,85 @@ const ShippingMethodWatcher = ({ control, setValue }: { control: any, setValue: 
     shippingMethods?.includes('面交') && (
       <FormField
         control={control}
-        name="pickupLocation"
+        name="pickupLocations"
         render={({ field }) => (
-          <FormItem>
+          <FormItem className="flex flex-col">
             <FormLabel>{t('listing_form.location.label')}</FormLabel>
-            <div className="flex flex-col sm:flex-row items-center gap-2">
-                <Select onValueChange={(value) => field.onChange(value)} defaultValue={field.value}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
-                        <SelectValue placeholder={t('listing_form.location.placeholder')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                        {Object.entries(mtrLines).map(([lineKey, stations]) => (
-                            <SelectGroup key={lineKey}>
-                                <SelectLabel>{t(`mtr_lines.${lineKey as keyof typeof mtrLines}`)}</SelectLabel>
-                                {stations.map(stationKey => (
-                                    <SelectItem key={`${lineKey}-${stationKey}`} value={t(`mtr_stations.${stationKey}`)}>
-                                        {t(`mtr_stations.${stationKey}`)}
-                                    </SelectItem>
-                                ))}
-                            </SelectGroup>
-                        ))}
-                    </SelectContent>
-                </Select>
-                <FormControl>
-                  <Input placeholder={t('listing_form.location.details_placeholder')} {...field} />
-                </FormControl>
-            </div>
+              <Popover>
+                  <PopoverTrigger asChild>
+                      <FormControl>
+                          <Button
+                              variant="outline"
+                              role="combobox"
+                              className={cn(
+                                  "w-full justify-between",
+                                  !field.value?.length && "text-muted-foreground"
+                              )}
+                          >
+                              {t('listing_form.location.placeholder')}
+                              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                      </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[--radix-popover-trigger-width] p-0">
+                      <Accordion type="multiple" className="w-full">
+                          <ScrollArea className="h-72">
+                              {Object.entries(mtrLines).map(([lineKey, stations]) => (
+                                  <AccordionItem value={lineKey} key={lineKey}>
+                                      <AccordionTrigger className="px-4 py-2 text-sm">
+                                          {t(`mtr_lines.${lineKey as keyof typeof mtrLines}`)}
+                                      </AccordionTrigger>
+                                      <AccordionContent>
+                                          <div className="flex flex-col space-y-1 pl-8 pr-4">
+                                              {stations.map(stationKey => {
+                                                  const stationName = t(`mtr_stations.${stationKey}`);
+                                                  return (
+                                                      <FormItem key={stationKey} className="flex flex-row items-start space-x-3 space-y-0 py-2">
+                                                          <FormControl>
+                                                              <Checkbox
+                                                                  checked={field.value?.includes(stationName)}
+                                                                  onCheckedChange={(checked) => {
+                                                                      const currentValue = field.value || [];
+                                                                      return checked
+                                                                          ? field.onChange([...currentValue, stationName])
+                                                                          : field.onChange(currentValue.filter(value => value !== stationName));
+                                                                  }}
+                                                              />
+                                                          </FormControl>
+                                                          <FormLabel className="font-normal text-sm">
+                                                              {stationName}
+                                                          </FormLabel>
+                                                      </FormItem>
+                                                  );
+                                              })}
+                                          </div>
+                                      </AccordionContent>
+                                  </AccordionItem>
+                              ))}
+                          </ScrollArea>
+                      </Accordion>
+                  </PopoverContent>
+              </Popover>
+              <div className="pt-2">
+                {field.value && field.value.length > 0 ? (
+                  <div className="flex gap-1 flex-wrap">
+                    {field.value.map(location => (
+                      <Badge
+                        variant="secondary"
+                        key={location}
+                        className="cursor-pointer"
+                        onClick={() => {
+                            const currentValue = field.value || [];
+                            field.onChange(currentValue.filter(value => value !== location));
+                        }}
+                      >
+                        {location}
+                        <X className="ml-1 h-3 w-3" />
+                      </Badge>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
             <FormMessage />
           </FormItem>
         )}
@@ -150,7 +207,7 @@ export function ListingForm() {
       price: 0,
       condition: undefined,
       shippingMethods: [],
-      pickupLocation: '',
+      pickupLocations: [],
       productDescription: '',
     },
   });
@@ -260,7 +317,8 @@ export function ListingForm() {
             originalPrice: values.price,
             condition: values.condition,
             shippingMethods: values.shippingMethods,
-            pickupLocation: values.shippingMethods.includes('面交') ? values.pickupLocation : '',
+            pickupLocation: values.shippingMethods.includes('面交') ? (values.pickupLocations || []).join(', ') : '',
+            pickupLocations: values.shippingMethods.includes('面交') ? values.pickupLocations : [],
             description: form.getValues('productDescription'),
             images: imageUrls,
             image: imageUrls[0], // For legacy compatibility
