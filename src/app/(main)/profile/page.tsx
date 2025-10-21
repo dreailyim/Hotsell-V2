@@ -4,8 +4,8 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
-import { Flame } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { Logo } from '@/components/logo';
 
 /**
  * This page acts as a redirector.
@@ -35,7 +35,7 @@ export default function ProfileRedirectPage() {
   return (
     <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center gap-4">
-            <Flame className="h-16 w-16 text-primary animate-burn" />
+            <Logo className="h-16 w-16" />
             <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
         </div>
     </div>

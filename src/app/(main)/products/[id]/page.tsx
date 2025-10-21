@@ -57,7 +57,6 @@ import {
   Trophy,
   BadgeCheck,
   ShieldCheck,
-  Flame,
   ChevronLeft,
   ChevronRight,
   X,
@@ -74,6 +73,7 @@ import { useScrollDirection } from '@/hooks/use-scroll-direction';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTranslation } from '@/hooks/use-translation';
+import { Logo } from '@/components/logo';
 
 
 // Reusable BidDialog component for initial bids and re-bids
@@ -471,7 +471,7 @@ const findOrCreateConversation = async (): Promise<string | null> => {
     return (
       <div className="flex h-screen items-center justify-center">
         <div className="flex flex-col items-center justify-center gap-4">
-            <Flame className="h-16 w-16 text-primary animate-burn" />
+            <Logo className="h-16 w-16" />
             <p className="text-muted-foreground animate-pulse">刪除中...</p>
         </div>
       </div>

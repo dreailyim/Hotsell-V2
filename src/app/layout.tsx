@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   title: 'HotSell',
   description: 'A secondhand marketplace app.',
   manifest: '/manifest.webmanifest',
+  icons: {
+    icon: '/logo.svg',
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

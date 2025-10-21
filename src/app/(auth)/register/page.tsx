@@ -17,10 +17,11 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { FirebaseError } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Flame } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslation } from '@/hooks/use-translation';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { Logo } from '@/components/logo';
 
 export default function RegisterPage() {
   const { user, loading: authLoading, signUp } = useAuth();
@@ -96,7 +97,7 @@ export default function RegisterPage() {
      return (
         <div className="flex min-h-screen items-center justify-center">
             <div className="flex flex-col items-center justify-center gap-4">
-                <Flame className="h-16 w-16 text-primary animate-burn" />
+                <Logo className="h-16 w-16" />
                 <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
             </div>
         </div>
@@ -107,7 +108,7 @@ export default function RegisterPage() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <div className="w-full max-w-md space-y-4">
         <div className="flex flex-col items-center justify-center space-y-2">
-            <Flame className="h-12 w-12 text-primary animate-burn" />
+            <Logo className="h-12 w-12" />
             <h1 className="text-2xl font-bold tracking-tight text-primary">HotSell</h1>
         </div>
         <Card>
