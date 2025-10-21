@@ -6,8 +6,8 @@ import { ListingForm } from '@/components/listing-form';
 import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { Flame } from 'lucide-react';
 import { useTranslation } from '@/hooks/use-translation';
+import { Logo } from '@/components/logo';
 
 export default function ListPage() {
     const { user, loading } = useAuth();
@@ -24,7 +24,7 @@ export default function ListPage() {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="flex flex-col items-center justify-center gap-4">
-                    <Flame className="h-16 w-16 text-primary animate-burn" />
+                    <Logo className="h-16 w-16" />
                     <p className="text-muted-foreground animate-pulse">{t('loading')}</p>
                 </div>
             </div>

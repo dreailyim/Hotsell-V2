@@ -2,7 +2,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Settings, Search as SearchIcon, X, Flame, LogIn } from 'lucide-react';
+import { ArrowLeft, Settings, Search as SearchIcon, X, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/use-auth';
@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { useEffect, useState } from 'react';
 import { useTranslation } from '@/hooks/use-translation';
+import { Logo } from '../logo';
 
 type HeaderProps = {
   showSearch?: boolean;
@@ -147,7 +148,7 @@ export function Header({
             </Button>
           ) : (
              <div className="flex items-center gap-2">
-                <Flame className="h-7 w-7 text-primary animate-burn" />
+                <Logo className="h-7 w-7" />
             </div>
           )}
         </div>
