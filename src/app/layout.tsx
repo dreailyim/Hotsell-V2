@@ -16,8 +16,8 @@ export const metadata: Metadata = {
   description: 'A secondhand marketplace app.',
   manifest: '/manifest.webmanifest',
   icons: {
-    icon: '/logo.svg',
-    apple: '/logo.svg',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 };
 
