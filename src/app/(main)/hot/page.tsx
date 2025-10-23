@@ -44,13 +44,16 @@ export default function HotPage() {
         const productsRef = collection(db, 'products');
         const q = query(
             productsRef, 
-            where('visibility', 'in', ['public', null]),
             orderBy('favorites', 'desc'), 
             limit(20)
         );
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
+             // Client-side filtering for visibility
+            if (data.visibility === 'hidden') {
+                return null;
+            }
             const createdAt = data.createdAt instanceof Timestamp 
                 ? data.createdAt.toDate().toISOString() 
                 : new Date().toISOString();
@@ -60,7 +63,7 @@ export default function HotPage() {
                 ...data,
                 createdAt,
             } as Product;
-        });
+        }).filter((p): p is Product => p !== null);;
         setProducts(productsData);
       } catch (err) {
         console.error("Error fetching hot products: ", err);

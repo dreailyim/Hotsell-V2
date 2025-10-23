@@ -131,14 +131,14 @@ function HomePageContent() {
               where('name_lowercase', '<=', searchTermLower + '\uf8ff')
           );
         } else {
-          q = query(productsRef, where('visibility', 'in', ['public', null]), orderBy('createdAt', 'desc'), limit(20));
+          q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
         }
 
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
-            // Filter client-side for search to avoid complex indexes if visibility is not always present
-            if (searchTerm && data.visibility === 'hidden') {
+            // Client-side filtering for visibility
+            if (data.visibility === 'hidden') {
                 return null;
             }
             const createdAt = data.createdAt instanceof Timestamp 
