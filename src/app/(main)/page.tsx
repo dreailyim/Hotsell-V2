@@ -127,12 +127,13 @@ function HomePageContent() {
         if (searchTerm) {
           const searchTermLower = searchTerm.toLowerCase();
           q = query(productsRef, 
+              where('visibility', '==', 'public'),
               orderBy('name_lowercase'), 
               startAt(searchTermLower), 
               endAt(searchTermLower + '\uf8ff')
           );
         } else {
-          q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
+          q = query(productsRef, where('visibility', '==', 'public'), orderBy('createdAt', 'desc'), limit(20));
         }
 
         const querySnapshot = await getDocs(q);

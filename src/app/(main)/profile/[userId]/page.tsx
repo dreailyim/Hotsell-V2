@@ -3,7 +3,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -151,6 +151,7 @@ const TabIndicator = ({ tabsListRef, activeTab }: { tabsListRef: React.RefObject
 export default function UserProfilePage() {
   const { user: currentUser } = useAuth();
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const userId = params.userId as string;
   const { toast } = useToast();
@@ -186,14 +187,11 @@ export default function UserProfilePage() {
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const searchParams = new URLSearchParams(window.location.search);
-        const tab = searchParams.get('tab');
-        if (tab && tabItems.some(t => t.value === tab)) {
-            setActiveTab(tab);
-        }
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabItems.some(t => t.value === tabParam)) {
+        setActiveTab(tabParam);
     }
-  }, [tabItems]);
+  }, [searchParams, tabItems]);
 
 
   useEffect(() => {
@@ -248,7 +246,11 @@ export default function UserProfilePage() {
      setLoadingFavorites(true);
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('favoritedBy', 'array-contains', userId));
+        const q = query(
+            productsRef, 
+            where('favoritedBy', 'array-contains', userId),
+            where('visibility', '==', 'public')
+        );
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
@@ -261,7 +263,7 @@ export default function UserProfilePage() {
             ...data,
             createdAt,
             } as Product;
-        }).filter(p => p.visibility !== 'hidden'); // Also hide hidden items from favorites
+        });
         setFavoriteProducts(productsData);
     } catch (error) {
          console.error("Error fetching favorite products:", error);
@@ -307,10 +309,19 @@ export default function UserProfilePage() {
     
     setLoadingUserProducts(true);
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
+    let q;
+
+    // If it's the owner's profile, fetch all products.
+    // If it's another user's profile, only fetch public products.
+    if (isOwnProfile) {
+        q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
+    } else {
+        q = query(productsRef, where('sellerId', '==', userId), where('visibility', '==', 'public'), orderBy('createdAt', 'desc'));
+    }
+
 
     const unsubscribeProducts = onSnapshot(q, (querySnapshot) => {
-      let productsData = querySnapshot.docs.map(doc => {
+      const productsData = querySnapshot.docs.map(doc => {
         const data = doc.data();
         const createdAt = data.createdAt instanceof Timestamp 
           ? data.createdAt.toDate().toISOString() 
@@ -323,11 +334,6 @@ export default function UserProfilePage() {
         } as Product;
       });
 
-      // If not the owner, filter out hidden products.
-      if (currentUser?.uid !== userId) {
-        productsData = productsData.filter(p => p.visibility !== 'hidden');
-      }
-
       setUserProducts(productsData);
       setLoadingUserProducts(false);
     }, (error) => {
@@ -336,7 +342,7 @@ export default function UserProfilePage() {
     });
     
     return () => unsubscribeProducts();
-  }, [userId, currentUser?.uid]);
+  }, [userId, isOwnProfile]);
   
   useEffect(() => {
     if (!userId) return;
