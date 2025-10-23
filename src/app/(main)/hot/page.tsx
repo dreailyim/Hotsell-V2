@@ -44,7 +44,7 @@ export default function HotPage() {
         const productsRef = collection(db, 'products');
         const q = query(
             productsRef, 
-            where('visibility', '==', 'public'),
+            where('visibility', 'in', ['public', null]),
             orderBy('favorites', 'desc'), 
             limit(20)
         );
