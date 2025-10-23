@@ -1,26 +1,28 @@
 {
-  "name": "HotSell",
-  "short_name": "HotSell",
-  "start_url": "/",
-  "display": "standalone",
-  "background_color": "#1c1c1e",
-  "theme_color": "#ff3b30",
-  "icons": [
-    {
-      "src": "/logoap.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "/logo-maskable.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
-    },
-    {
-      "src": "/logoap-512.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+    "name": "HotSell",
+    "short_name": "HotSell",
+    "start_url": "/",
+    "display": "standalone",
+    "background_color": "#222222",
+    "theme_color": "#FF4500",
+    "icons": [
+        {
+            "src": "logoap.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "logoap-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "logo-maskable.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ]
 }
