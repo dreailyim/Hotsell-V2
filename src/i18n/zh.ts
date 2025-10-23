@@ -283,7 +283,7 @@ export const zh = {
   'listing_form.edit_success': '更新成功！',
   'listing_form.edit_fail': '更新失败',
   
-  // Product Page
+  // Product Page & Card
   'product_page.bid': '出價',
   'product_page.bid_dialog.title': '您想出價多少？',
   'product_page.bid_dialog.price': '價格',
@@ -316,6 +316,7 @@ export const zh = {
   'product_page.reserve': '保留',
   'product_page.mark_as_sold': '售出',
   'product_page.chat': '傾傾',
+  'product_card.hidden': '已隱藏',
 
   // Categories
   'category.women_fashion': '女裝',

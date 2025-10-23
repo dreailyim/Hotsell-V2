@@ -44,8 +44,6 @@ export default function HotPage() {
         const productsRef = collection(db, 'products');
         const q = query(
             productsRef, 
-            where('visibility', '!=', 'hidden'),
-            orderBy('visibility', 'desc'), // Firestore requires an orderBy when using a not-equal-to filter
             orderBy('favorites', 'desc'), 
             limit(20)
         );
