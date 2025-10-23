@@ -2,19 +2,17 @@
 import { en } from './en';
 import { zh } from './zh';
 
-// This dynamically creates a union type of all possible keys.
-// It also supports nested keys with dot notation.
-type PathsToStringProps<T> = T extends string ? [] : {
-    [K in Extract<keyof T, string>]: [K, ...PathsToStringProps<T[K]>]
-}[Extract<keyof T, string>];
+// This is a simplified type definition to avoid TypeScript's "excessive stack depth" error
+// with very large and deeply nested translation objects.
 
-type Join<T extends string[], D extends string> =
-    T extends [] ? never :
-    T extends [infer F] ? F :
-    T extends [infer F, ...infer R] ?
-    F extends string ?
-    `${F}${D}${Join<Extract<R, string[]>, D>}` : never : string;
-
-type TranslationKeys<T> = Join<PathsToStringProps<T>, '.'>
-
-export type TranslationKey = TranslationKeys<typeof en> | TranslationKeys<typeof zh>;
+// It includes all top-level keys from both language files and uses template literal types
+// for dynamic keys like districts and MTR stations.
+export type TranslationKey = 
+  keyof typeof en | 
+  keyof typeof zh | 
+  `category.${string}` |
+  `condition.${string}` |
+  `district.group.${string}` |
+  `district.${string}` |
+  `mtr_lines.${string}` |
+  `mtr_stations.${string}`;
