@@ -23,6 +23,7 @@ export type Product = {
   pickupLocation?: string; // Legacy field for single location
   pickupLocations?: string[]; // New field for multiple locations
   status?: 'reserved' | 'sold';
+  visibility?: 'public' | 'hidden';
   createdAt: Timestamp | string; 
 };
 
@@ -139,8 +140,3 @@ export type SystemNotification = {
         price?: number;
     };
 };
-
-    
-
-    
-

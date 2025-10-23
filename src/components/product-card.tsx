@@ -4,7 +4,7 @@
 import { useTransition, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Heart, Share2, Star } from 'lucide-react';
+import { Heart, Share2, Star, EyeOff } from 'lucide-react';
 import type { Product, FullUser } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import { useTranslation } from '@/hooks/use-translation';
 
 type ProductCardProps = {
   product: Product;
+  isManaging?: boolean;
 };
 
 // This map helps to handle both old (Chinese) and new (English) condition values from the database.
@@ -43,7 +44,7 @@ const conditionMap: { [key: string]: Product['condition'] } = {
 };
 
 
-export function ProductCard({ product: initialProduct }: ProductCardProps) {
+export function ProductCard({ product: initialProduct, isManaging = false }: ProductCardProps) {
   const { user, loading: authLoading } = useAuth();
   const { t } = useTranslation();
   const { toast } = useToast();
@@ -183,8 +184,16 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
     return null;
   }
   
-  const { id, name, price, image, images, category, status, condition, originalPrice } = liveProduct;
+  const { id, name, price, image, images, category, status, condition, originalPrice, visibility, sellerId } = liveProduct;
   
+  const isOwner = user?.uid === sellerId;
+  const isHidden = visibility === 'hidden';
+  
+  // Final visibility check
+  if (isHidden && !isOwner) {
+    return null;
+  }
+
   const safeImage = images?.[0] || image || 'https://picsum.photos/600/400';
   const safeName = name || '無標題商品';
   
@@ -214,6 +223,12 @@ export function ProductCard({ product: initialProduct }: ProductCardProps) {
                   <Badge className="text-[10px] px-1.5 py-0.5 font-semibold z-10 bg-destructive text-destructive-foreground">
                       特價中
                   </Badge>
+                )}
+                {(isManaging || isOwner) && isHidden && (
+                    <Badge variant="outline" className="text-[10px] bg-black/60 text-white border-none px-1.5 py-0.5 font-semibold z-10">
+                        <EyeOff className="h-3 w-3 mr-1" />
+                        {t('product_card.hidden')}
+                    </Badge>
                 )}
                 {status && (
                     <Badge

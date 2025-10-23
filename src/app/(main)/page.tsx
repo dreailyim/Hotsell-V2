@@ -127,9 +127,8 @@ function HomePageContent() {
         if (searchTerm) {
           const searchTermLower = searchTerm.toLowerCase();
           q = query(productsRef, 
-              orderBy('name_lowercase'), 
-              startAt(searchTermLower), 
-              endAt(searchTermLower + '\uf8ff')
+              where('name_lowercase', '>=', searchTermLower),
+              where('name_lowercase', '<=', searchTermLower + '\uf8ff')
           );
         } else {
           q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
@@ -138,6 +137,10 @@ function HomePageContent() {
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
+            // Client-side filtering for visibility
+            if (data.visibility === 'hidden') {
+                return null;
+            }
             const createdAt = data.createdAt instanceof Timestamp 
                 ? data.createdAt.toDate().toISOString() 
                 : new Date().toISOString();
@@ -147,7 +150,8 @@ function HomePageContent() {
                 ...data,
                 createdAt,
             } as Product;
-        });
+        }).filter((p): p is Product => p !== null);
+
         setProducts(productsData);
       } catch (error) {
         console.error("Error fetching products: ", error);

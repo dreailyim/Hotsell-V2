@@ -174,8 +174,15 @@ export const zh = {
   'profile.empty.favorites': '您尚未收藏任何商品',
   'profile.empty.reviews.own': '您尚未收到任何評價',
   'profile.empty.reviews.other': '此用戶尚未收到任何評價',
-  'profile.management.sold': '已售出 ({count})',
-  'profile.management.delete': '刪除 ({count})',
+  'profile.management.actions': '操作',
+  'profile.management.sold': '標示為已售出',
+  'profile.management.hide': '隱藏',
+  'profile.management.unhide': '取消隱藏',
+  'profile.management.delete': '刪除',
+  'profile.management.toast.sold_success': '已將 {count} 件產品標示為已售出。',
+  'profile.management.toast.hide_success': '已成功隱藏 {count} 件產品。',
+  'profile.management.toast.unhide_success': '已重新發佈 {count} 件產品。',
+  'profile.management.toast.delete_success': '已成功刪除 {count} 件產品。',
   'profile.management.select_all': '全選',
   'profile.management.unselect_all': '取消全選',
   'profile.delete_dialog.title': '確定要刪除嗎？',
@@ -276,7 +283,7 @@ export const zh = {
   'listing_form.edit_success': '更新成功！',
   'listing_form.edit_fail': '更新失败',
   
-  // Product Page
+  // Product Page & Card
   'product_page.bid': '出價',
   'product_page.bid_dialog.title': '您想出價多少？',
   'product_page.bid_dialog.price': '價格',
@@ -309,6 +316,7 @@ export const zh = {
   'product_page.reserve': '保留',
   'product_page.mark_as_sold': '售出',
   'product_page.chat': '傾傾',
+  'product_card.hidden': '已隱藏',
 
   // Categories
   'category.women_fashion': '女裝',

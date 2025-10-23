@@ -176,8 +176,15 @@ export const en = {
   'profile.empty.favorites': 'You have not favorited any items yet.',
   'profile.empty.reviews.own': 'You have not received any reviews yet.',
   'profile.empty.reviews.other': 'This user has not received any reviews yet.',
-  'profile.management.sold': 'Sold ({count})',
-  'profile.management.delete': 'Delete ({count})',
+  'profile.management.actions': 'Actions',
+  'profile.management.sold': 'Mark as Sold',
+  'profile.management.hide': 'Hide',
+  'profile.management.unhide': 'Unhide',
+  'profile.management.delete': 'Delete',
+  'profile.management.toast.sold_success': '{count} item(s) marked as sold.',
+  'profile.management.toast.hide_success': '{count} item(s) hidden.',
+  'profile.management.toast.unhide_success': '{count} item(s) unhidden.',
+  'profile.management.toast.delete_success': '{count} item(s) deleted.',
   'profile.management.select_all': 'Select All',
   'profile.management.unselect_all': 'Deselect All',
   'profile.delete_dialog.title': 'Are you sure you want to delete?',
@@ -277,7 +284,7 @@ export const en = {
   'listing_form.edit_success': 'Updated successfully!',
   'listing_form.edit_fail': 'Update failed',
   
-  // Product Page
+  // Product Page & Card
   'product_page.bid': 'Bid',
   'product_page.bid_dialog.title': 'How much do you want to bid?',
   'product_page.bid_dialog.price': 'Price',
@@ -310,6 +317,7 @@ export const en = {
   'product_page.reserve': 'Reserve',
   'product_page.mark_as_sold': 'Sold',
   'product_page.chat': 'Chat',
+  'product_card.hidden': 'Hidden',
 
   // Categories
   'category.women_fashion': 'Women\'s Fashion',

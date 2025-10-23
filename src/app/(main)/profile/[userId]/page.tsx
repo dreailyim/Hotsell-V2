@@ -3,13 +3,13 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef, useTransition } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { Header } from '@/components/layout/header';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin, EyeOff, Eye, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -38,6 +38,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/hooks/use-translation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function ProductGridSkeleton() {
     return (
@@ -86,7 +93,7 @@ function ProductGrid({
         <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {products.map((product) => (
                 <div key={product.id} className="relative mb-4 break-inside-avoid" onClick={() => isManaging && onToggleSelect?.(product.id)}>
-                    <ProductCard product={product} />
+                    <ProductCard product={product} isManaging={isManaging} />
                     {isManaging && (
                         <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer">
                            {selectedProducts?.has(product.id) ? (
@@ -144,6 +151,7 @@ const TabIndicator = ({ tabsListRef, activeTab }: { tabsListRef: React.RefObject
 export default function UserProfilePage() {
   const { user: currentUser } = useAuth();
   const params = useParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const userId = params.userId as string;
   const { toast } = useToast();
@@ -179,14 +187,11 @@ export default function UserProfilePage() {
   const tabsListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-        const searchParams = new URLSearchParams(window.location.search);
-        const tab = searchParams.get('tab');
-        if (tab && tabItems.some(t => t.value === tab)) {
-            setActiveTab(tab);
-        }
+    const tabParam = searchParams.get('tab');
+    if (tabParam && tabItems.some(t => t.value === tabParam)) {
+        setActiveTab(tabParam);
     }
-  }, [tabItems]);
+  }, [searchParams, tabItems]);
 
 
   useEffect(() => {
@@ -241,7 +246,11 @@ export default function UserProfilePage() {
      setLoadingFavorites(true);
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, where('favoritedBy', 'array-contains', userId));
+        const q = query(
+            productsRef, 
+            where('favoritedBy', 'array-contains', userId),
+            where('visibility', '==', 'public')
+        );
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
@@ -300,7 +309,16 @@ export default function UserProfilePage() {
     
     setLoadingUserProducts(true);
     const productsRef = collection(db, 'products');
-    const q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
+    let q;
+
+    // If it's the owner's profile, fetch all products.
+    // If it's another user's profile, only fetch public products.
+    if (isOwnProfile) {
+        q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
+    } else {
+        q = query(productsRef, where('sellerId', '==', userId), where('visibility', '==', 'public'), orderBy('createdAt', 'desc'));
+    }
+
 
     const unsubscribeProducts = onSnapshot(q, (querySnapshot) => {
       const productsData = querySnapshot.docs.map(doc => {
@@ -315,6 +333,7 @@ export default function UserProfilePage() {
           createdAt,
         } as Product;
       });
+
       setUserProducts(productsData);
       setLoadingUserProducts(false);
     }, (error) => {
@@ -323,7 +342,7 @@ export default function UserProfilePage() {
     });
     
     return () => unsubscribeProducts();
-  }, [userId]);
+  }, [userId, isOwnProfile]);
   
   useEffect(() => {
     if (!userId) return;
@@ -393,7 +412,7 @@ export default function UserProfilePage() {
     }
   };
   
-  const handleBulkAction = (action: 'sold' | 'delete') => {
+  const handleBulkAction = (action: 'sold' | 'delete' | 'hide' | 'unhide') => {
     if (selectedProducts.size === 0) return;
 
     startTransition(async () => {
@@ -401,21 +420,31 @@ export default function UserProfilePage() {
         const productIds = Array.from(selectedProducts);
 
         try {
-            if (action === 'sold') {
-                productIds.forEach(id => {
-                    const productRef = doc(db, 'products', id);
+            productIds.forEach(id => {
+                const productRef = doc(db, 'products', id);
+                if (action === 'sold') {
                     batch.update(productRef, { status: 'sold' });
-                });
-                await batch.commit();
-                toast({ title: `已將 ${productIds.length} 件產品標示為已售出` });
-            } else if (action === 'delete') {
-                 productIds.forEach(id => {
-                    const productRef = doc(db, 'products', id);
+                } else if (action === 'delete') {
                     batch.delete(productRef);
-                });
-                await batch.commit();
-                toast({ title: `已成功刪除 ${productIds.length} 件產品` });
+                } else if (action === 'hide') {
+                    batch.update(productRef, { visibility: 'hidden' });
+                } else if (action === 'unhide') {
+                    batch.update(productRef, { visibility: 'public' });
+                }
+            });
+            
+            await batch.commit();
+
+            let toastMessage = '';
+            const count = productIds.length;
+
+            switch(action) {
+                case 'sold': toastMessage = t('profile.management.toast.sold_success').replace('{count}', String(count)); break;
+                case 'delete': toastMessage = t('profile.management.toast.delete_success').replace('{count}', String(count)); break;
+                case 'hide': toastMessage = t('profile.management.toast.hide_success').replace('{count}', String(count)); break;
+                case 'unhide': toastMessage = t('profile.management.toast.unhide_success').replace('{count}', String(count)); break;
             }
+            toast({ title: toastMessage });
             
             setIsManaging(false);
             setSelectedProducts(new Set());
@@ -472,44 +501,35 @@ export default function UserProfilePage() {
             {selectedProducts.size === filteredUserProducts.length ? t('profile.management.unselect_all') : t('profile.management.select_all')}
         </Button>
         <div className="flex items-center gap-2">
-            <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => handleBulkAction('sold')}
-                disabled={isProcessing || selectedProducts.size === 0}
-            >
-                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
-                {t('profile.management.sold').replace('{count}', String(selectedProducts.size))}
-            </Button>
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button
-                        variant="destructive"
-                        className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
-                        disabled={isProcessing || selectedProducts.size === 0}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        {t('profile.management.delete').replace('{count}', String(selectedProducts.size))}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="rounded-full" disabled={isProcessing || selectedProducts.size === 0}>
+                        {t('profile.management.actions')}
+                        <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>{t('profile.delete_dialog.title')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('profile.delete_dialog.description').replace('{count}', String(selectedProducts.size))}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => handleBulkAction('delete')}
-                            className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
-                        >
-                            {t('profile.delete_dialog.confirm')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => handleBulkAction('sold')} disabled={isProcessing}>
+                        <PackageCheck className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.sold')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleBulkAction('hide')} disabled={isProcessing}>
+                        <EyeOff className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.hide')}</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => handleBulkAction('unhide')} disabled={isProcessing}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.unhide')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                           <Trash2 className="mr-2 h-4 w-4" />
+                           <span>{t('profile.management.delete')}</span>
+                        </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
       </div>
     </div>
@@ -701,7 +721,7 @@ export default function UserProfilePage() {
                           <div className="space-y-1">
                              <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">{t('profile.about.city')}</p>
-                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city}` as any) : t('district.not_set')}</p>
+                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city as any}`) : t('district.not_set')}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
@@ -733,7 +753,26 @@ export default function UserProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
-      {isOwnProfile && isManaging && <ManagementFooter />}
+      <AlertDialog>
+          {isOwnProfile && isManaging && <ManagementFooter />}
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>{t('profile.delete_dialog.title')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      {t('profile.delete_dialog.description').replace('{count}', String(selectedProducts.size))}
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                      onClick={() => handleBulkAction('delete')}
+                      className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                  >
+                      {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : t('profile.delete_dialog.confirm')}
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

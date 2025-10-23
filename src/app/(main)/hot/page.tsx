@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, limit, getDocs, Timestamp, where } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -42,10 +42,18 @@ export default function HotPage() {
       setError(null);
       try {
         const productsRef = collection(db, 'products');
-        const q = query(productsRef, orderBy('favorites', 'desc'), limit(20));
+        const q = query(
+            productsRef, 
+            orderBy('favorites', 'desc'), 
+            limit(20)
+        );
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
+             // Client-side filtering for visibility
+            if (data.visibility === 'hidden') {
+                return null;
+            }
             const createdAt = data.createdAt instanceof Timestamp 
                 ? data.createdAt.toDate().toISOString() 
                 : new Date().toISOString();
@@ -55,7 +63,7 @@ export default function HotPage() {
                 ...data,
                 createdAt,
             } as Product;
-        });
+        }).filter((p): p is Product => p !== null);;
         setProducts(productsData);
       } catch (err) {
         console.error("Error fetching hot products: ", err);
