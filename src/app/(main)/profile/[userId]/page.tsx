@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin, EyeOff } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -86,7 +86,7 @@ function ProductGrid({
         <div className="columns-2 md:columns-2 lg:columns-3 gap-2 md:gap-4 lg:gap-6">
             {products.map((product) => (
                 <div key={product.id} className="relative mb-4 break-inside-avoid" onClick={() => isManaging && onToggleSelect?.(product.id)}>
-                    <ProductCard product={product} />
+                    <ProductCard product={product} isManaging={isManaging} />
                     {isManaging && (
                         <div className="absolute inset-0 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer">
                            {selectedProducts?.has(product.id) ? (
@@ -254,7 +254,7 @@ export default function UserProfilePage() {
             ...data,
             createdAt,
             } as Product;
-        });
+        }).filter(p => p.visibility !== 'hidden'); // Also hide hidden items from favorites
         setFavoriteProducts(productsData);
     } catch (error) {
          console.error("Error fetching favorite products:", error);
@@ -303,7 +303,7 @@ export default function UserProfilePage() {
     const q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
 
     const unsubscribeProducts = onSnapshot(q, (querySnapshot) => {
-      const productsData = querySnapshot.docs.map(doc => {
+      let productsData = querySnapshot.docs.map(doc => {
         const data = doc.data();
         const createdAt = data.createdAt instanceof Timestamp 
           ? data.createdAt.toDate().toISOString() 
@@ -315,6 +315,12 @@ export default function UserProfilePage() {
           createdAt,
         } as Product;
       });
+
+      // If not the owner, filter out hidden products.
+      if (currentUser?.uid !== userId) {
+        productsData = productsData.filter(p => p.visibility !== 'hidden');
+      }
+
       setUserProducts(productsData);
       setLoadingUserProducts(false);
     }, (error) => {
@@ -323,7 +329,7 @@ export default function UserProfilePage() {
     });
     
     return () => unsubscribeProducts();
-  }, [userId]);
+  }, [userId, currentUser?.uid]);
   
   useEffect(() => {
     if (!userId) return;
@@ -393,7 +399,7 @@ export default function UserProfilePage() {
     }
   };
   
-  const handleBulkAction = (action: 'sold' | 'delete') => {
+  const handleBulkAction = (action: 'sold' | 'delete' | 'hide' | 'unhide') => {
     if (selectedProducts.size === 0) return;
 
     startTransition(async () => {
@@ -401,21 +407,29 @@ export default function UserProfilePage() {
         const productIds = Array.from(selectedProducts);
 
         try {
-            if (action === 'sold') {
-                productIds.forEach(id => {
-                    const productRef = doc(db, 'products', id);
+            productIds.forEach(id => {
+                const productRef = doc(db, 'products', id);
+                if (action === 'sold') {
                     batch.update(productRef, { status: 'sold' });
-                });
-                await batch.commit();
-                toast({ title: `已將 ${productIds.length} 件產品標示為已售出` });
-            } else if (action === 'delete') {
-                 productIds.forEach(id => {
-                    const productRef = doc(db, 'products', id);
+                } else if (action === 'delete') {
                     batch.delete(productRef);
-                });
-                await batch.commit();
-                toast({ title: `已成功刪除 ${productIds.length} 件產品` });
+                } else if (action === 'hide') {
+                    batch.update(productRef, { visibility: 'hidden' });
+                } else if (action === 'unhide') {
+                    batch.update(productRef, { visibility: 'public' });
+                }
+            });
+            
+            await batch.commit();
+
+            let toastMessage = '';
+            switch(action) {
+                case 'sold': toastMessage = `已將 ${productIds.length} 件產品標示為已售出`; break;
+                case 'delete': toastMessage = `已成功刪除 ${productIds.length} 件產品`; break;
+                case 'hide': toastMessage = `已成功隱藏 ${productIds.length} 件產品`; break;
+                case 'unhide': toastMessage = `已重新發佈 ${productIds.length} 件產品`; break;
             }
+            toast({ title: toastMessage });
             
             setIsManaging(false);
             setSelectedProducts(new Set());
@@ -479,7 +493,16 @@ export default function UserProfilePage() {
                 disabled={isProcessing || selectedProducts.size === 0}
             >
                 {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
-                {t('profile.management.sold').replace('{count}', String(selectedProducts.size))}
+                {t('profile.management.sold').replace('{count}', '')}
+            </Button>
+            <Button
+                variant="outline"
+                className="rounded-full"
+                onClick={() => handleBulkAction('hide')}
+                disabled={isProcessing || selectedProducts.size === 0}
+            >
+                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <EyeOff className="mr-2 h-4 w-4" />}
+                隱藏
             </Button>
             <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -489,7 +512,7 @@ export default function UserProfilePage() {
                         disabled={isProcessing || selectedProducts.size === 0}
                     >
                         <Trash2 className="mr-2 h-4 w-4" />
-                        {t('profile.management.delete').replace('{count}', String(selectedProducts.size))}
+                        {t('profile.management.delete').replace('{count}', '')}
                     </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>

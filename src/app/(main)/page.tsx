@@ -127,12 +127,14 @@ function HomePageContent() {
         if (searchTerm) {
           const searchTermLower = searchTerm.toLowerCase();
           q = query(productsRef, 
+              where('visibility', '!=', 'hidden'),
+              orderBy('visibility', 'desc'),
               orderBy('name_lowercase'), 
               startAt(searchTermLower), 
               endAt(searchTermLower + '\uf8ff')
           );
         } else {
-          q = query(productsRef, orderBy('createdAt', 'desc'), limit(20));
+          q = query(productsRef, where('visibility', '!=', 'hidden'), orderBy('visibility', 'desc'), orderBy('createdAt', 'desc'), limit(20));
         }
 
         const querySnapshot = await getDocs(q);
@@ -151,6 +153,21 @@ function HomePageContent() {
         setProducts(productsData);
       } catch (error) {
         console.error("Error fetching products: ", error);
+        // Fallback for when the composite index is not ready
+        if ((error as any).code === 'failed-precondition') {
+            console.warn("Firestore index not ready. Fetching without visibility filter.");
+            const fallbackQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(20));
+            const fallbackSnapshot = await getDocs(fallbackQuery);
+            const fallbackData = fallbackSnapshot.docs.map(doc => {
+                const data = doc.data();
+                const createdAt = data.createdAt instanceof Timestamp 
+                    ? data.createdAt.toDate().toISOString() 
+                    : new Date().toISOString();
+                return { id: doc.id, ...data, createdAt } as Product;
+            }).filter(p => p.visibility !== 'hidden');
+            setProducts(fallbackData);
+        }
+
       } finally {
         setLoadingProducts(false);
       }
