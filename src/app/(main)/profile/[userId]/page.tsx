@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin, EyeOff } from 'lucide-react';
+import { Star, Heart, MessageSquare, User, Ticket, Search, Settings, Edit, Loader2, PackageCheck, Trash2, CheckCircle2, Circle, DatabaseZap, ShieldCheck, CalendarDays, BadgeCheck, ShoppingBag, Trophy, Share2, ShieldAlert, MapPin, EyeOff, Eye, MoreHorizontal, ChevronDown } from 'lucide-react';
 import { ProductCard } from '@/components/product-card';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
@@ -38,6 +38,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useTranslation } from '@/hooks/use-translation';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 function ProductGridSkeleton() {
     return (
@@ -423,11 +430,13 @@ export default function UserProfilePage() {
             await batch.commit();
 
             let toastMessage = '';
+            const count = productIds.length;
+
             switch(action) {
-                case 'sold': toastMessage = `已將 ${productIds.length} 件產品標示為已售出`; break;
-                case 'delete': toastMessage = `已成功刪除 ${productIds.length} 件產品`; break;
-                case 'hide': toastMessage = `已成功隱藏 ${productIds.length} 件產品`; break;
-                case 'unhide': toastMessage = `已重新發佈 ${productIds.length} 件產品`; break;
+                case 'sold': toastMessage = t('profile.management.toast.sold_success').replace('{count}', String(count)); break;
+                case 'delete': toastMessage = t('profile.management.toast.delete_success').replace('{count}', String(count)); break;
+                case 'hide': toastMessage = t('profile.management.toast.hide_success').replace('{count}', String(count)); break;
+                case 'unhide': toastMessage = t('profile.management.toast.unhide_success').replace('{count}', String(count)); break;
             }
             toast({ title: toastMessage });
             
@@ -486,53 +495,35 @@ export default function UserProfilePage() {
             {selectedProducts.size === filteredUserProducts.length ? t('profile.management.unselect_all') : t('profile.management.select_all')}
         </Button>
         <div className="flex items-center gap-2">
-            <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => handleBulkAction('sold')}
-                disabled={isProcessing || selectedProducts.size === 0}
-            >
-                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <PackageCheck className="mr-2 h-4 w-4" />}
-                {t('profile.management.sold').replace('{count}', '')}
-            </Button>
-            <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => handleBulkAction('hide')}
-                disabled={isProcessing || selectedProducts.size === 0}
-            >
-                {isProcessing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <EyeOff className="mr-2 h-4 w-4" />}
-                隱藏
-            </Button>
-            <AlertDialog>
-                <AlertDialogTrigger asChild>
-                    <Button
-                        variant="destructive"
-                        className="rounded-full bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
-                        disabled={isProcessing || selectedProducts.size === 0}
-                    >
-                        <Trash2 className="mr-2 h-4 w-4" />
-                        {t('profile.management.delete').replace('{count}', '')}
+            <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="rounded-full" disabled={isProcessing || selectedProducts.size === 0}>
+                        {t('profile.management.actions')}
+                        <ChevronDown className="ml-2 h-4 w-4" />
                     </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>{t('profile.delete_dialog.title')}</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            {t('profile.delete_dialog.description').replace('{count}', String(selectedProducts.size))}
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-                        <AlertDialogAction
-                            onClick={() => handleBulkAction('delete')}
-                            className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
-                        >
-                            {t('profile.delete_dialog.confirm')}
-                        </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => handleBulkAction('sold')} disabled={isProcessing}>
+                        <PackageCheck className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.sold')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleBulkAction('hide')} disabled={isProcessing}>
+                        <EyeOff className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.hide')}</span>
+                    </DropdownMenuItem>
+                     <DropdownMenuItem onClick={() => handleBulkAction('unhide')} disabled={isProcessing}>
+                        <Eye className="mr-2 h-4 w-4" />
+                        <span>{t('profile.management.unhide')}</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-destructive focus:bg-destructive/10 focus:text-destructive">
+                           <Trash2 className="mr-2 h-4 w-4" />
+                           <span>{t('profile.management.delete')}</span>
+                        </DropdownMenuItem>
+                    </AlertDialogTrigger>
+                </DropdownMenuContent>
+            </DropdownMenu>
         </div>
       </div>
     </div>
@@ -724,7 +715,7 @@ export default function UserProfilePage() {
                           <div className="space-y-1">
                              <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">{t('profile.about.city')}</p>
-                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city}` as any) : t('district.not_set')}</p>
+                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city as any}`) : t('district.not_set')}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
@@ -756,7 +747,26 @@ export default function UserProfilePage() {
           </TabsContent>
         </Tabs>
       </div>
-      {isOwnProfile && isManaging && <ManagementFooter />}
+      <AlertDialog>
+          {isOwnProfile && isManaging && <ManagementFooter />}
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>{t('profile.delete_dialog.title')}</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      {t('profile.delete_dialog.description').replace('{count}', String(selectedProducts.size))}
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
+                  <AlertDialogAction
+                      onClick={() => handleBulkAction('delete')}
+                      className="bg-gradient-to-r from-orange-500 to-red-600 text-primary-foreground dark:text-black hover:opacity-90 transition-opacity"
+                  >
+                      {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : t('profile.delete_dialog.confirm')}
+                  </AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }
