@@ -249,12 +249,14 @@ export default function UserProfilePage() {
         const productsRef = collection(db, 'products');
         const q = query(
             productsRef, 
-            where('favoritedBy', 'array-contains', userId),
-            where('visibility', '==', 'public')
+            where('favoritedBy', 'array-contains', userId)
         );
         const querySnapshot = await getDocs(q);
         const productsData = querySnapshot.docs.map(doc => {
             const data = doc.data();
+            if (data.visibility === 'hidden') {
+                return null;
+            }
             const createdAt = data.createdAt instanceof Timestamp 
             ? data.createdAt.toDate().toISOString() 
             : new Date().toISOString();
@@ -264,7 +266,7 @@ export default function UserProfilePage() {
             ...data,
             createdAt,
             } as Product;
-        });
+        }).filter((p): p is Product => p !== null);
         setFavoriteProducts(productsData);
     } catch (error) {
          console.error("Error fetching favorite products:", error);
@@ -312,8 +314,6 @@ export default function UserProfilePage() {
     const productsRef = collection(db, 'products');
     let q;
 
-    // If it's the owner's profile, fetch all products.
-    // If it's another user's profile, only fetch public products.
     if (isOwnProfile) {
         q = query(productsRef, where('sellerId', '==', userId), orderBy('createdAt', 'desc'));
     } else {
@@ -722,7 +722,7 @@ export default function UserProfilePage() {
                           <div className="space-y-1">
                              <MapPin className="mx-auto h-7 w-7 text-muted-foreground" />
                              <p className="text-xs text-muted-foreground">{t('profile.about.city')}</p>
-                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city}` as TranslationKey) : t('district.not_set')}</p>
+                             <p className="font-semibold text-sm">{profileUser.city ? t(`district.${profileUser.city}` as any) : t('district.not_set')}</p>
                           </div>
                            <div className="space-y-1">
                              <CalendarDays className="mx-auto h-7 w-7 text-muted-foreground" />
