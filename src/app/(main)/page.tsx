@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
+import { errorEmitter } from '@/lib/firebase/error-emitter';
+import { FirestorePermissionError } from '@/lib/firebase/errors';
 
 // Define the type for a banner
 type Banner = {
@@ -85,22 +87,39 @@ function HomePageContent() {
           createdAt: Timestamp.now()
       };
 
+      let hasChanges = false;
       if (snapshot.empty) {
           console.log("Banners collection is empty. Seeding initial data...");
           const docRef = doc(collection(db, 'banners'));
           batch.set(docRef, newBannerData);
+          hasChanges = true;
       } else {
-          // Overwrite existing banners with the single new one to fix old data structure
-          snapshot.docs.forEach(doc => {
-              batch.delete(doc.ref);
-          });
-          const docRef = doc(collection(db, 'banners'));
-          batch.set(docRef, newBannerData);
-          console.log("Outdated banners found. Overwriting with new structure.");
+          // A simple check to see if we need to overwrite.
+          // This can be made more robust.
+          const firstDocData = snapshot.docs[0].data();
+          if (!firstDocData.titleKey || snapshot.docs.length > 1) {
+              snapshot.docs.forEach(doc => {
+                  batch.delete(doc.ref);
+              });
+              const docRef = doc(collection(db, 'banners'));
+              batch.set(docRef, newBannerData);
+              console.log("Outdated banners found. Overwriting with new structure.");
+              hasChanges = true;
+          }
       }
 
-      await batch.commit();
-      return true; // Indicates that seeding/updating happened
+      if (hasChanges) {
+          batch.commit().catch(async (serverError) => {
+              const permissionError = new FirestorePermissionError({
+                  path: '/banners',
+                  operation: 'write', // Batch can contain multiple ops, 'write' is a general term
+                  requestResourceData: newBannerData,
+              });
+              errorEmitter.emit('permission-error', permissionError);
+          });
+      }
+      
+      return hasChanges;
   };
 
 
@@ -277,5 +296,3 @@ export default function HomePage() {
     </Suspense>
   )
 }
-
-    
