@@ -4,6 +4,7 @@ import { AuthProvider } from '@/hooks/use-auth';
 import { LanguageProvider } from '@/providers/language-provider';
 import { ThemeProvider } from 'next-themes';
 import { ReactNode } from 'react';
+import { FirebaseErrorListener } from '@/components/FirebaseErrorListener';
 
 export function Providers({
   children,
@@ -18,7 +19,10 @@ export function Providers({
         enableSystem
         disableTransitionOnChange
       >
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <FirebaseErrorListener />
+        </AuthProvider>
       </ThemeProvider>
     </LanguageProvider>
   );

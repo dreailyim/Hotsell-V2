@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp, doc } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import { useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
@@ -28,13 +28,9 @@ import { useAuth } from '@/hooks/use-auth';
 // Define the type for a banner
 type Banner = {
   id: string;
-  src: string;
-  alt: string;
-  titleKey: 'home.banner.fashion.title' | 'home.banner.electronics.title' | 'home.banner.home_goods.title';
-  descriptionKey: 'home.banner.fashion.description' | 'home.banner.electronics.description' | 'home.banner.home_goods.description';
+  titleKey: 'home_banner_title';
+  descriptionKey: 'home_banner_description';
   href: string;
-  dataAiHint: string;
-  createdAt: Timestamp;
 };
 
 
@@ -62,59 +58,20 @@ function HomePageContent() {
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [loadingBanners, setLoadingBanners] = useState(true);
+
+  // --- Static Banner Data ---
+  const banners: Banner[] = [
+    {
+      id: 'static-banner-1',
+      titleKey: "home_banner_title",
+      descriptionKey: "home_banner_description",
+      href: "/list",
+    }
+  ];
 
   const plugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
-
-  // --- Seed initial banners if the collection is empty ---
-  const seedBanners = async () => {
-      const bannersRef = collection(db, 'banners');
-      const q = query(bannersRef, limit(1));
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
-          console.log("Banners collection is empty. Seeding initial data...");
-          const batch = writeBatch(db);
-          const defaultBanners = [
-              { src: "https://picsum.photos/seed/ad2/1200/400", alt: "New fashion arrivals", titleKey: "home.banner.fashion.title", descriptionKey: "home.banner.fashion.description", dataAiHint: "fashion clothes", href: "/" },
-              { src: "https://picsum.photos/seed/ad1/1200/400", alt: "Special promotion on electronics", titleKey: "home.banner.electronics.title", descriptionKey: "home.banner.electronics.description", dataAiHint: "electronics sale", href: "/hot" },
-              { src: "https://picsum.photos/seed/ad3/1200/400", alt: "Home goods clearance", titleKey: "home.banner.home_goods.title", descriptionKey: "home.banner.home_goods.description", dataAiHint: "home decor", href: "/" },
-          ];
-
-          defaultBanners.forEach(banner => {
-              const docRef = doc(collection(db, 'banners'));
-              batch.set(docRef, { ...banner, createdAt: Timestamp.now() });
-          });
-
-          await batch.commit();
-          console.log("Default banners have been seeded.");
-          return true; // Indicates that seeding happened
-      }
-      return false; // Seeding was not needed
-  };
-
-  // --- Fetch Banners from Firestore ---
-  useEffect(() => {
-    const fetchBanners = async () => {
-        setLoadingBanners(true);
-        try {
-            await seedBanners();
-            const bannersRef = collection(db, 'banners');
-            const q = query(bannersRef, orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const bannersData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Banner));
-            setBanners(bannersData);
-        } catch (error) {
-            console.error("Error fetching banners: ", error);
-        } finally {
-            setLoadingBanners(false);
-        }
-    };
-    fetchBanners();
-  }, []);
 
   // --- Fetch Products ---
   useEffect(() => {
@@ -193,9 +150,6 @@ function HomePageContent() {
   const renderDefaultView = () => (
     <>
         <div className="container mx-auto px-4 md:px-6 py-3">
-        {loadingBanners ? (
-            <Skeleton className="w-full aspect-[3/1] rounded-lg" />
-        ) : (
             <Carousel 
                 plugins={[plugin.current]}
                 className="w-full"
@@ -208,17 +162,11 @@ function HomePageContent() {
                         <Link href={banner.href || '#'} passHref>
                           <div className="p-1 cursor-pointer">
                           <Card className="overflow-hidden">
-                              <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0">
-                                  <Image 
-                                      src={banner.src}
-                                      alt={banner.alt}
-                                      fill
-                                      className="object-cover"
-                                      data-ai-hint={banner.dataAiHint}
-                                  />
-                                  <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white p-4 text-center">
-                                      <h2 className="text-xl md:text-3xl font-bold">{t(banner.titleKey)}</h2>
-                                      <p className="text-sm md:text-lg mt-2">{t(banner.descriptionKey)}</p>
+                              <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0 bg-gradient-to-br from-orange-400 via-red-500 to-red-600">
+                                  <Flame className="absolute h-3/4 w-3/4 text-white/10" />
+                                  <div className="relative z-10 flex flex-col justify-center items-center text-white p-4 text-center">
+                                      <h2 className="text-3xl md:text-5xl font-bold tracking-tight drop-shadow-md">{t(banner.titleKey as any)}</h2>
+                                      <p className="text-base md:text-xl mt-2 drop-shadow-sm">{t(banner.descriptionKey as any)}</p>
                                   </div>
                               </CardContent>
                           </Card>
@@ -234,7 +182,6 @@ function HomePageContent() {
                     </>
                 )}
             </Carousel>
-        )}
       </div>
        <main className="container mx-auto px-4 md:px-6 py-3">
         <h2 className="text-xl font-bold mb-4">{t('home.latest_products')}</h2>
