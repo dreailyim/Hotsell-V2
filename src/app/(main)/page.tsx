@@ -165,8 +165,8 @@ function HomePageContent() {
                               <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0 bg-gradient-to-br from-orange-400 via-red-500 to-red-600">
                                   <Flame className="absolute h-3/4 w-3/4 text-white/10" />
                                   <div className="relative z-10 flex flex-col justify-center items-center text-white p-4 text-center">
-                                      <h2 className="text-xl md:text-3xl font-bold">{t(banner.titleKey as any)}</h2>
-                                      <p className="text-sm md:text-lg mt-2">{t(banner.descriptionKey as any)}</p>
+                                      <h2 className="text-3xl md:text-5xl font-bold tracking-tight drop-shadow-md">{t(banner.titleKey as any)}</h2>
+                                      <p className="text-base md:text-xl mt-2 drop-shadow-sm">{t(banner.descriptionKey as any)}</p>
                                   </div>
                               </CardContent>
                           </Card>
