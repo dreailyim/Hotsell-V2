@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/carousel';
 import Autoplay from 'embla-carousel-autoplay';
 import { useSearchParams } from 'next/navigation';
-import { Search } from 'lucide-react';
+import { Search, Flame } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
@@ -28,12 +28,9 @@ import { useAuth } from '@/hooks/use-auth';
 // Define the type for a banner
 type Banner = {
   id: string;
-  src: string;
-  alt: string;
   titleKey: 'home_banner_title';
   descriptionKey: 'home_banner_description';
   href: string;
-  dataAiHint: string;
 };
 
 
@@ -66,12 +63,9 @@ function HomePageContent() {
   const banners: Banner[] = [
     {
       id: 'static-banner-1',
-      src: "https://picsum.photos/seed/hotsell-freedom/1200/400",
-      alt: "HotSell - Realize the freedom of buying and selling",
       titleKey: "home_banner_title",
       descriptionKey: "home_banner_description",
       href: "/list",
-      dataAiHint: "market freedom",
     }
   ];
 
@@ -168,15 +162,9 @@ function HomePageContent() {
                         <Link href={banner.href || '#'} passHref>
                           <div className="p-1 cursor-pointer">
                           <Card className="overflow-hidden">
-                              <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0">
-                                  <Image 
-                                      src={banner.src}
-                                      alt={banner.alt}
-                                      fill
-                                      className="object-cover"
-                                      data-ai-hint={banner.dataAiHint}
-                                  />
-                                  <div className="absolute inset-0 bg-black/50 flex flex-col justify-center items-center text-white p-4 text-center">
+                              <CardContent className="relative flex aspect-[3/1] items-center justify-center p-0 bg-gradient-to-br from-orange-400 via-red-500 to-red-600">
+                                  <Flame className="absolute h-3/4 w-3/4 text-white/10" />
+                                  <div className="relative z-10 flex flex-col justify-center items-center text-white p-4 text-center">
                                       <h2 className="text-xl md:text-3xl font-bold">{t(banner.titleKey as any)}</h2>
                                       <p className="text-sm md:text-lg mt-2">{t(banner.descriptionKey as any)}</p>
                                   </div>
