@@ -24,8 +24,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
-import { errorEmitter } from '@/lib/firebase/error-emitter';
-import { FirestorePermissionError } from '@/lib/firebase/errors';
 
 // Define the type for a banner
 type Banner = {
@@ -36,7 +34,6 @@ type Banner = {
   descriptionKey: 'home_banner_description';
   href: string;
   dataAiHint: string;
-  createdAt: Timestamp;
 };
 
 
@@ -64,88 +61,23 @@ function HomePageContent() {
   
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [loadingBanners, setLoadingBanners] = useState(true);
+
+  // --- Static Banner Data ---
+  const banners: Banner[] = [
+    {
+      id: 'static-banner-1',
+      src: "https://picsum.photos/seed/hotsell-freedom/1200/400",
+      alt: "HotSell - Realize the freedom of buying and selling",
+      titleKey: "home_banner_title",
+      descriptionKey: "home_banner_description",
+      href: "/list",
+      dataAiHint: "market freedom",
+    }
+  ];
 
   const plugin = useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
-
-  // --- Seed or Update banners if necessary ---
-  const seedOrUpdateBanners = async () => {
-      // Only logged-in users should attempt to write to the database.
-      if (!user) {
-        return false;
-      }
-      const bannersRef = collection(db, 'banners');
-      const snapshot = await getDocs(bannersRef);
-      const batch = writeBatch(db);
-
-      const newBannerData = { 
-          src: "https://picsum.photos/seed/hotsell-freedom/1200/400", 
-          alt: "HotSell - Realize the freedom of buying and selling", 
-          titleKey: "home_banner_title", 
-          descriptionKey: "home_banner_description", 
-          dataAiHint: "market freedom", 
-          href: "/list",
-          createdAt: serverTimestamp() // Use server-side timestamp
-      };
-
-      let hasChanges = false;
-      if (snapshot.empty) {
-          console.log("Banners collection is empty. Seeding initial data...");
-          const docRef = doc(collection(db, 'banners'));
-          batch.set(docRef, newBannerData);
-          hasChanges = true;
-      } else {
-          // A simple check to see if we need to overwrite.
-          // This can be made more robust.
-          const firstDocData = snapshot.docs[0].data();
-          if (!firstDocData.titleKey || snapshot.docs.length > 1) {
-              snapshot.docs.forEach(doc => {
-                  batch.delete(doc.ref);
-              });
-              const docRef = doc(collection(db, 'banners'));
-              batch.set(docRef, newBannerData);
-              console.log("Outdated banners found. Overwriting with new structure.");
-              hasChanges = true;
-          }
-      }
-
-      if (hasChanges) {
-          batch.commit().catch((error) => {
-            const permissionError = new FirestorePermissionError({
-              path: '/banners', // The path being written to
-              operation: 'write', // 'write' covers create, update, delete in a batch
-              requestResourceData: newBannerData, // The data we attempted to write
-            });
-            errorEmitter.emit('permission-error', permissionError);
-          });
-      }
-      
-      return hasChanges;
-  };
-
-
-  // --- Fetch Banners from Firestore ---
-  useEffect(() => {
-    const fetchBanners = async () => {
-        setLoadingBanners(true);
-        try {
-            await seedOrUpdateBanners();
-            const bannersRef = collection(db, 'banners');
-            const q = query(bannersRef, orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const bannersData = querySnapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Banner));
-            setBanners(bannersData);
-        } catch (error) {
-            console.error("Error fetching banners: ", error);
-        } finally {
-            setLoadingBanners(false);
-        }
-    };
-    fetchBanners();
-  }, [user]); // Re-run when user logs in/out
 
   // --- Fetch Products ---
   useEffect(() => {
@@ -224,9 +156,6 @@ function HomePageContent() {
   const renderDefaultView = () => (
     <>
         <div className="container mx-auto px-4 md:px-6 py-3">
-        {loadingBanners ? (
-            <Skeleton className="w-full aspect-[3/1] rounded-lg" />
-        ) : (
             <Carousel 
                 plugins={[plugin.current]}
                 className="w-full"
@@ -265,7 +194,6 @@ function HomePageContent() {
                     </>
                 )}
             </Carousel>
-        )}
       </div>
        <main className="container mx-auto px-4 md:px-6 py-3">
         <h2 className="text-xl font-bold mb-4">{t('home.latest_products')}</h2>

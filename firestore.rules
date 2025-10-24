@@ -1,42 +1,51 @@
+
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    
-    // Banners can be read by anyone, but only modified by authenticated users.
-    // The createdAt timestamp must be set by the server and cannot be updated.
-    match /banners/{bannerId} {
+  
+    // --- USER PROFILES ---
+    // Anyone can read a user's public profile
+    // Only the user themselves can create or update their own profile
+    match /users/{userId} {
       allow read: if true;
-      allow create: if request.auth.uid != null;
-      allow update: if request.auth.uid != null && request.resource.data.createdAt == resource.data.createdAt;
-      allow delete: if request.auth.uid != null;
+      allow create: if request.auth.uid == userId;
+      allow update: if request.auth.uid == userId;
+      allow delete: if request.auth.uid == userId;
     }
-
+    
+    // --- PRODUCTS ---
+    // Publicly visible products can be read by anyone.
+    // Hidden products can only be read by the seller.
     match /products/{productId} {
       allow read: if resource.data.visibility == 'public' || request.auth.uid == resource.data.sellerId;
       allow create: if request.auth.uid != null;
       allow update, delete: if request.auth.uid == resource.data.sellerId;
     }
     
-    match /users/{userId} {
-      allow read: if true;
-      allow write: if request.auth.uid == userId;
-    }
-    
-    match /conversations/{conversationId} {
-      allow read, write: if request.auth.uid in resource.data.participantIds;
-      
-      match /messages/{messageId} {
-        allow read, write: if request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
-      }
-    }
-    
+    // --- REVIEWS ---
+    // Reviews are public and can be read by anyone.
+    // Only logged-in users can create a review.
+    // Users cannot edit or delete reviews once submitted.
     match /reviews/{reviewId} {
         allow read: if true;
         allow create: if request.auth.uid != null;
+        allow update, delete: if false; // Disallow editing/deleting reviews
     }
     
+    // --- CONVERSATIONS & MESSAGES ---
+    // Only participants can read/write to a conversation and its messages.
+    match /conversations/{conversationId} {
+        allow read, write: if request.auth.uid in resource.data.participantIds;
+        
+        match /messages/{messageId} {
+            allow read, write: if request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
+        }
+    }
+    
+     // --- NOTIFICATIONS ---
+    // Users can only access their own notifications.
     match /notifications/{notificationId} {
-      allow read, update, delete: if request.auth.uid == resource.data.userId;
+      allow read, write: if request.auth.uid == resource.data.userId;
     }
   }
 }
