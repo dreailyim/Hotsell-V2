@@ -2,7 +2,7 @@
 'use client';
 
 import { useEffect, useState, useRef, Suspense } from 'react';
-import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp, doc } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, limit, where, startAt, endAt, writeBatch, Timestamp, doc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client-app';
 import type { Product } from '@/lib/types';
 import { Header } from '@/components/layout/header';
@@ -24,8 +24,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
-import { errorEmitter } from '@/lib/firebase/error-emitter';
-import { FirestorePermissionError } from '@/lib/firebase/errors';
 
 // Define the type for a banner
 type Banner = {
@@ -73,6 +71,10 @@ function HomePageContent() {
 
   // --- Seed or Update banners if necessary ---
   const seedOrUpdateBanners = async () => {
+      // Only logged-in users should attempt to write to the database.
+      if (!user) {
+        return false;
+      }
       const bannersRef = collection(db, 'banners');
       const snapshot = await getDocs(bannersRef);
       const batch = writeBatch(db);
@@ -84,7 +86,7 @@ function HomePageContent() {
           descriptionKey: "home_banner_description", 
           dataAiHint: "market freedom", 
           href: "/list",
-          createdAt: Timestamp.now()
+          createdAt: serverTimestamp() // Use server-side timestamp
       };
 
       let hasChanges = false;
@@ -109,14 +111,7 @@ function HomePageContent() {
       }
 
       if (hasChanges) {
-          batch.commit().catch(async (serverError) => {
-              const permissionError = new FirestorePermissionError({
-                  path: '/banners',
-                  operation: 'write', // Batch can contain multiple ops, 'write' is a general term
-                  requestResourceData: newBannerData,
-              });
-              errorEmitter.emit('permission-error', permissionError);
-          });
+          await batch.commit();
       }
       
       return hasChanges;
@@ -141,7 +136,7 @@ function HomePageContent() {
         }
     };
     fetchBanners();
-  }, []);
+  }, [user]); // Re-run when user logs in/out
 
   // --- Fetch Products ---
   useEffect(() => {
