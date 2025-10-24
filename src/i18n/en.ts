@@ -73,8 +73,8 @@ export const en = {
 
   // Home Page
   'home.latest_products': 'Latest Items',
-  'home.banner.main.title': 'HotSell',
-  'home.banner.main.description': 'Realize the freedom of buying and selling',
+  'home_banner_title': 'HotSell',
+  'home_banner_description': 'Realize the freedom of buying and selling',
   'home.search_results': 'Search Results',
   'home.clear_search': 'Clear Search',
   'home.no_results_for': 'No results for "{searchTerm}"',
@@ -472,3 +472,5 @@ export const en = {
   'mtr_stations.airport': 'Airport',
   'mtr_stations.asiaworld_expo': 'AsiaWorld-Expo',
 };
+
+    

@@ -72,8 +72,8 @@ export const zh = {
 
   // Home Page
   'home.latest_products': '最新上架',
-  'home.banner.main.title': 'HotSell',
-  'home.banner.main.description': '實現買賣自由',
+  'home_banner_title': 'HotSell',
+  'home_banner_description': '實現買賣自由',
   'home.search_results': '搜尋結果',
   'home.clear_search': '清除搜尋',
   'home.no_results_for': '找不到「{searchTerm}」的相關商品',
@@ -471,3 +471,5 @@ export const zh = {
   'mtr_stations.airport': '機場',
   'mtr_stations.asiaworld_expo': '博覽館',
 };
+
+    

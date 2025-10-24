@@ -30,8 +30,8 @@ type Banner = {
   id: string;
   src: string;
   alt: string;
-  titleKey: 'home.banner.main.title';
-  descriptionKey: 'home.banner.main.description';
+  titleKey: 'home_banner_title';
+  descriptionKey: 'home_banner_description';
   href: string;
   dataAiHint: string;
   createdAt: Timestamp;
@@ -69,44 +69,47 @@ function HomePageContent() {
     Autoplay({ delay: 3000, stopOnInteraction: true })
   );
 
-  // --- Seed initial banners if the collection is empty ---
-  const seedBanners = async () => {
+  // --- Seed or Update banners if necessary ---
+  const seedOrUpdateBanners = async () => {
       const bannersRef = collection(db, 'banners');
-      const q = query(bannersRef, limit(1));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(bannersRef);
+      const batch = writeBatch(db);
+
+      const newBannerData = { 
+          src: "https://picsum.photos/seed/hotsell-freedom/1200/400", 
+          alt: "HotSell - Realize the freedom of buying and selling", 
+          titleKey: "home_banner_title", 
+          descriptionKey: "home_banner_description", 
+          dataAiHint: "market freedom", 
+          href: "/list",
+          createdAt: Timestamp.now()
+      };
 
       if (snapshot.empty) {
           console.log("Banners collection is empty. Seeding initial data...");
-          const batch = writeBatch(db);
-          const defaultBanners = [
-              { 
-                src: "https://picsum.photos/seed/hotsell-freedom/1200/400", 
-                alt: "HotSell - Realize the freedom of buying and selling", 
-                titleKey: "home.banner.main.title", 
-                descriptionKey: "home.banner.main.description", 
-                dataAiHint: "market freedom", 
-                href: "/list" 
-              },
-          ];
-
-          defaultBanners.forEach(banner => {
-              const docRef = doc(collection(db, 'banners'));
-              batch.set(docRef, { ...banner, createdAt: Timestamp.now() });
+          const docRef = doc(collection(db, 'banners'));
+          batch.set(docRef, newBannerData);
+      } else {
+          // Overwrite existing banners with the single new one to fix old data structure
+          snapshot.docs.forEach(doc => {
+              batch.delete(doc.ref);
           });
-
-          await batch.commit();
-          console.log("Default banners have been seeded.");
-          return true; // Indicates that seeding happened
+          const docRef = doc(collection(db, 'banners'));
+          batch.set(docRef, newBannerData);
+          console.log("Outdated banners found. Overwriting with new structure.");
       }
-      return false; // Seeding was not needed
+
+      await batch.commit();
+      return true; // Indicates that seeding/updating happened
   };
+
 
   // --- Fetch Banners from Firestore ---
   useEffect(() => {
     const fetchBanners = async () => {
         setLoadingBanners(true);
         try {
-            await seedBanners();
+            await seedOrUpdateBanners();
             const bannersRef = collection(db, 'banners');
             const q = query(bannersRef, orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(q);
@@ -274,3 +277,5 @@ export default function HomePage() {
     </Suspense>
   )
 }
+
+    
