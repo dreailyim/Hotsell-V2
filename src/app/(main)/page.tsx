@@ -24,6 +24,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useTranslation } from '@/hooks/use-translation';
 import { useAuth } from '@/hooks/use-auth';
+import { errorEmitter } from '@/lib/firebase/error-emitter';
+import { FirestorePermissionError } from '@/lib/firebase/errors';
 
 // Define the type for a banner
 type Banner = {
@@ -111,7 +113,14 @@ function HomePageContent() {
       }
 
       if (hasChanges) {
-          await batch.commit();
+          batch.commit().catch((error) => {
+            const permissionError = new FirestorePermissionError({
+              path: '/banners', // The path being written to
+              operation: 'write', // 'write' covers create, update, delete in a batch
+              requestResourceData: newBannerData, // The data we attempted to write
+            });
+            errorEmitter.emit('permission-error', permissionError);
+          });
       }
       
       return hasChanges;
