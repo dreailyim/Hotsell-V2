@@ -73,12 +73,8 @@ export const en = {
 
   // Home Page
   'home.latest_products': 'Latest Items',
-  'home.banner.fashion.title': 'New Fashion Arrivals',
-  'home.banner.fashion.description': 'Seasonal sale, shop now!',
-  'home.banner.electronics.title': 'Electronics Special',
-  'home.banner.electronics.description': 'Cameras, phones, laptops, and more!',
-  'home.banner.home_goods.title': 'Home Goods Clearance',
-  'home.banner.home_goods.description': 'Add warmth to your home.',
+  'home.banner.main.title': 'HotSell',
+  'home.banner.main.description': 'Realize the freedom of buying and selling',
   'home.search_results': 'Search Results',
   'home.clear_search': 'Clear Search',
   'home.no_results_for': 'No results for "{searchTerm}"',

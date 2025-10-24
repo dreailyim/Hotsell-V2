@@ -72,12 +72,8 @@ export const zh = {
 
   // Home Page
   'home.latest_products': '最新上架',
-  'home.banner.fashion.title': '時尚新品到著',
-  'home.banner.fashion.description': '換季大減價，立即選購！',
-  'home.banner.electronics.title': '電子產品特賣',
-  'home.banner.electronics.description': '相機、手機、筆電，應有尽有！',
-  'home.banner.home_goods.title': '家居好物清貨',
-  'home.banner.home_goods.description': '為您的家增添一份溫馨。',
+  'home.banner.main.title': 'HotSell',
+  'home.banner.main.description': '實現買賣自由',
   'home.search_results': '搜尋結果',
   'home.clear_search': '清除搜尋',
   'home.no_results_for': '找不到「{searchTerm}」的相關商品',
