@@ -1,7 +1,9 @@
+
 "use client"
 
 import * as React from "react"
 import * as AvatarPrimitive from "@radix-ui/react-avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 
 import { cn } from "@/lib/utils"
 
@@ -23,13 +25,25 @@ Avatar.displayName = AvatarPrimitive.Root.displayName
 const AvatarImage = React.forwardRef<
   React.ElementRef<typeof AvatarPrimitive.Image>,
   React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Image>
->(({ className, ...props }, ref) => (
-  <AvatarPrimitive.Image
-    ref={ref}
-    className={cn("aspect-square h-full w-full object-cover", className)}
-    {...props}
-  />
-))
+>(({ className, ...props }, ref) => {
+  const [isLoading, setIsLoading] = React.useState(true);
+
+  return (
+    <>
+      {isLoading && <Skeleton className="absolute inset-0 h-full w-full rounded-full" />}
+      <AvatarPrimitive.Image
+        ref={ref}
+        className={cn(
+          "aspect-square h-full w-full object-cover transition-opacity duration-300",
+          isLoading ? "opacity-0" : "opacity-100",
+          className
+        )}
+        onLoad={() => setIsLoading(false)}
+        {...props}
+      />
+    </>
+  )
+})
 AvatarImage.displayName = AvatarPrimitive.Image.displayName
 
 const AvatarFallback = React.forwardRef<

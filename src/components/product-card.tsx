@@ -57,6 +57,7 @@ export function ProductCard({ product: initialProduct, isManaging = false }: Pro
   
   const [isFavorited, setIsFavorited] = useState(false);
   const [optimisticFavorites, setOptimisticFavorites] = useState(initialProduct.favorites || 0);
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
   // Effect to listen for real-time updates on the product itself.
   // This solves the stale data issue when a product is updated elsewhere.
@@ -207,15 +208,23 @@ export function ProductCard({ product: initialProduct, isManaging = false }: Pro
     <Card className="w-full h-full flex flex-col overflow-hidden transition-all hover:shadow-lg group border-none shadow-md bg-card">
         <div className="relative w-full overflow-hidden aspect-square">
             <Link href={`/products/${id}`} aria-label={safeName}>
+              {isImageLoading && <Skeleton className="absolute inset-0 w-full h-full" />}
               <Image
                 src={safeImage}
                 alt={safeName}
                 width={400}
                 height={400}
                 sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                className="object-cover w-full h-full transition-transform duration-300 group-hover:scale-105"
+                className={cn(
+                  "object-cover w-full h-full transition-opacity duration-300 group-hover:scale-105",
+                  isImageLoading ? "opacity-0" : "opacity-100"
+                )}
                 data-ai-hint="product image"
-                onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/600/400'; }}
+                onLoad={() => setIsImageLoading(false)}
+                onError={(e) => { 
+                  (e.target as HTMLImageElement).src = 'https://picsum.photos/600/400'; 
+                  setIsImageLoading(false);
+                }}
               />
             </Link>
             <div className="absolute top-2 left-2 flex flex-col items-start gap-1">
